@@ -1,0 +1,1875 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Management System - Intan Pariwara 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { colors: { slate: { 850: '#151f32', 900: '#0f172a' }, teal: { 500: '#14b8a6' } } } }
+        }
+    </script>
+    <style>
+        body {
+            background: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', system-ui, sans-serif;
+            opacity: 0;
+            animation: fadeIn .8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1e293b;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+
+        .badge {
+            padding: .25rem .5rem;
+            border-radius: 9999px;
+            font-size: .75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+        }
+
+        .badge-deal {
+            background: rgba(34, 197, 94, .2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, .5);
+        }
+
+        .badge-closing {
+            background: rgba(132, 204, 22, .2);
+            color: #a3e635;
+            border: 1px solid rgba(132, 204, 22, .5);
+        }
+
+        .badge-pitching {
+            background: rgba(234, 179, 8, .2);
+            color: #facc15;
+            border: 1px solid rgba(234, 179, 8, .5);
+        }
+
+        .badge-shortlisted {
+            background: rgba(249, 115, 22, .2);
+            color: #fb923c;
+            border: 1px solid rgba(249, 115, 22, .5);
+        }
+
+        .badge-pendekatan {
+            background: rgba(239, 68, 68, .2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, .5);
+        }
+
+        .badge-dead {
+            background: rgba(100, 116, 139, .2);
+            color: #94a3b8;
+            text-decoration: line-through;
+            border: 1px solid rgba(100, 116, 139, .5);
+        }
+
+        .badge-100 {
+            background: rgba(34, 197, 94, .2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, .5);
+        }
+
+        .badge-75 {
+            background: rgba(132, 204, 22, .2);
+            color: #a3e635;
+            border: 1px solid rgba(132, 204, 22, .5);
+        }
+
+        .badge-50 {
+            background: rgba(234, 179, 8, .2);
+            color: #facc15;
+            border: 1px solid rgba(234, 179, 8, .5);
+        }
+
+        .badge-25 {
+            background: rgba(249, 115, 22, .2);
+            color: #fb923c;
+            border: 1px solid rgba(249, 115, 22, .5);
+        }
+
+        .badge-10 {
+            background: rgba(239, 68, 68, .2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, .5);
+        }
+
+        .badge-5 {
+            background: rgba(239, 68, 68, .2);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, .5);
+        }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: .75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, .1);
+            transition: transform .2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, .2);
+            border-color: #475569;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+
+        select option {
+            background: #1e293b;
+            color: white;
+        }
+
+        .input-field {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: white;
+            font-size: .875rem;
+            border-radius: .5rem;
+            padding: .625rem;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #14b8a6;
+            box-shadow: 0 0 0 2px rgba(20, 184, 166, .3);
+        }
+
+        .nav-btn {
+            padding: .5rem 1rem;
+            border-radius: .5rem;
+            font-size: .875rem;
+            font-weight: 600;
+            transition: all .2s;
+            cursor: pointer;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+
+        .nav-btn:hover {
+            background: #334155;
+            color: #e2e8f0;
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #0d9488, #0ea5e9);
+            color: white;
+            border-color: transparent;
+        }
+
+        .status-row-deal {
+            background: rgba(34, 197, 94, .05);
+        }
+
+        .status-row-closing {
+            background: rgba(132, 204, 22, .05);
+        }
+
+        .status-row-pitching {
+            background: rgba(234, 179, 8, .05);
+        }
+
+        .status-row-shortlisted {
+            background: rgba(249, 115, 22, .05);
+        }
+
+        .status-row-pendekatan {
+            background: rgba(239, 68, 68, .05);
+        }
+
+        .status-row-dead {
+            background: rgba(100, 116, 139, .05);
+            opacity: .7;
+        }
+
+        .toast {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            padding: 1rem 1.5rem;
+            border-radius: .75rem;
+            font-weight: 600;
+            z-index: 9999;
+            transform: translateX(120%);
+            transition: transform .4s ease;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+        }
+
+        .toast-success {
+            background: #065f46;
+            border: 1px solid #10b981;
+            color: #6ee7b7;
+        }
+
+        .toast-error {
+            background: #7f1d1d;
+            border: 1px solid #ef4444;
+            color: #fca5a5;
+        }
+
+        .project-item {
+            padding: .75rem 1rem;
+            border: 1px solid #334155;
+            border-radius: .5rem;
+            cursor: pointer;
+            transition: all .2s;
+            background: #1e293b;
+        }
+
+        .project-item:hover {
+            border-color: #14b8a6;
+            background: #1e293b;
+        }
+
+        .project-item.selected {
+            border-color: #14b8a6;
+            background: rgba(20, 184, 166, .1);
+        }
+
+        .field-error {
+            border-color: #ef4444 !important;
+        }
+
+        .error-msg {
+            color: #f87171;
+            font-size: .75rem;
+            margin-top: .25rem;
+            display: none;
+        }
+
+        @media(max-width:768px) {
+            .nav-btn {
+                font-size: .75rem;
+                padding: .375rem .75rem;
+            }
+        }
+
+        .filter-btn {
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background-color: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+
+    <!-- ===== TOAST NOTIFICATION ===== -->
+    <div id="toast" class="toast toast-success"></div>
+
+    <!-- ===== NAVBAR ===== -->
+    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-700 px-4 py-3">
+        <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+            <div class="flex items-center gap-4">
+                <h1
+                    class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">
+                    SALES MANAGEMENT SYSTEM</h1>
+                <span class="text-slate-500 text-sm font-semibold hidden md:inline">INTAN PARIWARA 2026</span>
+            </div>
+            <div class="flex items-center gap-3 flex-wrap">
+                <div class="flex gap-2 flex-wrap" id="nav-menu">
+                    <button class="nav-btn active" onclick="switchMenu('input')" id="nav-input">📝 Input Funnel</button>
+                    <button class="nav-btn" onclick="switchMenu('update')" id="nav-update">🔄 Update Funnel</button>
+                    <button class="nav-btn" onclick="switchMenu('dashboard')" id="nav-dashboard">📊 Dashboard</button>
+                    <button class="nav-btn" onclick="switchMenu('monitoring')" id="nav-monitoring">📋
+                        Monitoring</button>
+                    <button class="nav-btn hidden" onclick="switchMenu('control')" id="nav-control">⚙️ Control
+                        Panel</button>
+                    <button class="nav-btn text-red-400 border-red-500/30 hover:bg-red-500/20"
+                        onclick="window.location.reload()">🔄 Reset Data</button>
+                </div>
+                <div class="bg-slate-800 border border-slate-600 rounded-lg px-3 py-1.5 flex items-center gap-2">
+                    <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                    <span class="text-xs font-bold text-teal-400" id="role-badge">SALES</span>
+                    <select id="sales-name-picker"
+                        class="hidden ml-2 text-xs bg-slate-700 border border-slate-600 rounded text-white py-1 px-2 focus:ring-teal-500 focus:border-teal-500"
+                        onchange="setCurrentSales(this.value)">
+                    </select>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="flex-1 p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto w-full">
+
+        <!-- ===== SECTION 1: INPUT FUNNEL ===== -->
+        <section id="section-input">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">📝 Input Funnel Baru</h2>
+                <p class="text-slate-400 text-sm mt-1">Tambah project baru ke pipeline sales</p>
+            </div>
+            <div class="card p-6">
+                <form id="input-form" onsubmit="return handleInputSubmit(event)">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        <!-- PIC -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">PIC / Nama Sales
+                                <span class="text-red-400">*</span></label>
+                            <select id="f-pic" class="input-field" required>
+                                <option value="">-- Pilih PIC --</option>
+                            </select>
+                            <div class="error-msg" id="err-pic">PIC wajib dipilih</div>
+                        </div>
+                        <!-- Principal -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Principal <span
+                                    class="text-red-400">*</span></label>
+                            <select id="f-principal" class="input-field" required>
+                                <option value="">-- Pilih Principal --</option>
+                            </select>
+                            <div class="error-msg" id="err-principal">Principal wajib dipilih</div>
+                        </div>
+                        <!-- Sumber Dana -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Sumber Dana <span
+                                    class="text-red-400">*</span></label>
+                            <select id="f-sumberdana" class="input-field" required>
+                                <option value="">-- Pilih --</option>
+                            </select>
+                            <div class="error-msg" id="err-sumberdana">Sumber Dana wajib dipilih</div>
+                        </div>
+                        <!-- Nama Paket -->
+                        <div class="lg:col-span-2">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nama Paket /
+                                Rencana Pengadaan <span class="text-red-400">*</span></label>
+                            <input type="text" id="f-namapaket" class="input-field"
+                                placeholder="Nama paket pengadaan..." required>
+                            <div class="error-msg" id="err-namapaket">Nama Paket wajib diisi</div>
+                        </div>
+                        <!-- K/L/P/D -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">K/L/P/D (Instansi)
+                                <span class="text-red-400">*</span></label>
+                            <input type="text" id="f-instansi" class="input-field" placeholder="Nama instansi..."
+                                required>
+                            <div class="error-msg" id="err-instansi">Instansi wajib diisi</div>
+                        </div>
+                        <!-- Provinsi -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Provinsi <span
+                                    class="text-red-400">*</span></label>
+                            <select id="f-provinsi" class="input-field" required>
+                                <option value="">-- Pilih Provinsi --</option>
+                            </select>
+                            <div class="error-msg" id="err-provinsi">Provinsi wajib dipilih</div>
+                        </div>
+                        <!-- Kab/Kota -->
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-slate-400 uppercase mb-1">Kabupaten/Kota</label>
+                            <input type="text" id="f-wilayah" class="input-field" placeholder="Kab/Kota...">
+                        </div>
+                        <!-- Quarter -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Quarter <span
+                                    class="text-red-400">*</span></label>
+                            <select id="f-quarter" class="input-field" required>
+                                <option value="">-- Pilih --</option>
+                                <option>Q1</option>
+                                <option>Q2</option>
+                                <option>Q3</option>
+                                <option>Q4</option>
+                            </select>
+                            <div class="error-msg" id="err-quarter">Quarter wajib dipilih</div>
+                        </div>
+                        <!-- Jenis Produk -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Jenis Produk <span
+                                    class="text-red-400">*</span></label>
+                            <select id="f-jenisproduk" class="input-field" required>
+                                <option value="">-- Pilih --</option>
+                            </select>
+                            <div class="error-msg" id="err-jenisproduk">Jenis Produk wajib dipilih</div>
+                        </div>
+                        <!-- Status -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Status <span
+                                    class="text-red-400">*</span></label>
+                            <select id="f-status" class="input-field" required>
+                                <option value="">-- Pilih --</option>
+                                <option>Pendekatan</option>
+                                <option>Shortlisted</option>
+                                <option>Pitching</option>
+                                <option>Closing</option>
+                                <option>Deal</option>
+                                <option>Dead</option>
+                            </select>
+                            <div class="error-msg" id="err-status">Status wajib dipilih</div>
+                        </div>
+                        <!-- TK -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Tingkat Keyakinan
+                                (TK) <span class="text-red-400">*</span></label>
+                            <select id="f-tk" class="input-field" required onchange="calcForecast()">
+                                <option value="">-- Pilih --</option>
+                                <option value="5">5%</option>
+                                <option value="10">10%</option>
+                                <option value="25">25%</option>
+                                <option value="50">50%</option>
+                                <option value="75">75%</option>
+                                <option value="100">100%</option>
+                            </select>
+                            <div class="error-msg" id="err-tk">TK wajib dipilih</div>
+                            <div class="error-msg" id="err-tk-val">TK harus antara 0-100</div>
+                        </div>
+                        <!-- Nilai Brutto -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nilai Brutto (Rp)
+                                <span class="text-red-400">*</span></label>
+                            <input type="text" id="f-brutto" class="input-field" placeholder="0" required
+                                oninput="formatCurrency(this); calcForecast()">
+                            <div class="error-msg" id="err-brutto">Nilai Brutto wajib diisi</div>
+                            <div class="error-msg" id="err-brutto-val">Brutto harus >= 0</div>
+                        </div>
+                        <!-- Forecast Netto -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Forecast Netto (Rp)
+                                <span class="text-teal-400 text-xs">(auto)</span></label>
+                            <input type="text" id="f-netto" class="input-field bg-slate-800" placeholder="0"
+                                oninput="nettoManuallyEdited = true; formatCurrency(this)">
+                            <p class="text-xs text-slate-500 mt-1">Auto = Brutto × TK%. Bisa diedit manual.</p>
+                            <div class="error-msg" id="err-netto-val">Netto tidak boleh melebihi Brutto</div>
+                        </div>
+                        <!-- Keterangan -->
+                        <div class="lg:col-span-3">
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Keterangan /
+                                Notes</label>
+                            <textarea id="f-keterangan" class="input-field" rows="2"
+                                placeholder="Catatan tambahan..."></textarea>
+                        </div>
+                    </div>
+                    <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-700">
+                        <button type="button" onclick="resetInputForm()"
+                            class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold text-white border border-slate-600 transition">Reset</button>
+                        <button type="submit"
+                            class="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 rounded-lg text-sm font-bold text-white transition shadow-lg shadow-teal-500/20">💾
+                            Simpan ke Pipeline</button>
+                    </div>
+                </form>
+            </div>
+            <!-- Recent entries -->
+            <div class="mt-6">
+                <h3 class="text-lg font-bold text-white mb-3">📋 Pipeline Terbaru</h3>
+                <div class="card overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-300">
+                        <thead class="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
+                            <tr>
+                                <th class="px-3 py-3">No</th>
+                                <th class="px-3 py-3">PIC</th>
+                                <th class="px-3 py-3">Nama Paket</th>
+                                <th class="px-3 py-3">Instansi</th>
+                                <th class="px-3 py-3">Sumber Dana</th>
+                                <th class="px-3 py-3 text-right">Nilai Brutto</th>
+                                <th class="px-3 py-3 text-right">Forecast Netto</th>
+                                <th class="px-3 py-3 text-center">TK</th>
+                                <th class="px-3 py-3 text-center">Status</th>
+                                <th class="px-3 py-3 text-center">Quarter</th>
+                            </tr>
+                        </thead>
+                        <tbody id="pipeline-tbody" class="divide-y divide-slate-700/80"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 2: UPDATE FUNNEL ===== -->
+        <section id="section-update" class="hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">🔄 Update Funnel Mingguan</h2>
+                <p class="text-slate-400 text-sm mt-1">Update status dan forecast project per minggu. <span
+                        class="text-teal-400 font-semibold" id="current-week-label"></span></p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <!-- Left: Project List -->
+                <div class="lg:col-span-2">
+                    <div class="card p-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <h3 class="text-sm font-bold text-white uppercase">Daftar Project</h3>
+                            <input type="text" id="update-search" class="input-field w-40 text-xs py-1.5"
+                                placeholder="🔍 Cari..." oninput="renderProjectList()">
+                        </div>
+                        <div id="project-list" class="space-y-2 max-h-[600px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+                <!-- Right: Update Form -->
+                <div class="lg:col-span-3">
+                    <div class="card p-6" id="update-form-card">
+                        <div id="update-placeholder" class="text-center py-16 text-slate-500">
+                            <div class="text-5xl mb-4">📂</div>
+                            <p class="text-lg font-semibold">Pilih project dari daftar di sebelah kiri</p>
+                            <p class="text-sm mt-1">Klik project untuk memulai update mingguan</p>
+                        </div>
+                        <div id="update-form-container" class="hidden">
+                            <div class="flex justify-between items-start mb-4 pb-3 border-b border-slate-700">
+                                <div>
+                                    <h3 class="text-lg font-bold text-white" id="upd-project-name"></h3>
+                                    <p class="text-sm text-slate-400" id="upd-project-info"></p>
+                                </div>
+                                <span class="badge" id="upd-current-badge"></span>
+                            </div>
+                            <div id="update-blocked-msg"
+                                class="hidden p-4 bg-yellow-900/30 border border-yellow-600/50 rounded-lg mb-4">
+                                <p class="text-yellow-400 font-semibold text-sm" id="blocked-text"></p>
+                                <button id="override-btn"
+                                    class="hidden mt-2 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 rounded text-xs font-bold text-white"
+                                    onclick="overrideSubmissionLock()">🔓 Override Lock (Admin+)</button>
+                            </div>
+                            <form id="weekly-update-form" onsubmit="return submitWeeklyUpdate(event)">
+                                <div class="error-msg mb-4" id="err-duplicate-update"
+                                    style="display: none; font-size: 0.875rem;">Error: Update minggu ini sudah disubmit
+                                    sebelumnya.</div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Status
+                                            Terbaru <span class="text-red-400">*</span></label>
+                                        <select id="upd-status" class="input-field" required>
+                                            <option value="">-- Pilih --</option>
+                                            <option>Pendekatan</option>
+                                            <option>Shortlisted</option>
+                                            <option>Pitching</option>
+                                            <option>Closing</option>
+                                            <option>Deal</option>
+                                            <option>Dead</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nilai
+                                            Forecast Update (Rp)</label>
+                                        <input type="text" id="upd-forecast" class="input-field" placeholder="0"
+                                            oninput="formatCurrency(this)">
+                                    </div>
+                                    <div class="md:col-span-2">
+                                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Notes
+                                            Minggu Ini</label>
+                                        <textarea id="upd-notes" class="input-field" rows="3"
+                                            placeholder="Progress minggu ini..."></textarea>
+                                    </div>
+                                    <!-- Admin notes (visible to Admin+) -->
+                                    <div class="md:col-span-2 hidden" id="admin-notes-section">
+                                        <label class="block text-xs font-semibold text-teal-400 uppercase mb-1">📌
+                                            Catatan Admin</label>
+                                        <textarea id="upd-admin-notes" class="input-field border-teal-500/30" rows="2"
+                                            placeholder="Catatan dari admin..."></textarea>
+                                    </div>
+                                </div>
+                                <div class="flex justify-end gap-3 mt-5 pt-4 border-t border-slate-700">
+                                    <button type="submit" id="upd-submit-btn"
+                                        class="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 rounded-lg text-sm font-bold text-white transition shadow-lg shadow-teal-500/20">📤
+                                        Submit Update</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section><!-- ===== SECTION 3: DASHBOARD & STATISTIK MP ===== -->
+        <section id="section-dashboard" class="hidden">
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">📊 Dashboard & Statistik MP</h2>
+                    <p class="text-slate-400 text-sm mt-1">Ringkasan performa pipeline sales</p>
+                </div>
+            </div>
+            <!-- FILTER BAR -->
+            <div class="card p-4 md:p-6 mb-8 border-l-4 border-l-blue-500 w-full">
+                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-5">
+                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
+                        <span class="text-blue-400">🔍</span> Filter Data
+                    </h2>
+                    <button onclick="resetFilters()"
+                        class="text-sm px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors border border-slate-600 text-white font-medium flex items-center gap-2">
+                        Reset Filters
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Filter Quarter -->
+                    <div>
+                        <label
+                            class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">QUARTER</label>
+                        <div class="flex flex-wrap gap-2" id="filter-quarter">
+                            <button
+                                class="filter-btn active px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
+                                data-val="ALL" onclick="setFilter('quarter', 'ALL', this)">ALL</button>
+                            <button
+                                class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
+                                data-val="Q1" onclick="setFilter('quarter', 'Q1', this)">Q1</button>
+                            <button
+                                class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
+                                data-val="Q2" onclick="setFilter('quarter', 'Q2', this)">Q2</button>
+                            <button
+                                class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
+                                data-val="Q3" onclick="setFilter('quarter', 'Q3', this)">Q3</button>
+                            <button
+                                class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
+                                data-val="Q4" onclick="setFilter('quarter', 'Q4', this)">Q4</button>
+                        </div>
+                    </div>
+                    <!-- Filter Sumber Dana -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">SUMBER
+                            DANA</label>
+                        <div class="flex flex-wrap gap-2" id="filter-sumberdana">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <!-- Filter PIC & Provinsi -->
+                    <div class="flex flex-col gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">PIC
+                                (Sales)</label>
+                            <select id="filter-pic"
+                                class="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2"
+                                onchange="setFilter('pic', this.value, null)">
+                                <option value="ALL">Semua PIC</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label
+                                class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Provinsi</label>
+                            <select id="filter-provinsi"
+                                class="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2"
+                                onchange="setFilter('provinsi', this.value, null)">
+                                <option value="ALL">Semua Provinsi</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- Filter T.K. -->
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">STAGE
+                            FUNNEL (T.K)</label>
+                        <div class="flex flex-wrap gap-2" id="filter-tk">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- KPI Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                <div class="card p-6">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-slate-400 font-semibold uppercase tracking-wider text-xs">Total Nilai Brutto
+                        </h3>
+                        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400"><svg class="w-5 h-5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg></div>
+                    </div>
+                    <div class="mt-3"><span class="text-2xl font-bold text-white" id="kpi-brutto">Rp 0</span></div>
+                </div>
+                <div class="card p-6 border-b-4 border-b-teal-500">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-slate-300 font-bold uppercase tracking-wider text-xs">Total Forecast Netto
+                        </h3>
+                        <div class="p-2 bg-teal-500/10 rounded-lg text-teal-400"><svg class="w-5 h-5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg></div>
+                    </div>
+                    <div class="mt-3"><span
+                            class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400"
+                            id="kpi-netto">Rp 0</span></div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-slate-400 font-semibold uppercase tracking-wider text-xs">Total Pipeline
+                        </h3>
+                        <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400"><svg class="w-5 h-5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                            </svg></div>
+                    </div>
+                    <div class="mt-3"><span class="text-2xl font-bold text-white" id="kpi-pipeline">0</span> <span
+                            class="text-slate-400 text-sm">Paket</span></div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex justify-between items-start">
+                        <h3 class="text-slate-400 font-semibold uppercase tracking-wider text-xs">Deal / Closing
+                        </h3>
+                        <div class="p-2 bg-green-500/10 rounded-lg text-green-400"><svg class="w-5 h-5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg></div>
+                    </div>
+                    <div class="mt-3"><span class="text-2xl font-bold text-green-400" id="kpi-closing">0</span>
+                        <span class="text-slate-400 text-sm" id="kpi-closing-val">(Rp 0)</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Submission Rate + Status Comparison (new) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="card p-5">
+                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">📈 Weekly
+                        Submission
+                        Rate</h3>
+                    <div class="flex items-center gap-6 mt-4">
+                        <div class="text-center">
+                            <div class="text-4xl font-extrabold text-teal-400" id="submission-rate">0%</div>
+                            <div class="text-xs text-slate-400 mt-1">Minggu Ini</div>
+                        </div>
+                        <div class="flex-1">
+                            <div class="bg-slate-700 rounded-full h-4 overflow-hidden">
+                                <div class="bg-gradient-to-r from-teal-500 to-blue-500 h-full rounded-full transition-all duration-500"
+                                    id="submission-bar" style="width:0%"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-slate-500 mt-1">
+                                <span id="submitted-count">0 submitted</span>
+                                <span id="total-sales-count">0 total sales</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-5">
+                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">📊 Status: Minggu
+                        Ini
+                        vs Minggu Lalu</h3>
+                    <div class="chart-container" style="height:220px"><canvas id="statusCompareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <!-- Charts Row 1 -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="card p-5">
+                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Sales Funnel (Nilai
+                        Netto per Stage)</h3>
+                    <div class="chart-container"><canvas id="funnelChart"></canvas></div>
+                </div>
+                <div class="card p-5">
+                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Forecast Netto
+                        Aktual
+                        per Quarter</h3>
+                    <div class="chart-container"><canvas id="quarterChart"></canvas></div>
+                </div>
+            </div>
+            <!-- Charts Row 2 -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
+                <div class="card p-5 lg:col-span-3">
+                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Top 10 PIC
+                        (Berdasarkan
+                        Forecast Netto)</h3>
+                    <div class="chart-container"><canvas id="picChart"></canvas></div>
+                </div>
+                <div class="card p-5 lg:col-span-2">
+                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Proporsi Sumber
+                        Dana
+                    </h3>
+                    <div class="chart-container"><canvas id="sumberDanaChart"></canvas></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 4: MONITORING WEEKLY MP ===== -->
+        <section id="section-monitoring" class="hidden">
+            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">📋 Monitoring Weekly MP</h2>
+                    <p class="text-slate-400 text-sm mt-1">Riwayat update mingguan seluruh sales</p>
+                </div>
+                <button onclick="exportData()"
+                    class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold border border-slate-600 text-white transition">📥
+                    Export CSV</button>
+            </div>
+            <!-- Filters -->
+            <div class="card p-4 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Sales</label>
+                        <select id="mon-filter-sales" class="input-field text-xs py-1.5" onchange="renderMonitoring()">
+                            <option value="ALL">Semua Sales</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Week</label>
+                        <select id="mon-filter-week" class="input-field text-xs py-1.5" onchange="renderMonitoring()">
+                            <option value="ALL">Semua Week</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Status</label>
+                        <select id="mon-filter-status" class="input-field text-xs py-1.5" onchange="renderMonitoring()">
+                            <option value="ALL">Semua Status</option>
+                            <option>Pendekatan</option>
+                            <option>Shortlisted</option>
+                            <option>Pitching</option>
+                            <option>Closing</option>
+                            <option>Deal</option>
+                            <option>Dead</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Quarter</label>
+                        <select id="mon-filter-quarter" class="input-field text-xs py-1.5"
+                            onchange="renderMonitoring()">
+                            <option value="ALL">Semua Q</option>
+                            <option>Q1</option>
+                            <option>Q2</option>
+                            <option>Q3</option>
+                            <option>Q4</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="card overflow-x-auto">
+                <table class="w-full text-sm text-left text-slate-300">
+                    <thead
+                        class="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700 sticky top-0 z-10">
+                        <tr>
+                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring('week')">Week ↕</th>
+                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring('sales')">Nama Sales ↕</th>
+                            <th class="px-4 py-3 cursor-pointer" onclick="sortMonitoring('project')">Nama Project ↕</th>
+                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring('status')">Status ↕</th>
+                            <th class="px-3 py-3 text-right cursor-pointer" onclick="sortMonitoring('forecast')">Nilai
+                                Forecast
+                                ↕</th>
+                            <th class="px-4 py-3">Notes</th>
+                            <th class="px-4 py-3">Admin Notes</th>
+                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring('timestamp')">Timestamp ↕</th>
+                            <th class="px-3 py-3 text-center" id="mon-action-col">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monitoring-tbody" class="divide-y divide-slate-700/80"></tbody>
+                </table>
+                <div class="p-3 border-t border-slate-700 text-sm text-slate-400" id="monitoring-info">Menampilkan 0
+                    data</div>
+            </div>
+        </section>
+
+        <!-- ===== SECTION 5: CONTROL PANEL (Super Admin) ===== -->
+        <section id="section-control" class="hidden">
+            <div class="mb-6">
+                <h2 class="text-2xl font-bold text-white flex items-center gap-2">⚙️ Control Panel</h2>
+                <p class="text-slate-400 text-sm mt-1">Super Admin — Kelola sistem</p>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- User Management -->
+                <div class="card p-5">
+                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">👤 User Management</h3>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="cp-new-user" class="input-field flex-1 text-xs py-1.5"
+                            placeholder="Nama sales baru...">
+                        <button onclick="addSalesUser()"
+                            class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">+
+                            Tambah</button>
+                    </div>
+                    <div id="cp-user-list" class="space-y-1 max-h-60 overflow-y-auto"></div>
+                </div>
+                <!-- Reset Submission Flag -->
+                <div class="card p-5">
+                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">🔄 Reset Submission
+                        Flag</h3>
+                    <p class="text-xs text-slate-400 mb-3">Reset flag agar sales bisa submit ulang minggu ini</p>
+                    <div class="flex gap-2">
+                        <select id="cp-reset-user" class="input-field flex-1 text-xs py-1.5">
+                            <option value="">-- Pilih Sales --</option>
+                        </select>
+                        <select id="cp-reset-project" class="input-field flex-1 text-xs py-1.5">
+                            <option value="">-- Pilih Project --</option>
+                        </select>
+                        <button onclick="resetSubmissionFlag()"
+                            class="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 rounded text-xs font-bold text-white">Reset</button>
+                    </div>
+                </div>
+                <!-- Dropdown Master Edit (Admin+) -->
+                <div class="card p-5">
+                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">📝 Edit Dropdown Master
+                    </h3>
+                    <div class="mb-3">
+                        <label class="text-xs text-slate-400 font-semibold">Pilih Dropdown:</label>
+                        <select id="cp-dropdown-select" class="input-field text-xs py-1.5 mt-1"
+                            onchange="loadDropdownEditor()">
+                            <option value="picNames">PIC Names</option>
+                            <option value="principals">Principal</option>
+                            <option value="sumberDanaList">Sumber Dana</option>
+                        </select>
+                    </div>
+                    <div id="cp-dropdown-items" class="space-y-1 max-h-48 overflow-y-auto mb-3"></div>
+                    <div class="flex gap-2">
+                        <input type="text" id="cp-dropdown-new" class="input-field flex-1 text-xs py-1.5"
+                            placeholder="Nilai baru...">
+                        <button onclick="addDropdownItem()"
+                            class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">+
+                            Tambah</button>
+                    </div>
+                </div>
+                <!-- Export & Activity Log -->
+                <div class="card p-5">
+                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">📊 Export & Activity
+                        Log</h3>
+                    <button onclick="exportAllCSV()"
+                        class="w-full mb-3 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-bold text-white transition">📥
+                        Export All Data as CSV</button>
+                    <h4 class="text-sm font-semibold text-slate-300 mb-2">Aktivitas Terakhir:</h4>
+                    <div id="activity-log" class="space-y-1 max-h-52 overflow-y-auto text-xs text-slate-400"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===== ROLE SWITCHER (Floating) ===== -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <div id="role-menu"
+            class="hidden mb-3 bg-slate-800 border border-slate-600 rounded-xl shadow-2xl p-2 space-y-1 animate-fade-in">
+            <button onclick="setRole('sales')"
+                class="w-full text-left px-4 py-2 rounded-lg hover:bg-slate-700 text-sm font-semibold text-white transition">👤
+                Sales</button>
+            <button onclick="setRole('admin')"
+                class="w-full text-left px-4 py-2 rounded-lg hover:bg-slate-700 text-sm font-semibold text-white transition">🛡️
+                Admin</button>
+            <button onclick="setRole('superadmin')"
+                class="w-full text-left px-4 py-2 rounded-lg hover:bg-slate-700 text-sm font-semibold text-white transition">⚡
+                Super Admin</button>
+        </div>
+        <button onclick="toggleRoleMenu()"
+            class="w-14 h-14 rounded-full bg-gradient-to-r from-teal-500 to-blue-500 shadow-lg shadow-teal-500/30 flex items-center justify-center text-2xl hover:scale-110 transition-transform"
+            title="Ganti Role">
+            🔄
+        </button>
+    </div><!-- ===== JAVASCRIPT: DATA + STATE + CORE LOGIC ===== -->
+    <script>
+        // ============================================================
+        // SECTION A: DROPDOWN MASTER DATA (from Excel)
+        // ============================================================
+        let picNames = ['GIRI SURYANTO', 'DIKKY MAHISA PUTERA', 'DANANG SETYO BUDI', 'BAMBANG SURYANTO', 'HERI IRWANSYAH', 'BLASIUS DIMAS', 'JOKO WALUYO', 'LILIK LASONO', 'MANAEK HENDRAWAN SITINJAK', 'MUHAMMAD RASYID RIDHA', 'EKO JULIANTO', 'YUDISTIRA WOLDI PAOKI', 'AJI FARIZ RACHMAN', 'REZKI ANUGRAHA', 'ATEP KUNAEPI', 'YUDHA PRATISTA APRIANATA', 'AGUS MUHCLIS', 'BAMBANG MUDJIRAN', 'RISKY ALDIANSYAH', 'FIKRI ARI HANAFI'];
+        let principals = ['ATS', 'SKE', 'SMK', 'IPE', 'IPV', 'Un categories'];
+        let sumberDanaList = ['APBN', 'APBD', 'DAK', 'BOS', 'BLUD', 'BUMD', 'POKIR', 'APBDP', 'Swasta'];
+        let jenisProdukList = ['Mebel / Furnitur', 'Alat Tulis Kantor', 'TIK & Periperal', 'Buku Non Teks HET', 'Buku Teks Pendamping HET', 'Buku Teks Pendamping', 'Buku Non Teks', 'Buku PAUD', 'Cetak, Kertas, dan Buku Tulis', 'Alat Olahraga', 'Alat Kesehatan / Kebersihan', 'Alat Praktik', 'Alat Praktik SMK', 'Alat Peraga APE Luar', 'Alat Peraga APE Dalam', 'Alat Peraga LAB IPA', 'Pakaian dan Seragam', 'Elektronik', 'Paket Project'];
+        const provinsiList = ['Nanggroe Aceh Darussalam', 'Sumatera Utara', 'Sumatera Barat', 'Riau', 'Jambi', 'Sumatera Selatan', 'Bengkulu', 'Lampung', 'Kepulauan Bangka Belitung', 'Kepulauan Riau', 'DKI Jakarta', 'Jawa Barat', 'Jawa Tengah', 'Daerah Istimewa Yogyakarta', 'Jawa Timur', 'Banten', 'Bali', 'Nusa Tenggara Barat', 'Nusa Tenggara Timur', 'Kalimantan Barat', 'Kalimantan Tengah', 'Kalimantan Selatan', 'Kalimantan Timur', 'Kalimantan Utara', 'Sulawesi Utara', 'Sulawesi Tengah', 'Sulawesi Selatan', 'Sulawesi Tenggara', 'Gorontalo', 'Sulawesi Barat', 'Maluku', 'Maluku Utara', 'Papua', 'Papua Barat', 'Papua Selatan', 'Papua Tengah', 'Papua Pegunungan', 'Papua Barat Daya'];
+        const statusList = ['Pendekatan', 'Shortlisted', 'Pitching', 'Closing', 'Deal', 'Dead'];
+        const tkValues = ['5%', '10%', '25%', '50%', '75%', '100%'];
+
+        // ============================================================
+        // SECTION B: STATE MANAGEMENT
+        // ============================================================
+        let currentRole = 'sales'; // sales | admin | admin | superadmin
+        let currentMenu = 'input';
+        let currentSalesUser = 'DANANG SETYO BUDI'; // simulated logged-in sales
+        let selectedProjectId = null;
+        let monitoringSortKey = 'timestamp';
+        let monitoringSortAsc = false;
+        let activityLog = [];
+        let nextFunnelId = 100;
+        let nextUpdateId = 200;
+        let nettoManuallyEdited = false;
+
+        // Helper: current ISO week
+        function getISOWeek(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+        const today = new Date(2026, 2, 7); // March 7 2026
+        const currentWeek = getISOWeek(today);
+        const currentYear = 2026;
+        const currentWeekLabel = `W${currentWeek}-${currentYear}`;
+
+        // ============================================================
+        // SECTION C: MOCK FUNNEL DATA (from Excel - 15 real entries)
+        // ============================================================
+        let funnelData = [
+            { id: 1, pic: 'DANANG SETYO BUDI', principal: 'ATS', instansi: 'Dinas Pendidikan Kutai Timur', wilayah: 'Kabupaten Kutai Timur', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan meubel', sumberDana: 'APBD', nilaiAnggaran: 6489999430, forecastNetto: 5846846333, jenisProduk: 'Mebel / Furnitur', quarter: 'Q2', tk: 100, status: 'Deal', keterangan: 'PO sudah masuk' },
+            { id: 2, pic: 'DANANG SETYO BUDI', principal: 'SMK', instansi: 'Dinas Pendidikan Kutai Timur', wilayah: 'Kabupaten Kutai Timur', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan ATK', sumberDana: 'APBD', nilaiAnggaran: 2499999810, forecastNetto: 2252252081, jenisProduk: 'Alat Tulis Kantor', quarter: 'Q2', tk: 100, status: 'Deal', keterangan: '' },
+            { id: 3, pic: 'DANANG SETYO BUDI', principal: 'SKE', instansi: 'Dinas Pendidikan Kutai Timur', wilayah: 'Kabupaten Kutai Timur', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan seragam dan meubel', sumberDana: 'APBD', nilaiAnggaran: 30000000000, forecastNetto: 27027027027, jenisProduk: 'Paket Project', quarter: 'Q2', tk: 75, status: 'Closing', keterangan: 'Shortlisted, kemungkinan besar menang' },
+            { id: 4, pic: 'DANANG SETYO BUDI', principal: 'SMK', instansi: 'Kemenag', wilayah: 'Kota Yogyakarta', provinsi: 'Daerah Istimewa Yogyakarta', namaPaket: 'Paket pengadaan ATK', sumberDana: 'APBN', nilaiAnggaran: 10000000000, forecastNetto: 9009009009, jenisProduk: 'Alat Tulis Kantor', quarter: 'Q2', tk: 75, status: 'Shortlisted', keterangan: '' },
+            { id: 5, pic: 'GIRI SURYANTO', principal: 'ATS', instansi: 'Bawaslu', wilayah: 'Kota Administrasi Jakarta Pusat', provinsi: 'DKI Jakarta', namaPaket: 'Belanja Modal alat dan mesin', sumberDana: 'APBN', nilaiAnggaran: 1000000000, forecastNetto: 810810811, jenisProduk: 'Cetak, Kertas, dan Buku Tulis', quarter: 'Q3', tk: 50, status: 'Pitching', keterangan: '' },
+            { id: 6, pic: 'MUHAMMAD RASYID RIDHA', principal: 'IPE', instansi: 'Dinas Pendidikan dan Kebudayaan', wilayah: 'Kota Singkawang', provinsi: 'Kalimantan Barat', namaPaket: 'Paket pengadaan Buku Smartbook SD', sumberDana: 'APBD', nilaiAnggaran: 400000000, forecastNetto: 360360360, jenisProduk: 'Buku Non Teks', quarter: 'Q1', tk: 100, status: 'Deal', keterangan: 'Sudah closing Q1' },
+            { id: 7, pic: 'MUHAMMAD RASYID RIDHA', principal: 'ATS', instansi: 'Dinas Pendidikan dan Kebudayaan', wilayah: 'Kota Singkawang', provinsi: 'Kalimantan Barat', namaPaket: 'Paket pengadaan Meubelair', sumberDana: 'APBD', nilaiAnggaran: 200000000, forecastNetto: 180180180, jenisProduk: 'Mebel / Furnitur', quarter: 'Q1', tk: 100, status: 'Deal', keterangan: '' },
+            { id: 8, pic: 'LILIK LASONO', principal: 'SMK', instansi: 'Dinas Pendidikan', wilayah: 'Kabupaten Kutai Barat', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan Baju Seragam TK Negeri', sumberDana: 'APBD', nilaiAnggaran: 565896000, forecastNetto: 509816216, jenisProduk: 'Pakaian dan Seragam', quarter: 'Q2', tk: 75, status: 'Shortlisted', keterangan: '' },
+            { id: 9, pic: 'LILIK LASONO', principal: 'ATS', instansi: 'Dinas Pendidikan', wilayah: 'Kabupaten Kutai Barat', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan Meja Kursi Siswa', sumberDana: 'APBD', nilaiAnggaran: 1980000000, forecastNetto: 1783783784, jenisProduk: 'Mebel / Furnitur', quarter: 'Q2', tk: 75, status: 'Closing', keterangan: '' },
+            { id: 10, pic: 'HERI IRWANSYAH', principal: 'SKE', instansi: 'INSPEKTORAT', wilayah: 'Kabupaten Boyolali', provinsi: 'Jawa Tengah', namaPaket: 'Paket Pengadaan Hibah', sumberDana: 'APBD', nilaiAnggaran: 24000839, forecastNetto: 21622378, jenisProduk: 'Alat Praktik', quarter: 'Q2', tk: 100, status: 'Deal', keterangan: 'Closing/Masuk PO' },
+            { id: 11, pic: 'JOKO WALUYO', principal: 'IPV', instansi: 'Perpusda Kalteng', wilayah: 'Kota Palangka Raya', provinsi: 'Kalimantan Tengah', namaPaket: 'Paket pengadaan Buku Perpustakaan', sumberDana: 'POKIR', nilaiAnggaran: 1500000000, forecastNetto: 1351351351, jenisProduk: 'Buku Non Teks HET', quarter: 'Q3', tk: 50, status: 'Pitching', keterangan: '' },
+            { id: 12, pic: 'BAMBANG SURYANTO', principal: 'IPE', instansi: 'Pendidikan', wilayah: 'Kabupaten Kolaka Utara', provinsi: 'Sulawesi Tenggara', namaPaket: 'Paket Buku Teks pendamping koding Ai', sumberDana: 'APBD', nilaiAnggaran: 242400000, forecastNetto: 242400000, jenisProduk: 'Buku Teks Pendamping HET', quarter: 'Q2', tk: 50, status: 'Pendekatan', keterangan: '' },
+            { id: 13, pic: 'YUDISTIRA WOLDI PAOKI', principal: 'ATS', instansi: 'Dinas Perpustakaan dan Kearsipan', wilayah: 'Kabupaten Minahasa Tenggara', provinsi: 'Sulawesi Utara', namaPaket: 'Paket pengadaan meubel', sumberDana: 'APBN', nilaiAnggaran: 500000000, forecastNetto: 500000000, jenisProduk: 'Mebel / Furnitur', quarter: 'Q2', tk: 75, status: 'Shortlisted', keterangan: '' },
+            { id: 14, pic: 'FIKRI ARI HANAFI', principal: 'ATS', instansi: 'DINAS KESEHATAN KAB.PEMALANG', wilayah: 'Kabupaten Pemalang', provinsi: 'Jawa Tengah', namaPaket: 'Paket pengadaan Meubel', sumberDana: 'APBD', nilaiAnggaran: 1198820000, forecastNetto: 1080018018, jenisProduk: 'Mebel / Furnitur', quarter: 'Q3', tk: 50, status: 'Pendekatan', keterangan: '' },
+            { id: 15, pic: 'AGUS MUHCLIS', principal: 'ATS', instansi: 'Sekwan DPRD Kab.Bandung Barat', wilayah: 'Kabupaten Bandung Barat', provinsi: 'Jawa Barat', namaPaket: 'Paket pengadaan meja dan kursi', sumberDana: 'APBD', nilaiAnggaran: 741300000, forecastNetto: 667837838, jenisProduk: 'Mebel / Furnitur', quarter: 'Q2', tk: 75, status: 'Closing', keterangan: '' },
+        ];
+
+        // ============================================================
+        // SECTION D: MOCK WEEKLY UPDATES (20+ entries across W8-W10)
+        // ============================================================
+        let weeklyUpdates = [
+            { id: 101, projectId: 1, pic: 'DANANG SETYO BUDI', week: 'W9-2026', status: 'Deal', forecast: 5846846333, notes: 'PO sudah diterima, proses pengiriman', adminNotes: 'Good job, monitor delivery', timestamp: '03/03/2026 09:15' },
+            { id: 102, projectId: 2, pic: 'DANANG SETYO BUDI', week: 'W9-2026', status: 'Deal', forecast: 2252252081, notes: 'ATK sudah kirim sebagian', adminNotes: '', timestamp: '03/03/2026 09:20' },
+            { id: 103, projectId: 3, pic: 'DANANG SETYO BUDI', week: 'W9-2026', status: 'Closing', forecast: 27027027027, notes: 'Negosiasi harga final', adminNotes: 'Push for closing W10', timestamp: '03/03/2026 09:30' },
+            { id: 104, projectId: 4, pic: 'DANANG SETYO BUDI', week: 'W9-2026', status: 'Shortlisted', forecast: 9009009009, notes: 'Masuk daftar pendek, tunggu evaluasi', adminNotes: '', timestamp: '03/03/2026 09:35' },
+            { id: 105, projectId: 5, pic: 'GIRI SURYANTO', week: 'W9-2026', status: 'Pitching', forecast: 810810811, notes: 'Presentasi ke tim Bawaslu minggu depan', adminNotes: '', timestamp: '03/02/2026 14:00' },
+            { id: 106, projectId: 6, pic: 'MUHAMMAD RASYID RIDHA', week: 'W9-2026', status: 'Deal', forecast: 360360360, notes: 'Sudah closing, invoice terkirim', adminNotes: '', timestamp: '03/02/2026 10:30' },
+            { id: 107, projectId: 8, pic: 'LILIK LASONO', week: 'W9-2026', status: 'Shortlisted', forecast: 509816216, notes: 'Menunggu keputusan tender', adminNotes: '', timestamp: '03/03/2026 11:00' },
+            { id: 108, projectId: 9, pic: 'LILIK LASONO', week: 'W9-2026', status: 'Closing', forecast: 1783783784, notes: 'Proses negosiasi akhir', adminNotes: '', timestamp: '03/03/2026 11:15' },
+            { id: 109, projectId: 11, pic: 'JOKO WALUYO', week: 'W9-2026', status: 'Pitching', forecast: 1351351351, notes: 'Presentasi minggu depan', adminNotes: '', timestamp: '03/04/2026 08:45' },
+            { id: 110, projectId: 12, pic: 'BAMBANG SURYANTO', week: 'W9-2026', status: 'Pendekatan', forecast: 242400000, notes: 'Masih pendekatan awal', adminNotes: 'Follow up segera', timestamp: '03/04/2026 09:00' },
+            // W8 entries
+            { id: 111, projectId: 1, pic: 'DANANG SETYO BUDI', week: 'W8-2026', status: 'Closing', forecast: 5846846333, notes: 'Negosiasi kontrak', adminNotes: '', timestamp: '02/24/2026 10:00' },
+            { id: 112, projectId: 3, pic: 'DANANG SETYO BUDI', week: 'W8-2026', status: 'Shortlisted', forecast: 27027027027, notes: 'Masuk shortlist vendor', adminNotes: '', timestamp: '02/24/2026 10:15' },
+            { id: 113, projectId: 5, pic: 'GIRI SURYANTO', week: 'W8-2026', status: 'Pendekatan', forecast: 810810811, notes: 'Identifikasi kebutuhan klien', adminNotes: '', timestamp: '02/23/2026 14:30' },
+            { id: 114, projectId: 8, pic: 'LILIK LASONO', week: 'W8-2026', status: 'Pendekatan', forecast: 509816216, notes: 'Awal pendekatan ke Dinas', adminNotes: '', timestamp: '02/24/2026 09:00' },
+            { id: 115, projectId: 13, pic: 'YUDISTIRA WOLDI PAOKI', week: 'W8-2026', status: 'Pitching', forecast: 500000000, notes: 'Kirim proposal', adminNotes: '', timestamp: '02/25/2026 11:00' },
+            // W10 entries
+            { id: 116, projectId: 1, pic: 'DANANG SETYO BUDI', week: 'W10-2026', status: 'Deal', forecast: 5846846333, notes: 'Delivery batch 1 selesai', adminNotes: 'Excellent progress', timestamp: '03/07/2026 08:00' },
+            { id: 117, projectId: 3, pic: 'DANANG SETYO BUDI', week: 'W10-2026', status: 'Closing', forecast: 27027027027, notes: 'Final negotiation done, menunggu PO', adminNotes: '', timestamp: '03/07/2026 08:10' },
+            { id: 118, projectId: 13, pic: 'YUDISTIRA WOLDI PAOKI', week: 'W10-2026', status: 'Shortlisted', forecast: 500000000, notes: 'Sudah masuk shortlist', adminNotes: '', timestamp: '03/07/2026 09:00' },
+            { id: 119, projectId: 14, pic: 'FIKRI ARI HANAFI', week: 'W10-2026', status: 'Pendekatan', forecast: 1080018018, notes: 'Masih pendekatan ke dinas kesehatan', adminNotes: '', timestamp: '03/07/2026 08:30' },
+            { id: 120, projectId: 15, pic: 'AGUS MUHCLIS', week: 'W10-2026', status: 'Closing', forecast: 667837838, notes: 'Menuju closing, RAB disetujui', adminNotes: '', timestamp: '03/07/2026 08:45' },
+            { id: 121, projectId: 10, pic: 'HERI IRWANSYAH', week: 'W9-2026', status: 'Deal', forecast: 21622378, notes: 'Deal selesai, barang sudah dikirim', adminNotes: '', timestamp: '03/03/2026 15:00' },
+            { id: 122, projectId: 7, pic: 'MUHAMMAD RASYID RIDHA', week: 'W10-2026', status: 'Deal', forecast: 180180180, notes: 'Semua terkirim', adminNotes: '', timestamp: '03/07/2026 09:15' },
+        ];
+
+        // ============================================================
+        // SECTION E: UTILITY FUNCTIONS
+        // ============================================================
+        function fmtRp(n) {
+            if (n === null || n === undefined || isNaN(n)) return 'Rp 0';
+            return 'Rp ' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        function parseCurrency(s) {
+            if (!s) return 0;
+            const val = parseInt(s.toString().replace(/[^\d]/g, ''));
+            return isNaN(val) ? 0 : val;
+        }
+        function formatCurrency(el) {
+            let v = el.value.replace(/[^\d]/g, '');
+            el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        function calcForecast() {
+            if (nettoManuallyEdited) return;
+            const brutto = parseCurrency(document.getElementById('f-brutto').value);
+            const tkVal = parseInt(document.getElementById('f-tk').value) || 0;
+            const netto = Math.round(brutto * tkVal / 100);
+            document.getElementById('f-netto').value = netto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+        }
+        function getStatusBadgeClass(s) {
+            const map = { Deal: 'badge-deal', Closing: 'badge-closing', Pitching: 'badge-pitching', Shortlisted: 'badge-shortlisted', Pendekatan: 'badge-pendekatan', Dead: 'badge-dead' };
+            return map[s] || 'badge-pendekatan';
+        }
+        function getStatusRowClass(s) {
+            const map = { Deal: 'status-row-deal', Closing: 'status-row-closing', Pitching: 'status-row-pitching', Shortlisted: 'status-row-shortlisted', Pendekatan: 'status-row-pendekatan', Dead: 'status-row-dead' };
+            return map[s] || '';
+        }
+        function getTKBadgeClass(tk) {
+            const v = parseInt(tk);
+            if (v >= 100) return 'badge-100';
+            if (v >= 75) return 'badge-75';
+            if (v >= 50) return 'badge-50';
+            if (v >= 25) return 'badge-25';
+            if (v >= 10) return 'badge-10';
+            return 'badge-5';
+        }
+        function showToast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = `toast toast-${type} show`;
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+        function logActivity(action) {
+            const now = today.toLocaleDateString('id-ID');
+            activityLog.unshift({ time: now + ' ' + new Date().toLocaleTimeString('id-ID'), role: currentRole.toUpperCase(), action });
+            if (activityLog.length > 50) activityLog.pop();
+        }
+        function canSeeAllData() { return ['admin', 'superadmin'].includes(currentRole); }
+        function canDelete() { return ['superadmin'].includes(currentRole); }
+        function canExportCSV() { return ['superadmin'].includes(currentRole); }
+        function canEditDropdowns() { return ['admin', 'superadmin'].includes(currentRole); }
+        function isSuperAdmin() { return currentRole === 'superadmin'; }
+        function getVisibleFunnel() {
+            if (canSeeAllData()) return funnelData;
+            return funnelData.filter(f => f.pic === currentSalesUser);
+        }
+        function getVisibleUpdates() {
+            if (canSeeAllData()) return weeklyUpdates;
+            return weeklyUpdates.filter(u => u.pic === currentSalesUser);
+        }
+        function loadPipelineData() {
+            return funnelData;
+        }
+        function savePipelineData() {
+            console.log("Saving pipeline data...");
+            // Replace with Apps Script fetch endpoint in Phase 2
+        }// ============================================================
+        // SECTION F: NAVIGATION & ROLE SYSTEM
+        // ============================================================
+        function switchMenu(menu) {
+            currentMenu = menu;
+            ['input', 'update', 'dashboard', 'monitoring', 'control'].forEach(m => {
+                const sec = document.getElementById('section-' + m);
+                const btn = document.getElementById('nav-' + m);
+                if (sec) sec.classList.toggle('hidden', m !== menu);
+                if (btn) btn.classList.toggle('active', m === menu);
+            });
+            if (menu === 'input') { populateDropdowns(); renderPipelineTable(); }
+            if (menu === 'update') { renderProjectList(); }
+            if (menu === 'dashboard') { renderDashboard(); }
+            if (menu === 'monitoring') { populateMonitoringFilters(); renderMonitoring(); }
+            if (menu === 'control') { renderControlPanel(); }
+        }
+        function setCurrentSales(name) {
+            currentSalesUser = name;
+            switchMenu(currentMenu);
+            logActivity('Changed active sales to ' + name);
+        }
+        function setRole(role) {
+            currentRole = role;
+            document.getElementById('role-badge').textContent = role.toUpperCase();
+
+            // ADMIN = can see everything, menus 1-4, no control panel. SUPERADMIN = all, control panel.
+            document.getElementById('nav-control').classList.toggle('hidden', currentRole !== 'superadmin');
+
+            document.getElementById('role-menu').classList.add('hidden');
+            const sp = document.getElementById('sales-name-picker');
+            if (sp) sp.classList.toggle('hidden', role !== 'sales');
+            // Admin notes section in update form
+            const mns = document.getElementById('admin-notes-section');
+            if (mns) mns.classList.toggle('hidden', !canSeeAllData());
+            // Re-render current view
+            switchMenu(currentMenu);
+            logActivity('Role switched to ' + role.toUpperCase());
+            showToast('Role: ' + role.toUpperCase(), 'success');
+        }
+        function toggleRoleMenu() {
+            document.getElementById('role-menu').classList.toggle('hidden');
+        }
+        // Close role menu on outside click
+        document.addEventListener('click', e => {
+            const rm = document.getElementById('role-menu');
+            const btn = e.target.closest('[onclick*="toggleRoleMenu"]');
+            const menu = e.target.closest('#role-menu');
+            if (!btn && !menu && rm) rm.classList.add('hidden');
+        });
+
+        // ============================================================
+        // SECTION G: INPUT FUNNEL LOGIC
+        // ============================================================
+        function populateDropdowns() {
+            fillSelect('f-pic', picNames, '-- Pilih PIC --');
+            fillSelect('f-principal', principals, '-- Pilih Principal --');
+            fillSelect('f-sumberdana', sumberDanaList, '-- Pilih --');
+            fillSelect('f-provinsi', provinsiList, '-- Pilih Provinsi --');
+            fillSelect('f-jenisproduk', jenisProdukList, '-- Pilih --');
+            // If Sales role, auto-select their name and disable
+            const picSel = document.getElementById('f-pic');
+            if (!canSeeAllData()) {
+                picSel.value = currentSalesUser;
+                picSel.disabled = true;
+            } else {
+                picSel.disabled = false;
+            }
+        }
+        function fillSelect(id, items, placeholder, placeholderValue = "") {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            const current = sel.value;
+            sel.innerHTML = '<option value="' + placeholderValue + '">' + placeholder + '</option>';
+            items.forEach(it => {
+                const o = document.createElement('option'); o.value = it; o.textContent = it; sel.appendChild(o);
+            });
+            if (current && items.includes(current)) sel.value = current;
+        }
+        function resetInputForm() {
+            document.getElementById('input-form').reset();
+            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
+            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
+            if (!canSeeAllData()) document.getElementById('f-pic').value = currentSalesUser;
+            nettoManuallyEdited = false;
+        }
+        function handleInputSubmit(e) {
+            e.preventDefault();
+            let valid = true;
+            const fields =
+                ['pic', 'principal', 'sumberdana', 'namapaket', 'instansi', 'provinsi', 'quarter', 'jenisproduk', 'status', 'tk', 'brutto'];
+            fields.forEach(f => {
+                const el = document.getElementById('f-' + f);
+                const err = document.getElementById('err-' + f);
+                if (el && !el.value.trim()) {
+                    el.classList.add('field-error');
+                    if (err) err.style.display = 'block';
+                    valid = false;
+                } else {
+                    if (el) el.classList.remove('field-error');
+                    if (err) err.style.display = 'none';
+                }
+            });
+            if (!valid) { showToast('Lengkapi semua field yang wajib diisi!', 'error'); return false; }
+
+            const bruttoVal = parseCurrency(document.getElementById('f-brutto').value);
+            const nettoVal = parseCurrency(document.getElementById('f-netto').value);
+            const tkVal = parseInt(document.getElementById('f-tk').value) || 0;
+
+            let numValid = true;
+            if (bruttoVal < 0) {
+                document.getElementById('f-brutto').classList.add('field-error');
+                document.getElementById('err-brutto-val').style.display = 'block';
+                numValid = false;
+            }
+            if (tkVal < 0 || tkVal > 100) {
+                document.getElementById('f-tk').classList.add('field-error');
+                document.getElementById('err-tk-val').style.display = 'block';
+                numValid = false;
+            }
+            if (nettoVal > bruttoVal) {
+                document.getElementById('f-netto').classList.add('field-error');
+                document.getElementById('err-netto-val').style.display = 'block';
+                numValid = false;
+            }
+            if (!numValid) { showToast('Periksa kembali nilai angka yang dimasukkan', 'error'); return false; }
+
+            const instansiVal = document.getElementById('f-instansi').value.trim();
+            const namaPaketVal = document.getElementById('f-namapaket').value.trim();
+            const principalVal = document.getElementById('f-principal').value.trim();
+
+            const isDuplicate = funnelData.some(d =>
+                d.instansi.toLowerCase() === instansiVal.toLowerCase() &&
+                d.namaPaket.toLowerCase() === namaPaketVal.toLowerCase() &&
+                d.principal.toLowerCase() === principalVal.toLowerCase()
+            );
+
+            if (isDuplicate) {
+                showToast('Gagal: Duplikasi Project (Instansi + Nama Paket + Principal sudah ada)', 'error');
+                return false;
+            }
+
+            const entry = {
+                id: nextFunnelId++,
+                pic: document.getElementById('f-pic').value,
+                principal: document.getElementById('f-principal').value,
+                instansi: document.getElementById('f-instansi').value,
+                wilayah: document.getElementById('f-wilayah').value,
+                provinsi: document.getElementById('f-provinsi').value,
+                namaPaket: document.getElementById('f-namapaket').value,
+                sumberDana: document.getElementById('f-sumberdana').value,
+                nilaiAnggaran: parseCurrency(document.getElementById('f-brutto').value),
+                forecastNetto: parseCurrency(document.getElementById('f-netto').value),
+                jenisProduk: document.getElementById('f-jenisproduk').value,
+                quarter: document.getElementById('f-quarter').value,
+                tk: parseInt(document.getElementById('f-tk').value),
+                status: document.getElementById('f-status').value,
+                keterangan: document.getElementById('f-keterangan').value
+            };
+            funnelData.push(entry);
+            logActivity('Added funnel: ' + entry.namaPaket + ' by ' + entry.pic);
+            showToast('✅ Project berhasil ditambahkan ke pipeline!');
+            resetInputForm();
+            renderPipelineTable();
+            return false;
+        }
+        function renderPipelineTable() {
+            const tbody = document.getElementById('pipeline-tbody');
+            if (!tbody) return;
+            const data = getVisibleFunnel();
+            tbody.innerHTML = data.map((d, i) =>
+                `<tr class="${getStatusRowClass(d.status)} hover:bg-slate-700/30">
+    <td class="px-3 py-2.5">${i + 1}</td>
+    <td class="px-3 py-2.5 font-medium">${d.pic}</td>
+    <td class="px-3 py-2.5">${d.namaPaket}</td>
+    <td class="px-3 py-2.5">${d.instansi}</td>
+    <td class="px-3 py-2.5">${d.sumberDana}</td>
+    <td class="px-3 py-2.5 text-right">${fmtRp(d.nilaiAnggaran)}</td>
+    <td class="px-3 py-2.5 text-right font-semibold text-teal-400">${fmtRp(d.forecastNetto)}</td>
+    <td class="px-3 py-2.5 text-center"><span class="badge ${getTKBadgeClass(d.tk)}">${d.tk}%</span></td>
+    <td class="px-3 py-2.5 text-center"><span class="badge ${getStatusBadgeClass(d.status)}">${d.status}</span></td>
+    <td class="px-3 py-2.5 text-center">${d.quarter}</td>
+</tr>`
+            ).join('');
+        }
+
+        // ============================================================
+        // SECTION H: UPDATE FUNNEL LOGIC
+        // ============================================================
+        function renderProjectList() {
+            const container = document.getElementById('project-list');
+            if (!container) return;
+            const search = (document.getElementById('update-search')?.value || '').toLowerCase();
+            const data = getVisibleFunnel().filter(d =>
+                !search || d.namaPaket.toLowerCase().includes(search) || d.instansi.toLowerCase().includes(search) ||
+                d.pic.toLowerCase().includes(search)
+            );
+            document.getElementById('current-week-label').textContent = 'Minggu saat ini: ' + currentWeekLabel;
+            container.innerHTML = data.map(d => {
+                const lastUpdate = weeklyUpdates.filter(u => u.projectId === d.id).sort((a, b) => b.id - a.id)[0];
+                return `<div class="project-item ${selectedProjectId === d.id ? 'selected' : ''}" onclick="selectProject(${d.id})">
+    <div class="flex justify-between items-center">
+        <span class="font-semibold text-sm text-white">${d.namaPaket}</span>
+        <span class="badge ${getStatusBadgeClass(d.status)} text-xs">${d.status}</span>
+    </div>
+    <div class="text-xs text-slate-400 mt-1">${d.instansi} • ${d.pic}</div>
+    <div class="flex justify-between mt-1">
+        <span class="text-xs text-teal-400 font-semibold">${fmtRp(d.forecastNetto)}</span>
+        <span class="text-xs text-slate-500">${lastUpdate ? 'Updated: ' + lastUpdate.week : 'Belum diupdate'}</span>
+    </div>
+</div>`;
+            }).join('');
+        }
+        function selectProject(id) {
+            selectedProjectId = id;
+            const project = funnelData.find(f => f.id === id);
+            if (!project) return;
+            document.getElementById('update-placeholder').classList.add('hidden');
+            document.getElementById('update-form-container').classList.remove('hidden');
+            document.getElementById('upd-project-name').textContent = project.namaPaket;
+            document.getElementById('upd-project-info').textContent = project.instansi + ' • ' + project.pic + ' • ' +
+                project.quarter;
+            const badge = document.getElementById('upd-current-badge');
+            badge.textContent = project.status;
+            badge.className = 'badge ' + getStatusBadgeClass(project.status);
+            document.getElementById('upd-status').value = project.status;
+            document.getElementById('upd-forecast').value = project.forecastNetto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+            document.getElementById('upd-notes').value = '';
+            document.getElementById('upd-admin-notes') && (document.getElementById('upd-admin-notes').value = '');
+            // Check anti-duplication
+            const alreadySubmitted = weeklyUpdates.find(u => u.projectId === id && u.pic === (canSeeAllData() ? project.pic :
+                currentSalesUser) && u.week === currentWeekLabel);
+            const blocked = document.getElementById('update-blocked-msg');
+            const form = document.getElementById('weekly-update-form');
+            const overrideBtn = document.getElementById('override-btn');
+            if (alreadySubmitted && !canSeeAllData()) {
+                blocked.classList.remove('hidden');
+                document.getElementById('blocked-text').textContent = `Sudah diupdate ${currentWeekLabel}. Hubungi Admin untuk
+koreksi.`;
+                form.querySelectorAll('input,select,textarea,button[type=submit]').forEach(el => el.disabled = true);
+                overrideBtn.classList.add('hidden');
+            } else if (alreadySubmitted && canSeeAllData()) {
+                blocked.classList.remove('hidden');
+                document.getElementById('blocked-text').textContent = `Sales sudah submit ${currentWeekLabel}. Anda dapat override atau
+tambah catatan admin.`;
+                overrideBtn.classList.remove('hidden');
+                form.querySelectorAll('input,select,textarea,button[type=submit]').forEach(el => el.disabled = false);
+                // Admin notes always enabled for Admin+
+            } else {
+                blocked.classList.add('hidden');
+                form.querySelectorAll('input,select,textarea,button[type=submit]').forEach(el => el.disabled = false);
+            }
+            // Show admin note section for Admin+
+            const mns = document.getElementById('admin-notes-section');
+            if (mns) mns.classList.toggle('hidden', !canSeeAllData());
+            renderProjectList();
+        }
+        function overrideSubmissionLock() {
+            if (!canSeeAllData()) return;
+            const blocked = document.getElementById('update-blocked-msg');
+            blocked.classList.add('hidden');
+            const form = document.getElementById('weekly-update-form');
+            form.querySelectorAll('input,select,textarea,button[type=submit]').forEach(el => el.disabled = false);
+            showToast('🔓 Submission lock overridden');
+            logActivity('Override submission lock for project ID ' + selectedProjectId);
+        }
+        function submitWeeklyUpdate(e) {
+            e.preventDefault();
+            document.getElementById('err-duplicate-update').style.display = 'none';
+            if (!selectedProjectId) return false;
+            const project = funnelData.find(f => f.id === selectedProjectId);
+            if (!project) return false;
+
+            // Cek duplikasi: max 1x per week
+            const isDuplicate = weeklyUpdates.some(u =>
+                u.projectId === selectedProjectId &&
+                u.pic === (canSeeAllData() ? project.pic : currentSalesUser) &&
+                u.week === currentWeekLabel
+            );
+            if (isDuplicate && !canSeeAllData()) {
+                document.getElementById('err-duplicate-update').style.display = 'block';
+                return false;
+            }
+            const update = {
+                id: nextUpdateId++,
+                projectId: selectedProjectId,
+                pic: project.pic,
+                week: currentWeekLabel,
+                status: document.getElementById('upd-status').value || project.status,
+                forecast: parseCurrency(document.getElementById('upd-forecast').value),
+                notes: document.getElementById('upd-notes').value,
+                adminNotes: canSeeAllData() ? (document.getElementById('upd-admin-notes')?.value || '') : '',
+                timestamp: today.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + new
+                    Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+            };
+            // Update funnel project status & forecast
+            project.status = update.status;
+            project.forecastNetto = update.forecast;
+            weeklyUpdates.push(update);
+            logActivity('Weekly update: ' + project.namaPaket + ' → ' + update.status + ' by ' + project.pic);
+            showToast('✅ Update mingguan berhasil disimpan!');
+            selectProject(selectedProjectId);
+            // Refresh list
+            renderProjectList();
+            return false;
+        }// ============================================================
+        // SECTION I: DASHBOARD RENDERING & CHARTS
+        // ============================================================
+        let chartInstances = {};
+        function destroyCharts() {
+            Object.values(chartInstances).forEach(c => c && c.destroy());
+            chartInstances = {};
+        }
+        let currentFilters = { quarter: 'ALL', sumberDana: 'ALL', tk: 'ALL', pic: 'ALL', provinsi: 'ALL' };
+        let filtersPopulated = false;
+
+        function populateDashboardFilters() {
+            if (filtersPopulated) return;
+            const data = getVisibleFunnel();
+            const sumberDanas = new Set();
+            const pics = new Set();
+            const provinsis = new Set();
+            const tks = [0, 5, 10, 25, 50, 75, 100];
+
+            data.forEach(d => {
+                if (d.sumberDana && d.sumberDana.trim() !== "") sumberDanas.add(d.sumberDana.trim());
+                if (d.pic && d.pic.trim() !== "") pics.add(d.pic.trim());
+                if (d.provinsi && d.provinsi.trim() !== "") provinsis.add(d.provinsi.trim());
+            });
+
+            const sdContainer = document.getElementById('filter-sumberdana');
+            if (sdContainer) {
+                let sdHtml = '<button class="filter-btn active px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium" data-val="ALL" onclick="setFilter(\'sumberDana\', \'ALL\', this)">ALL</button>';
+                Array.from(sumberDanas).sort().forEach(sd => {
+                    sdHtml += '<button class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium" data-val="' + sd + '" onclick="setFilter(\'sumberDana\', \'' + sd + '\', this)">' + sd + '</button>';
+                });
+                sdContainer.innerHTML = sdHtml;
+            }
+
+            const tkContainer = document.getElementById('filter-tk');
+            if (tkContainer) {
+                let tkHtml = '<button class="filter-btn active px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium" data-val="ALL" onclick="setFilter(\'tk\', \'ALL\', this)">ALL</button>';
+                tks.forEach(tk => {
+                    tkHtml += '<button class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium" data-val="' + tk + '" onclick="setFilter(\'tk\', \'' + tk + '\', this)">' + tk + '%</button>';
+                });
+                tkContainer.innerHTML = tkHtml;
+            }
+
+            fillSelect('filter-pic', Array.from(pics).sort(), 'Semua PIC', 'ALL');
+            fillSelect('filter-provinsi', Array.from(provinsis).sort(), 'Semua Provinsi', 'ALL');
+            filtersPopulated = true;
+        }
+
+        function setFilter(type, value, btnElem) {
+            currentFilters[type] = value;
+            if (btnElem) {
+                Array.from(btnElem.parentNode.children).forEach(btn => btn.classList.remove('active'));
+                btnElem.classList.add('active');
+            }
+            applyFilters();
+        }
+
+        function resetFilters() {
+            currentFilters = { quarter: 'ALL', sumberDana: 'ALL', tk: 'ALL', pic: 'ALL', provinsi: 'ALL' };
+            const picSel = document.getElementById('filter-pic'); if (picSel) picSel.value = 'ALL';
+            const provSel = document.getElementById('filter-provinsi'); if (provSel) provSel.value = 'ALL';
+            ['quarter', 'sumberdana', 'tk'].forEach(group => {
+                const container = document.getElementById('filter-' + group);
+                if (container) {
+                    Array.from(container.children).forEach(btn => {
+                        btn.classList.remove('active');
+                        if (btn.getAttribute('data-val') === 'ALL') btn.classList.add('active');
+                    });
+                }
+            });
+            applyFilters();
+        }
+
+        function applyFilters() {
+            let data = getVisibleFunnel().filter(d => {
+                let tkMatch = currentFilters.tk === 'ALL' || d.tk.toString() === currentFilters.tk;
+                let qMatch = currentFilters.quarter === 'ALL' || d.quarter === currentFilters.quarter;
+                let sdMatch = currentFilters.sumberDana === 'ALL' || d.sumberDana === currentFilters.sumberDana;
+                let picMatch = currentFilters.pic === 'ALL' || d.pic === currentFilters.pic;
+                let provMatch = currentFilters.provinsi === 'ALL' || d.provinsi === currentFilters.provinsi;
+                return tkMatch && qMatch && sdMatch && picMatch && provMatch;
+            });
+
+            const totalBrutto = data.reduce((s, d) => s + (d.nilaiAnggaran || 0), 0);
+            const totalNetto = data.reduce((s, d) => s + (d.forecastNetto || 0), 0);
+            const totalPipeline = data.length;
+            const deals = data.filter(d => d.status === 'Deal' || d.status === 'Closing');
+            document.getElementById('kpi-brutto').textContent = fmtRp(totalBrutto);
+            document.getElementById('kpi-netto').textContent = fmtRp(totalNetto);
+            document.getElementById('kpi-pipeline').textContent = totalPipeline;
+            document.getElementById('kpi-closing').textContent = deals.length;
+            document.getElementById('kpi-closing-val').textContent = '(' + fmtRp(deals.reduce((s, d) => s + d.forecastNetto, 0)) + ')';
+
+            destroyCharts();
+            renderFunnelChart(data);
+            renderQuarterChart(data);
+            renderPicChart(data);
+            renderSumberDanaChart(data);
+            renderStatusCompareChart();
+        }
+
+        function renderDashboard() {
+            destroyCharts();
+            populateDashboardFilters();
+            applyFilters();
+            // Submission rate
+            const allPics = [...new Set(funnelData.map(f => f.pic))].filter(p => p !== 'SALES PROJECT');
+            const submittedPics = [...new Set(weeklyUpdates.filter(u => u.week === currentWeekLabel).map(u => u.pic))];
+            const rate = allPics.length ? Math.round(submittedPics.length / allPics.length * 100) : 0;
+            document.getElementById('submission-rate').textContent = rate + '%';
+            document.getElementById('submission-bar').style.width = rate + '%';
+            document.getElementById('submitted-count').textContent = submittedPics.length + ' submitted';
+            document.getElementById('total-sales-count').textContent = allPics.length + ' total sales';
+        }
+        function renderFunnelChart(data) {
+            const stages = [100, 75, 50, 25, 10, 5];
+            const stageLabels = ['100% Closing', '75% Shortlist', '50% Peluang', '25% Penawaran', '10% Kebutuhan', '5% Peluang Awal'];
+            const stageColors = ['#22c55e', '#84cc16', '#eab308', '#f97316', '#ef4444', '#fca5a5'];
+            const funnelCounts = stages.map(s => data.filter(d => d.tk === s).length);
+            const vals = stages.map(s => data.filter(d => d.tk === s).reduce((a, d) => a + d.forecastNetto, 0));
+            const ctx = document.getElementById('funnelChart');
+            if (!ctx) return;
+            chartInstances.funnel = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: stageLabels, datasets: [{ label: 'Forecast Netto (Rp)', data: vals, backgroundColor: stageColors.map(c => c + 'CC'), borderColor: stageColors, borderWidth: 1, borderRadius: 4 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#fff', font: { weight: 'bold', size: 10 }, formatter: (v, ctx2) => v > 0 ? fmtRp(v) + ' (' + funnelCounts[ctx2.dataIndex] + ')' : '', anchor: 'end', align: 'start', offset: 4 } }, scales: { x: { ticks: { color: '#94a3b8', callback: v => 'Rp ' + (v / 1e9).toFixed(0) + 'B' }, grid: { color: '#334155' } }, y: { ticks: { color: '#cbd5e1' }, grid: { display: false } } } }
+            });
+        }
+        function renderQuarterChart(data) {
+            const quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+            const targets = { Q1: 45500000000, Q2: 91000000000, Q3: 182000000000, Q4: 136500000000 };
+            const actuals = quarters.map(q => data.filter(d => d.quarter === q).reduce((a, d) => a + d.forecastNetto, 0));
+            const targetData = quarters.map(q => targets[q]);
+            const ctx = document.getElementById('quarterChart');
+            if (!ctx) return;
+            chartInstances.quarter = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: quarters, datasets: [{ label: 'Target', data: targetData, backgroundColor: '#475569', borderRadius: 4 }, { label: 'Actual Forecast Netto', data: actuals, backgroundColor: '#3b82f6', borderRadius: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } }, datalabels: { color: '#fff', font: { weight: 'bold', size: 10 }, display: (ctx2) => ctx2.dataset.data[ctx2.dataIndex] > 0, formatter: v => 'Rp ' + (v / 1e9).toFixed(1) + 'B' } }, scales: { y: { ticks: { color: '#94a3b8', callback: v => 'Rp ' + (v / 1e9).toFixed(0) + 'B' }, grid: { color: '#334155' } }, x: { ticks: { color: '#cbd5e1' }, grid: { display: false } } } }
+            });
+        }
+        function renderPicChart(data) {
+            const picTotals = {};
+            data.forEach(d => { const name = d.pic && d.pic.trim() !== '' ? d.pic : 'Unknown'; picTotals[name] = (picTotals[name] || 0) + d.forecastNetto; });
+            const sorted = Object.entries(picTotals).sort((a, b) => b[1] - a[1]).slice(0, 10);
+            const ctx = document.getElementById('picChart');
+            if (!ctx) return;
+            chartInstances.pic = new Chart(ctx, {
+                type: 'bar',
+                data: { labels: sorted.map(s => s[0]), datasets: [{ label: 'Total Forecast Netto', data: sorted.map(s => s[1]), backgroundColor: '#14b8a6', borderRadius: 4 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#fff', font: { weight: 'bold', size: 10 }, formatter: v => fmtRp(v), anchor: 'end', align: 'start', offset: 4 } }, scales: { x: { ticks: { color: '#94a3b8', callback: v => 'Rp ' + (v / 1e9).toFixed(0) + 'B' }, grid: { color: '#334155' } }, y: { ticks: { color: '#cbd5e1' }, grid: { display: false } } } }
+            });
+        }
+        function renderSumberDanaChart(data) {
+            const sdTotals = {};
+            data.forEach(d => { if (d.sumberDana) sdTotals[d.sumberDana] = (sdTotals[d.sumberDana] || 0) + d.forecastNetto; });
+            const sdLabels = Object.keys(sdTotals);
+            const sdData = Object.values(sdTotals);
+            const pieColors = ['#f43f5e', '#8b5cf6', '#0ea5e9', '#10b981', '#f59e0b', '#ec4899', '#64748b', '#eab308'];
+            const ctx = document.getElementById('sumberDanaChart');
+            if (!ctx) return;
+            chartInstances.sumberDana = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: sdLabels, datasets: [{ data: sdData, backgroundColor: pieColors.slice(0, sdLabels.length), borderWidth: 2, borderColor: '#1e293b', hoverOffset: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 }, padding: 12 } }, datalabels: { color: '#fff', font: { weight: 'bold', size: 10 }, formatter: (v, c) => { const t = c.dataset.data.reduce((a, b) => a + b, 0); return t ? (v * 100 / t).toFixed(1) + '%' : ''; } } } }
+            });
+        }
+        function renderStatusCompareChart() {
+            const thisWeek = weeklyUpdates.filter(u => u.week === currentWeekLabel);
+            const prevWeekNum = currentWeek - 1;
+            const prevWeekLabel = 'W' + prevWeekNum + '-' + currentYear;
+            const lastWeek = weeklyUpdates.filter(u => u.week === prevWeekLabel);
+            const statuses = statusList;
+            const thisData = statuses.map(s => thisWeek.filter(u => u.status === s).length);
+            const lastData = statuses.map(s => lastWeek.filter(u => u.status === s).length);
+            const ctx = document.getElementById('statusCompareChart');
+            if (!ctx) return;
+            chartInstances.statusCompare = new Chart(ctx, {
+                type: 'bar', data: {
+                    labels: statuses, datasets: [{
+                        label: 'Minggu Ini (' + currentWeekLabel + ')', data: thisData, backgroundColor: 'rgba(20, 184, 166, 0.7)', borderRadius: 4
+                    }, { label: 'Minggu Lalu (' + prevWeekLabel + ')', data: lastData, backgroundColor: 'rgba(100, 116, 139, 0.5)', borderRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10 } } }, datalabels: { display: false } }, scales: { y: { ticks: { stepSize: 1 }, grid: { color: '#334155' } }, x: { grid: { display: false } } } }
+            });
+        }
+
+        // ============================================================
+        // SECTION J: MONITORING TABLE
+        // ============================================================
+        function populateMonitoringFilters() {
+            const salesFil = document.getElementById('mon-filter-sales');
+            if (!salesFil) return;
+            const uniqueSales = [...new Set(getVisibleUpdates().map(u => u.pic))];
+            salesFil.innerHTML = '<option value="ALL">Semua Sales</option>';
+            uniqueSales.forEach(s => {
+                const o = document.createElement('option'); o.value = s; o.textContent = s;
+                salesFil.appendChild(o);
+            });
+            const weekFil = document.getElementById('mon-filter-week');
+            const uniqueWeeks = [...new Set(weeklyUpdates.map(u => u.week))].sort();
+            weekFil.innerHTML = '<option value="ALL">Semua Week</option>';
+            uniqueWeeks.forEach(w => {
+                const o = document.createElement('option'); o.value = w; o.textContent = w; weekFil.appendChild(o);
+            });
+        }
+        function renderMonitoring() {
+            const tbody = document.getElementById('monitoring-tbody');
+            if (!tbody) return;
+            let data = getVisibleUpdates();
+            const sf = document.getElementById('mon-filter-sales')?.value;
+            const wf = document.getElementById('mon-filter-week')?.value;
+            const stf = document.getElementById('mon-filter-status')?.value;
+            const qf = document.getElementById('mon-filter-quarter')?.value;
+            if (sf && sf !== 'ALL') data = data.filter(u => u.pic === sf);
+            if (wf && wf !== 'ALL') data = data.filter(u => u.week === wf);
+            if (stf && stf !== 'ALL') data = data.filter(u => u.status === stf);
+            if (qf && qf !== 'ALL') {
+                const projectIds = funnelData.filter(f => f.quarter === qf).map(f => f.id);
+                data = data.filter(u => projectIds.includes(u.projectId));
+            }
+            // Sort
+            data.sort((a, b) => {
+                let va = a[monitoringSortKey], vb = b[monitoringSortKey];
+                if (monitoringSortKey === 'forecast') { va = a.forecast; vb = b.forecast; }
+                if (monitoringSortKey === 'sales') { va = a.pic; vb = b.pic; }
+                if (monitoringSortKey === 'project') {
+                    const pa = funnelData.find(f => f.id === a.projectId);
+                    const pb = funnelData.find(f => f.id === b.projectId);
+                    va = pa ? pa.namaPaket : ''; vb = pb ? pb.namaPaket : '';
+                }
+                if (typeof va === 'string') va = va.toLowerCase();
+                if (typeof vb === 'string') vb = vb.toLowerCase();
+                if (va < vb) return monitoringSortAsc ? -1 : 1; if (va > vb) return monitoringSortAsc ? 1 : -1;
+                return 0;
+            });
+            const showActions = canDelete();
+            document.getElementById('mon-action-col').style.display = showActions ? '' : 'none';
+            tbody.innerHTML = data.map(u => {
+                const project = funnelData.find(f => f.id === u.projectId);
+                return `<tr class="${getStatusRowClass(u.status)} hover:bg-slate-700/30">
+        <td class="px-3 py-2.5 font-medium">${u.week}</td>
+        <td class="px-3 py-2.5">${u.pic}</td>
+        <td class="px-4 py-2.5">${project ? project.namaPaket : '-'}</td>
+        <td class="px-3 py-2.5"><span class="badge ${getStatusBadgeClass(u.status)}">${u.status}</span></td>
+        <td class="px-3 py-2.5 text-right text-teal-400 font-semibold">${fmtRp(u.forecast)}</td>
+        <td class="px-4 py-2.5 text-xs max-w-[200px] truncate" title="${u.notes}">${u.notes || '-'}</td>
+        <td class="px-4 py-2.5 text-xs text-teal-300 max-w-[200px] truncate" title="${u.adminNotes}">
+            ${u.adminNotes || '-'}</td>
+        <td class="px-3 py-2.5 text-xs text-slate-500">${u.timestamp}</td>
+        <td class="px-3 py-2.5 text-center" style="${showActions ? '' : 'display:none'}">${showActions ? `<button
+                onclick="deleteUpdate(${u.id})"
+                class="text-red-400 hover:text-red-300 text-xs font-bold">🗑️</button>`: ''}</td>
+    </tr>`;
+            }).join('');
+            document.getElementById('monitoring-info').textContent = 'Menampilkan ' + data.length + ' data';
+        }
+        function sortMonitoring(key) {
+            if (monitoringSortKey === key) monitoringSortAsc = !monitoringSortAsc;
+            else { monitoringSortKey = key; monitoringSortAsc = true; }
+            renderMonitoring();
+        }
+        function deleteUpdate(id) {
+            if (!canDelete()) { showToast('Tidak punya akses untuk menghapus!', 'error'); return; }
+            weeklyUpdates = weeklyUpdates.filter(u => u.id !== id);
+            logActivity('Deleted weekly update ID ' + id);
+            showToast('Data berhasil dihapus');
+            renderMonitoring();
+        }
+        function exportData() {
+            if (!canExportCSV()) {
+                showToast('Hanya Superadmin yang bisa export CSV!', 'error');
+                return;
+            }
+            exportCSV();
+        }
+
+        // ============================================================
+        // SECTION K: CONTROL PANEL (Super Admin)
+        // ============================================================
+        function renderControlPanel() {
+            renderUserList();
+            loadDropdownEditor();
+            renderActivityLog();
+            populateResetSelects();
+        }
+        function renderUserList() {
+            const cont = document.getElementById('cp-user-list');
+            if (!cont) return;
+            cont.innerHTML = picNames.map(n =>
+                `<div class="flex justify-between items-center py-1.5 px-2 rounded hover:bg-slate-700/50 text-sm text-slate-300">
+        <span>${n}</span>
+        <button onclick="removeSalesUser('${n}')" class="text-red-400 hover:text-red-300 text-xs">✕</button>
+    </div>`
+            ).join('');
+        }
+        function addSalesUser() {
+            const inp = document.getElementById('cp-new-user');
+            const name = inp.value.trim().toUpperCase();
+            if (!name) return;
+            if (picNames.includes(name)) { showToast('Nama sudah ada!', 'error'); return; }
+            picNames.push(name);
+            inp.value = '';
+            renderUserList();
+            logActivity('Added sales user: ' + name);
+            showToast('User ' + name + ' ditambahkan');
+        }
+        function removeSalesUser(name) {
+            picNames = picNames.filter(n => n !== name);
+            renderUserList();
+            logActivity('Removed sales user: ' + name);
+            showToast('User ' + name + ' dihapus');
+        }
+        function loadDropdownEditor() {
+            const sel = document.getElementById('cp-dropdown-select')?.value;
+            const cont = document.getElementById('cp-dropdown-items');
+            if (!cont || !sel) return;
+            let items = [];
+            if (sel === 'picNames') items = picNames;
+            else if (sel === 'principals') items = principals;
+            else if (sel === 'sumberDanaList') items = sumberDanaList;
+            cont.innerHTML = items.map((it, i) =>
+                `<div class="flex justify-between items-center py-1 px-2 rounded hover:bg-slate-700/50 text-xs text-slate-300">
+        <span>${it}</span>
+        <button onclick="removeDropdownItem('${sel}',${i})" class="text-red-400 hover:text-red-300">✕</button>
+    </div>`
+            ).join('');
+        }
+        function addDropdownItem() {
+            const sel = document.getElementById('cp-dropdown-select')?.value;
+            const inp = document.getElementById('cp-dropdown-new');
+            const val = inp.value.trim();
+            if (!val || !sel) return;
+            if (sel === 'picNames') picNames.push(val.toUpperCase());
+            else if (sel === 'principals') principals.push(val);
+            else if (sel === 'sumberDanaList') sumberDanaList.push(val);
+            inp.value = '';
+            loadDropdownEditor();
+            logActivity('Added dropdown item to ' + sel + ': ' + val);
+            showToast('Item ditambahkan');
+        }
+        function removeDropdownItem(listName, idx) {
+            if (listName === 'picNames') picNames.splice(idx, 1);
+            else if (listName === 'principals') principals.splice(idx, 1);
+            else if (listName === 'sumberDanaList') sumberDanaList.splice(idx, 1);
+            loadDropdownEditor();
+            logActivity('Removed dropdown item from ' + listName);
+            showToast('Item dihapus');
+        }
+        function populateResetSelects() {
+            fillSelect('cp-reset-user', picNames, '-- Pilih Sales --');
+            const projNames = funnelData.map(f => f.id + '|' + f.namaPaket);
+            const sel = document.getElementById('cp-reset-project');
+            if (sel) {
+                sel.innerHTML = '<option value="">-- Pilih Project --</option>';
+                funnelData.forEach(f => {
+                    const
+                        o = document.createElement('option'); o.value = f.id; o.textContent = f.namaPaket; sel.appendChild(o);
+                });
+            }
+        }
+        function resetSubmissionFlag() {
+            const user = document.getElementById('cp-reset-user')?.value;
+            const projId = parseInt(document.getElementById('cp-reset-project')?.value);
+            if (!user || !projId) { showToast('Pilih Sales dan Project terlebih dahulu', 'error'); return; }
+            weeklyUpdates = weeklyUpdates.filter(u => !(u.pic === user && u.projectId === projId && u.week === currentWeekLabel));
+            logActivity('Reset submission flag: ' + user + ' project ID ' + projId + ' week ' + currentWeekLabel);
+            showToast('✅ Submission flag direset untuk ' + user);
+        }
+        function exportCSV() {
+            if (!weeklyUpdates.length) { showToast('Tidak ada data update untuk diexport', 'error'); return; }
+            const headers = ['ID Update', 'Week', 'PIC', 'ID Project', 'Nama Paket', 'Instansi', 'Principal', 'Status', 'Forecast Netto', 'Notes Sales', 'Admin Notes', 'Timestamp'];
+            const rows = [headers.join(',')];
+            weeklyUpdates.forEach(u => {
+                const p = funnelData.find(f => f.id === u.projectId) || {};
+                const row = [
+                    u.id, u.week, `"${u.pic}"`, u.projectId, `"${p.namaPaket || ''}"`, `"${p.instansi || ''}"`, `"${p.principal || ''}"`,
+                    u.status, u.forecast, `"${(u.notes || '').replace(/"/g, '""')}"`, `"${(u.adminNotes || '').replace(/"/g, '""')}"`, `"${u.timestamp}"`
+                ];
+                rows.push(row.join(','));
+            });
+            const csv = rows.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.setAttribute('download', 'tracker-export.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            logActivity('Exported weekly updates to CSV');
+            showToast('✅ Download CSV dimulai');
+        }
+        function renderActivityLog() {
+            const cont = document.getElementById('activity-log');
+            if (!cont) return;
+            cont.innerHTML = activityLog.length ? activityLog.map(a =>
+                `<div class="py-1 border-b border-slate-700/50"><span class="text-slate-500">${a.time}</span> <span
+            class="text-teal-400 font-semibold">[${a.role}]</span> ${a.action}</div>`
+            ).join('') : '<p class="text-slate-500 italic">Belum ada aktivitas</p>';
+        }
+
+        // ============================================================
+        // SECTION L: INITIALIZATION
+        // ============================================================
+        function init() {
+            // Log startup
+            const sp = document.getElementById('sales-name-picker');
+            if (sp) {
+                sp.innerHTML = '';
+                picNames.forEach(name => {
+                    const opt = document.createElement('option');
+                    opt.value = name;
+                    opt.textContent = name;
+                    sp.appendChild(opt);
+                });
+                sp.value = currentSalesUser;
+            }
+            logActivity('System initialized');
+            logActivity('Default role: SALES, user: ' + currentSalesUser);
+            // Set initial role
+            setRole('sales');
+            // Start with Input Funnel
+            switchMenu('input');
+            console.log('Sales Management System - Intan Pariwara 2026 initialized');
+            console.log('Current Week:', currentWeekLabel);
+            console.log('Funnel entries:', funnelData.length);
+            console.log('Weekly updates:', weeklyUpdates.length);
+        }
+        // Run on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+
+</html>
