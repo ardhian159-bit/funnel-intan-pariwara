@@ -433,6 +433,14 @@
 
 <body class="min-h-screen flex flex-col">
 
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div id="loading-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:9999; align-items:center; justify-content:center;">
+        <div style="color:white; font-size:1.2rem; text-align:center;">
+            <div style="font-size:2rem; margin-bottom:0.5rem;">&#9203;</div>
+            Memuat data...
+        </div>
+    </div>
+
     <!-- ===== TOAST NOTIFICATION ===== -->
     <div id="toast" class="toast toast-success"></div>
 
@@ -443,6 +451,7 @@
                 <h1 class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">
                     SALES MANAGEMENT SYSTEM</h1>
                 <span class="text-slate-500 text-sm font-semibold hidden md:inline">INTAN PARIWARA 2026</span>
+                <span id="connection-status" class="text-xs font-semibold px-2 py-0.5 rounded-full ml-2 hidden md:inline-flex items-center gap-1"></span>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
                 <div class="flex gap-2 flex-wrap" id="nav-menu">
@@ -1080,6 +1089,74 @@
     </div><!-- ===== JAVASCRIPT: DATA + STATE + CORE LOGIC ===== -->
     <script>
         // ============================================================
+        // CONFIG: Google Sheets Integration
+        // ============================================================
+        const CONFIG = {
+            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxchhQHWthWjnmffOMGgDt1ShO3-D-T0XXOmpGNvP6jhgmtdCQZ5hiXcyymixjCRZOxNA/exec',
+            TOKEN: 'IPFUNNEL2026',
+            USE_MOCK_DATA: false  // set to true to use mock data fallback
+        };
+
+        // ============================================================
+        // API Helper Functions
+        // ============================================================
+        async function apiGet(action, params = {}) {
+            const url = new URL(CONFIG.APPS_SCRIPT_URL);
+            url.searchParams.set('action', action);
+            url.searchParams.set('token', CONFIG.TOKEN);
+            Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
+            const res = await fetch(url.toString());
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            return data;
+        }
+
+        async function apiPost(action, body = {}) {
+            const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action, token: CONFIG.TOKEN, ...body })
+            });
+            const data = await res.json();
+            if (data.error) throw new Error(data.error);
+            return data;
+        }
+
+        function showLoadingState(show) {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.style.display = show ? 'flex' : 'none';
+        }
+
+        function updateConnectionStatus() {
+            const el = document.getElementById('connection-status');
+            if (!el) return;
+            if (CONFIG.USE_MOCK_DATA) {
+                el.innerHTML = '<span style="color:#facc15;">&#9679;</span> Mock Data';
+                el.style.background = 'rgba(234,179,8,0.15)';
+                el.style.color = '#facc15';
+                el.style.border = '1px solid rgba(234,179,8,0.4)';
+            } else {
+                el.innerHTML = '<span style="color:#14b8a6;">&#9679;</span> Live (Google Sheets)';
+                el.style.background = 'rgba(20,184,166,0.15)';
+                el.style.color = '#14b8a6';
+                el.style.border = '1px solid rgba(20,184,166,0.4)';
+            }
+        }
+
+        async function verifyLogin(username, password) {
+            if (CONFIG.USE_MOCK_DATA) {
+                const cfg = AUTH_CONFIG[username];
+                return cfg && cfg.password === password ? cfg.role : null;
+            }
+            try {
+                const result = await apiGet('verifyAuth', { username, password });
+                return result.role || null;
+            } catch {
+                return null;
+            }
+        }
+
+        // ============================================================
         // SECTION A: DROPDOWN MASTER DATA (from Excel)
         // ============================================================
         var picNames = ['GIRI SURYANTO', 'DIKKY MAHISA PUTERA', 'DANANG SETYO BUDI', 'BAMBANG SURYANTO', 'HERI IRWANSYAH', 'BLASIUS DIMAS', 'JOKO WALUYO', 'LILIK LASONO', 'MANAEK HENDRAWAN SITINJAK', 'MUHAMMAD RASYID RIDHA', 'EKO JULIANTO', 'YUDISTIRA WOLDI PAOKI', 'AJI FARIZ RACHMAN', 'REZKI ANUGRAHA', 'ATEP KUNAEPI', 'YUDHA PRATISTA APRIANATA', 'AGUS MUHCLIS', 'BAMBANG MUDJIRAN', 'RISKY ALDIANSYAH', 'FIKRI ARI HANAFI'];
@@ -1097,6 +1174,7 @@
             superadmin: { password: "IPADMIN2026", role: "superadmin" }
         };
         var currentSession = { role: null, username: null }; // null = not logged in (sales)
+        var currentRole = null;
         var currentMenu = 'update'; // Default landing page
         var currentSalesUser = '';
         var selectedProjectId = null;
@@ -1296,12 +1374,64 @@
             if (canSeeAllData()) return weeklyUpdates;
             return weeklyUpdates.filter(u => u.pic === currentSalesUser);
         }
-        function loadPipelineData() {
-            return funnelData;
+        async function loadPipelineData() {
+            if (CONFIG.USE_MOCK_DATA) return funnelData;
+            try {
+                showLoadingState(true);
+                const data = await apiGet('getLeads');
+                // Normalize Sheets data to match local format
+                funnelData = data.map(d => ({
+                    ...d,
+                    id: d.id || d.no || 0,
+                    tk: (typeof d.tk === 'number' && d.tk > 0 && d.tk <= 1) ? Math.round(d.tk * 100) : (parseInt(d.tk) || 0),
+                    nilaiAnggaran: Number(d.nilaiAnggaran) || 0,
+                    forecastNetto: Number(d.forecastNetto) || 0
+                }));
+                return funnelData;
+            } catch (err) {
+                showToast('Gagal memuat data: ' + err.message, 'error');
+                return funnelData; // fallback to mock
+            } finally {
+                showLoadingState(false);
+            }
         }
-        function savePipelineData() {
-            console.log("Saving pipeline data...");
-            // Replace with Apps Script fetch endpoint in Phase 2
+
+        async function loadTrackerData() {
+            if (CONFIG.USE_MOCK_DATA) return weeklyUpdates;
+            try {
+                showLoadingState(true);
+                const data = await apiGet('getTrackers');
+                // Map Sheets fields to local weeklyUpdates format
+                weeklyUpdates = data.map((d, i) => ({
+                    id: d.id || (i + 1),
+                    projectId: d.funnelId || '',
+                    pic: d.pic || '',
+                    namaPaket: d.namaPaket || '',
+                    week: d.week || '',
+                    status: d.statusBaru || '',
+                    forecast: d.forecastNetto || 0,
+                    notes: d.notes || '',
+                    adminNotes: d.adminNotes || '',
+                    timestamp: d.timestamp || ''
+                }));
+                return weeklyUpdates;
+            } catch (err) {
+                showToast('Gagal memuat data tracker: ' + err.message, 'error');
+                return weeklyUpdates; // fallback
+            } finally {
+                showLoadingState(false);
+            }
+        }
+
+        async function savePipelineData(leadData) {
+            if (CONFIG.USE_MOCK_DATA) return { success: true };
+            try {
+                const result = await apiPost('addLead', leadData);
+                return result;
+            } catch (err) {
+                showToast('Gagal menyimpan data: ' + err.message, 'error');
+                throw err;
+            }
         }// ============================================================
         // SECTION F: NAVIGATION & ROLE SYSTEM
         // ============================================================
@@ -1332,13 +1462,14 @@
             document.getElementById('login-error').style.display = 'none';
             document.getElementById('login-form').reset();
         }
-        function handleLogin(e) {
+        async function handleLogin(e) {
             e.preventDefault();
             const u = document.getElementById('login-username').value.trim().toLowerCase();
             const p = document.getElementById('login-password').value;
 
-            if (AUTH_CONFIG[u] && AUTH_CONFIG[u].password === p) {
-                currentSession = { role: AUTH_CONFIG[u].role, username: u };
+            const role = await verifyLogin(u, p);
+            if (role) {
+                currentSession = { role: role, username: u };
                 currentRole = currentSession.role;
                 closeLoginModal();
                 showToast(`✅ Berhasil login sebagai ${u.toUpperCase()}`);
@@ -1483,7 +1614,7 @@
             if (!canSeeAllData()) document.getElementById('f-pic').value = currentSalesUser;
             nettoManuallyEdited = false;
         }
-        function handleInputSubmit(e) {
+        async function handleInputSubmit(e) {
             e.preventDefault();
             let valid = true;
             const fields =
@@ -1566,6 +1697,16 @@
             funnelData.push(entry);
             logActivity('Added funnel: ' + entry.namaPaket + ' by ' + entry.pic);
             showToast(`✅ Project berhasil disimpan! ID: ${entry.funnelId}`);
+
+            // Also save to Google Sheets if not using mock data
+            if (!CONFIG.USE_MOCK_DATA) {
+                try {
+                    await savePipelineData(entry);
+                } catch (err) {
+                    // Error toast already shown by savePipelineData
+                }
+            }
+
             resetInputForm();
             renderPipelineTable();
             return false;
@@ -1674,7 +1815,7 @@ tambah catatan admin.`;
             showToast('🔓 Submission lock overridden');
             logActivity('Override submission lock for project ID ' + selectedProjectId);
         }
-        function submitWeeklyUpdate(e) {
+        async function submitWeeklyUpdate(e) {
             e.preventDefault();
             document.getElementById('err-duplicate-update').style.display = 'none';
             if (!selectedProjectId) return false;
@@ -1709,6 +1850,25 @@ tambah catatan admin.`;
             weeklyUpdates.push(update);
             logActivity('Weekly update: ' + project.namaPaket + ' → ' + update.status + ' by ' + project.pic);
             showToast('✅ Update mingguan berhasil disimpan!');
+
+            // Also save to Google Sheets if not using mock data
+            if (!CONFIG.USE_MOCK_DATA) {
+                try {
+                    await apiPost('updateTracker', {
+                        funnelId: project.funnelId || '',
+                        pic: project.pic,
+                        namaPaket: project.namaPaket,
+                        statusBaru: update.status,
+                        forecastNetto: update.forecast,
+                        notes: update.notes,
+                        week: update.week,
+                        adminNotes: update.adminNotes
+                    });
+                } catch (err) {
+                    showToast('Gagal menyimpan ke Google Sheets: ' + err.message, 'error');
+                }
+            }
+
             selectProject(selectedProjectId);
             // Refresh list
             renderProjectList();
@@ -2182,7 +2342,22 @@ tambah catatan admin.`;
         // ============================================================
         // SECTION L: INITIALIZATION
         // ============================================================
-        function init() {
+        async function init() {
+            // Show connection status indicator
+            updateConnectionStatus();
+
+            // If live, clear mock data and load from Sheets
+            if (!CONFIG.USE_MOCK_DATA) {
+                weeklyUpdates = [];
+                funnelData = [];
+                try {
+                    await loadPipelineData();
+                    await loadTrackerData();
+                } catch (err) {
+                    showToast('Gagal memuat data awal: ' + err.message, 'error');
+                }
+            }
+
             // Backfill mock Funnel IDs
             funnelData.forEach(f => {
                 if (!f.funnelId) f.funnelId = generateFunnelId(f.pic);
