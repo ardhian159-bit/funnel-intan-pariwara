@@ -1965,6 +1965,14 @@
                             </select>
                             <div class="error-msg" id="err-status">Status wajib dipilih</div>
                         </div>
+                        <!-- TK / Win Rate (%) -->
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">TK (%) <span
+                                    class="text-red-400">*</span></label>
+                            <input type="number" id="f-tk" class="input-field" placeholder="0" required="">
+                            <div class="error-msg" id="err-tk">TK wajib diisi</div>
+                            <div class="error-msg" id="err-tk-val">TK harus 0 - 100</div>
+                        </div>
                         <!-- Nilai Brutto -->
                         <div>
                             <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nilai Brutto /
@@ -2829,7 +2837,8 @@
         }
         function logActivity(action) {
             const now = today.toLocaleDateString('id-ID');
-            activityLog.unshift({ time: now + ' ' + new Date().toLocaleTimeString('id-ID'), role: currentRole.toUpperCase(), action });
+            const roleStr = currentRole ? currentRole.toUpperCase() : 'SYSTEM';
+            activityLog.unshift({ time: now + ' ' + new Date().toLocaleTimeString('id-ID'), role: roleStr, action });
             if (activityLog.length > 50) activityLog.pop();
         }
         function canSeeAllData() { return ['admin', 'superadmin'].includes(currentRole); }
