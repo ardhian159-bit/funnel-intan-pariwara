@@ -60,6 +60,14 @@ function doGet(e) {
         var password = params.password || '';
         return successResponse(verifyAuth(username, password));
 
+      case 'addLead':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(addLead(payload));
+
+      case 'updateTracker':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(updateTracker(payload));
+
       default:
         return errorResponse('Aksi tidak dikenali: ' + action);
     }
