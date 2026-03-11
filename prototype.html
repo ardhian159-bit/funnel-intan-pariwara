@@ -2788,7 +2788,7 @@
             let v = el.value.replace(/[^\d]/g, '');
             el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
-        function calcForecast() {
+     
 function calcForecast() {
     if (nettoManuallyEdited) return;
     const brutto = parseCurrency(document.getElementById('f-brutto').value);
