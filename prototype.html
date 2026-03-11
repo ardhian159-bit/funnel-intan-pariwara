@@ -3163,16 +3163,18 @@
                 namaPaket: namaPaketVal,
                 sumberDana: document.getElementById('f-sumberdana').value,
                 nilaiAnggaran: parseCurrency(document.getElementById('f-brutto').value),
+                dpp: parseCurrency(document.getElementById('f-dpp') ? document.getElementById('f-dpp').value : '0'),
                 forecastNetto: parseCurrency(document.getElementById('f-netto').value),
-                jenisProduk: document.getElementById('f-jenisproduk').value,
-                quarter: document.getElementById('f-quarter').value,
-                cb: parseFloat(document.getElementById('f-cb').value || 0),
-                status: document.getElementById('f-status').value,
-                keterangan: document.getElementById('f-keterangan').value,
-                ppn: document.getElementById('f-ppn').value,
-                produkNama: document.getElementById('f-produk').value,
+                ppnNon: document.getElementById('f-ppn').value,
+                perkiraanCb: parseFloat(document.getElementById('f-cb').value || 0),
+                produk: document.getElementById('f-produk').value,
                 qty: parseInt(document.getElementById('f-qty').value || 0),
-                satuan: document.getElementById('f-satuan').value
+                satuan: document.getElementById('f-satuan').value,
+                jenisProduk: document.getElementById('f-jenisproduk').value,
+                tk: tkVal,
+                quarter: document.getElementById('f-quarter').value,
+                status: document.getElementById('f-status').value,
+                keterangan: document.getElementById('f-keterangan').value
             };
             funnelData.push(entry);
             logActivity('Added funnel: ' + entry.namaPaket + ' by ' + entry.pic);
@@ -3849,7 +3851,7 @@ tambah catatan admin.`;
             console.log('Sales Management System - Intan Pariwara 2026 initialized');
             console.log('Current Week:', currentWeekLabel);
             console.log('Funnel entries:', funnelData.length);
-            console.log('Weekly updates:', weeklyUpdates.length);
+        conso'Weekly updates:', weeklyUpdates.length);
         }
         // Run on load
         document.addEventListener('DOMContentLoaded', init);
