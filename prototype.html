@@ -3163,7 +3163,11 @@
                 namaPaket: namaPaketVal,
                 sumberDana: document.getElementById('f-sumberdana').value,
                 nilaiAnggaran: parseCurrency(document.getElementById('f-brutto').value),
-                dpp: parseCurrency(document.getElementById('f-dpp') ? document.getElementById('f-dpp').value : '0'),
+                dpp: (function() {
+    const ppn = document.getElementById('f-ppn').value;
+    const brutto = parseCurrency(document.getElementById('f-brutto').value);
+    return ppn === 'PPN' ? Math.round(brutto / 1.11) : brutto;
+})(),
                 forecastNetto: parseCurrency(document.getElementById('f-netto').value),
                 ppnNon: document.getElementById('f-ppn').value,
                 perkiraanCb: parseFloat(document.getElementById('f-cb').value || 0),
