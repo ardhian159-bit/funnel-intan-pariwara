@@ -3116,7 +3116,8 @@
             const bruttoVal = parseCurrency(document.getElementById('f-brutto').value);
             const nettoVal = parseCurrency(document.getElementById('f-netto').value);
             const tkVal = parseInt(document.getElementById('f-tk').value) || 0;
-
+            const ppnVal = document.getElementById('f-ppn').value;
+            const dppVal = ppnVal === 'PPN' ? Math.round(bruttoVal / 1.11) : bruttoVal;
             let numValid = true;
             if (bruttoVal < 0) {
                 document.getElementById('f-brutto').classList.add('field-error');
@@ -3163,11 +3164,7 @@
                 namaPaket: namaPaketVal,
                 sumberDana: document.getElementById('f-sumberdana').value,
                 nilaiAnggaran: parseCurrency(document.getElementById('f-brutto').value),
-                dpp: (function() {
-    const ppn = document.getElementById('f-ppn').value;
-    const brutto = parseCurrency(document.getElementById('f-brutto').value);
-    return ppn === 'PPN' ? Math.round(brutto / 1.11) : brutto;
-})(),
+          dpp: dppVal,
                 forecastNetto: parseCurrency(document.getElementById('f-netto').value),
                 ppnNon: document.getElementById('f-ppn').value,
                 perkiraanCb: parseFloat(document.getElementById('f-cb').value || 0),
