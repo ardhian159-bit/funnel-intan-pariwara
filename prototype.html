@@ -2789,15 +2789,18 @@
             el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
         }
         function calcForecast() {
-            if (nettoManuallyEdited) return;
-            const brutto = parseCurrency(document.getElementById('f-brutto').value);
-            const cbInput = document.getElementById('f-cb').value;
-            const cbVal = cbInput ? parseFloat(cbInput) : 0;
-            const cbDecimal = cbVal / 100;
-            const netto = Math.round(brutto * (1 - cbDecimal));
-            document.getElementById('f-netto').value = netto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-            document.getElementById('f-netto-hint').textContent = `DPP: ${fmtRp(brutto)} → Netto: ${fmtRp(netto)} (CB: ${cbVal}%)`;
-        }
+function calcForecast() {
+    if (nettoManuallyEdited) return;
+    const brutto = parseCurrency(document.getElementById('f-brutto').value);
+    const ppn = document.getElementById('f-ppn').value;
+    const cbInput = document.getElementById('f-cb').value;
+    const cbVal = cbInput ? parseFloat(cbInput) : 0;
+    const cbDecimal = cbVal / 100;
+    const dpp = ppn === 'PPN' ? Math.round(brutto / 1.11) : brutto;
+    const netto = Math.round(dpp * (1 - cbDecimal));
+    document.getElementById('f-netto').value = netto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    document.getElementById('f-netto-hint').textContent = `DPP: ${fmtRp(dpp)} → Netto: ${fmtRp(netto)} (CB: ${cbVal}%)`;
+}
 
         function manualNettoEdit(el) {
             nettoManuallyEdited = true;
