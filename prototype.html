@@ -3725,6 +3725,7 @@ tambah catatan admin.`;
             if (!name) return;
             if (picNames.includes(name)) { showToast('Nama sudah ada!', 'error'); return; }
             picNames.push(name);
+            saveSettingsToSheets();
             inp.value = '';
             renderUserList();
             logActivity('Added sales user: ' + name);
@@ -3732,6 +3733,7 @@ tambah catatan admin.`;
         }
         function removeSalesUser(name) {
             picNames = picNames.filter(n => n !== name);
+            saveSettingsToSheets();
             renderUserList();
             logActivity('Removed sales user: ' + name);
             showToast('User ' + name + ' dihapus');
@@ -3816,6 +3818,17 @@ tambah catatan admin.`;
             logActivity('Exported weekly updates to CSV');
             showToast('✅ Download CSV dimulai');
         }
+        async function saveSettingsToSheets() {
+    try {
+        await apiGet('saveSettings', {
+            payload: JSON.stringify({
+                picNames, principals, sumberDanaList
+            })
+        });
+    } catch(e) {
+        console.warn('Gagal save settings:', e);
+    }
+}
         function renderActivityLog() {
             const cont = document.getElementById('activity-log');
             if (!cont) return;
@@ -3833,6 +3846,14 @@ tambah catatan admin.`;
             updateConnectionStatus();
 
             // If live, clear mock data and load from Sheets
+            try {
+    const settings = await apiGet('getSettings');
+    if (settings.picNames?.length)   picNames = settings.picNames;
+    if (settings.principals?.length) principals = settings.principals;
+    if (settings.sumberDana?.length) sumberDanaList = settings.sumberDana;
+} catch(e) {
+    console.warn('Gagal load settings:', e);
+}
             if (!CONFIG.USE_MOCK_DATA) {
                 weeklyUpdates = [];
                 funnelData = [];
