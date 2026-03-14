@@ -28,6 +28,7 @@
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+  <script src="assets/api.js"></script>
   <!-- PapaParse -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <style>
@@ -2056,17 +2057,7 @@
         };
       });
     }
-const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxchhQHWthWjnmffOMGgDt1ShO3-D-T0XXOmpGNvP6jhgmtdCQZ5hiXcyymixjCRZOxNA/exec';
-const TOKEN = 'IPFUNNEL2026';
-
-async function apiGet(action, params = {}) {
-    const url = new URL(APPS_SCRIPT_URL);
-    url.searchParams.set('action', action);
-    url.searchParams.set('token', TOKEN);
-    Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-    const res = await fetch(url.toString());
-    return await res.json();
-}
+// APPS_SCRIPT_URL, TOKEN, apiGet → lihat assets/api.js
 
 async function loadFromSheets() {
     try {

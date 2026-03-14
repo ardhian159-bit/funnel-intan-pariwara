@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup Sales Tracker — Intan Pariwara</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2236;
+    --border: #1f2d45;
+    --border2: #2a3d5c;
+    --teal: #2dd4bf;
+    --teal-dim: rgba(45,212,191,0.12);
+    --blue: #3b82f6;
+    --blue-dim: rgba(59,130,246,0.12);
+    --green: #22c55e;
+    --yellow: #eab308;
+    --orange: #f97316;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --text: #f1f5f9;
+    --text-muted: #64748b;
+    --text-dim: #94a3b8;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ─── HEADER ─── */
+  .header {
+    padding: 24px 40px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .header-badge {
+    background: var(--teal-dim);
+    border: 1px solid rgba(45,212,191,0.3);
+    color: var(--teal);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    letter-spacing: 0.08em;
+  }
+
+  /* ─── TABS ─── */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    padding: 20px 40px 0;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    border-radius: 6px 6px 0 0;
+  }
+  .tab:hover { color: var(--text-dim); background: var(--surface2); }
+  .tab.active { color: var(--teal); border-bottom-color: var(--teal); background: var(--teal-dim); }
+
+  /* ─── CONTENT ─── */
+  .content { padding: 32px 40px; max-width: 1400px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ─── SECTION LABEL ─── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ─── COMPARISON GRID ─── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 32px;
+  }
+
+  .option-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .option-card:hover { border-color: var(--border2); }
+  .option-card.recommended { border-color: rgba(45,212,191,0.4); }
+
+  .option-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+  }
+  .option-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .option-label.a { color: var(--blue); }
+  .option-label.b { color: var(--teal); }
+  .rec-badge {
+    background: var(--teal-dim);
+    border: 1px solid rgba(45,212,191,0.3);
+    color: var(--teal);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  /* ─── GOOGLE FORM MOCKUP ─── */
+  .form-mockup {
+    padding: 20px;
+  }
+  .form-topbar {
+    background: #1e3a5f;
+    border-radius: 8px 8px 0 0;
+    height: 8px;
+    margin-bottom: 0;
+  }
+  .form-topbar.teal { background: linear-gradient(90deg, #0d9488, #2dd4bf); }
+  .form-body {
+    background: #1a2236;
+    border-radius: 0 0 8px 8px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-top: none;
+  }
+  .form-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .form-subtitle {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-field {
+    margin-bottom: 14px;
+  }
+  .form-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin-bottom: 6px;
+  }
+  .form-field label span { color: #ef4444; margin-left: 2px; }
+  .form-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--teal); }
+  .form-select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    cursor: pointer;
+  }
+  .form-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    resize: none;
+    height: 70px;
+  }
+  .form-submit {
+    background: var(--teal);
+    color: #0a0f1e;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 24px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 4px;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.04em;
+  }
+
+  /* status chips */
+  .status-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+  }
+  .chip.pendekatan { background: rgba(59,130,246,0.15); color: #60a5fa; border-color: rgba(59,130,246,0.3); }
+  .chip.shortlisted { background: rgba(168,85,247,0.15); color: #c084fc; border-color: rgba(168,85,247,0.3); }
+  .chip.pitching { background: rgba(234,179,8,0.15); color: #fbbf24; border-color: rgba(234,179,8,0.3); }
+  .chip.closing { background: rgba(249,115,22,0.15); color: #fb923c; border-color: rgba(249,115,22,0.3); }
+  .chip.deal { background: rgba(34,197,94,0.15); color: #4ade80; border-color: rgba(34,197,94,0.3); }
+  .chip.dead { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.3); }
+  .chip.selected { transform: scale(1.05); box-shadow: 0 0 0 2px currentColor; }
+
+  /* ─── SHEET MOCKUP ─── */
+  .sheet-mockup {
+    padding: 20px;
+  }
+  .sheet-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: #1a2c1a;
+    border-radius: 8px 8px 0 0;
+    border: 1px solid #2a3d2a;
+    border-bottom: none;
+  }
+  .sheet-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .sheet-name {
+    font-size: 11px;
+    font-weight: 600;
+    color: #4ade80;
+    font-family: 'DM Mono', monospace;
+    margin-left: 4px;
+  }
+  .sheet-table-wrap {
+    border: 1px solid #2a3d2a;
+    border-radius: 0 0 8px 8px;
+    overflow: auto;
+  }
+  .sheet-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+  }
+  .sheet-table th {
+    background: #162616;
+    color: #4ade80;
+    padding: 6px 10px;
+    text-align: left;
+    border: 1px solid #2a3d2a;
+    font-weight: 600;
+    white-space: nowrap;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .sheet-table td {
+    padding: 5px 10px;
+    border: 1px solid #1a2d1a;
+    color: #94a3b8;
+    white-space: nowrap;
+    background: #0f1a0f;
+  }
+  .sheet-table tr:hover td { background: #141f14; }
+  .sheet-table td.auto { color: #4ade80; opacity: 0.7; font-style: italic; }
+  .sheet-table td.status-p { color: #60a5fa; }
+  .sheet-table td.status-s { color: #c084fc; }
+  .sheet-table td.status-pi { color: #fbbf24; }
+  .sheet-table td.status-c { color: #fb923c; }
+  .sheet-table td.status-d { color: #4ade80; }
+  .sheet-table td.status-dead { color: #f87171; }
+
+  .sheet-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 8px 12px 0;
+    background: #0f1a0f;
+    border: 1px solid #2a3d2a;
+    border-bottom: none;
+    border-radius: 0 0 0 0;
+    margin-top: 0;
+  }
+  .sheet-tab-pill {
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+    padding: 4px 12px;
+    border-radius: 4px 4px 0 0;
+    cursor: pointer;
+  }
+  .sheet-tab-pill.active { background: #162616; color: #4ade80; border: 1px solid #2a3d2a; border-bottom: none; }
+  .sheet-tab-pill.inactive { background: transparent; color: #2a4a2a; }
+
+  /* ─── PROS CONS ─── */
+  .pros-cons {
+    padding: 14px 20px;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .pro-item, .con-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .pro-item { color: #86efac; }
+  .con-item { color: #fca5a5; }
+  .pro-item::before { content: '✓'; font-weight: 700; flex-shrink: 0; }
+  .con-item::before { content: '✗'; font-weight: 700; flex-shrink: 0; }
+
+  /* ─── SHEET FULL VIEW ─── */
+  .sheet-full {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .sheet-full-header {
+    padding: 14px 20px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sheet-full-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .sheet-icon {
+    width: 20px; height: 20px;
+    background: #166534;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .col-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    font-family: 'DM Mono', monospace;
+  }
+  .col-auto { background: rgba(34,197,94,0.15); color: #4ade80; border: 1px solid rgba(34,197,94,0.3); }
+  .col-user { background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+  .col-calc { background: rgba(168,85,247,0.15); color: #c084fc; border: 1px solid rgba(168,85,247,0.3); }
+
+  .col-legend {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  /* full sheet table */
+  .fst-wrap { overflow-x: auto; }
+  .fst {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+  }
+  .fst th {
+    background: #0d1f0d;
+    padding: 7px 10px;
+    border: 1px solid #1a2e1a;
+    text-align: left;
+    font-size: 10px;
+    font-weight: 700;
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+  .fst th.auto { color: #4ade80; }
+  .fst th.user { color: #60a5fa; }
+  .fst th.calc { color: #c084fc; }
+  .fst td {
+    padding: 5px 10px;
+    border: 1px solid #111c11;
+    color: #64748b;
+    white-space: nowrap;
+    background: #0a120a;
+    font-size: 11px;
+  }
+  .fst tr:hover td { background: #0e180e; }
+  .fst td.auto-val { color: #4ade80; opacity: 0.8; }
+  .fst td.user-val { color: #94a3b8; }
+  .fst td.calc-val { color: #c084fc; opacity: 0.8; font-style: italic; }
+
+  /* ─── NOTES ─── */
+  .note-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--teal);
+    border-radius: 8px;
+    padding: 14px 18px;
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 16px;
+  }
+  .note-box strong { color: var(--teal); }
+
+  /* ─── FLOW DIAGRAM ─── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 24px;
+    overflow-x: auto;
+  }
+  .flow-step {
+    flex-shrink: 0;
+    text-align: center;
+    padding: 0 16px;
+  }
+  .flow-icon {
+    width: 44px; height: 44px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin: 0 auto 8px;
+  }
+  .flow-step-label { font-size: 11px; font-weight: 600; color: var(--text-dim); }
+  .flow-step-sub { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+  .flow-arrow {
+    color: var(--border2);
+    font-size: 20px;
+    flex-shrink: 0;
+    padding: 0 4px;
+  }
+
+  @media (max-width: 900px) {
+    .compare-grid { grid-template-columns: 1fr; }
+    .content { padding: 20px; }
+    .tab-bar { padding: 12px 20px 0; overflow-x: auto; }
+    .header { padding: 16px 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="header-title">Sales Tracker Mockup — Intan Pariwara 2026</span>
+  <span class="header-badge">A/B Presentation</span>
+</div>
+
+<div class="tab-bar">
+  <div class="tab active" onclick="showPanel('form')">📋 Form Options (A/B)</div>
+  <div class="tab" onclick="showPanel('sheet')">📊 Google Sheet Structure</div>
+  <div class="tab" onclick="showPanel('flow')">🔄 Alur Sistem</div>
+</div>
+
+<!-- ════════════════════════ PANEL: FORM ════════════════════════ -->
+<div class="panel active" id="panel-form">
+  <div class="content">
+
+    <div class="section-label">Pilihan Form untuk Sales</div>
+
+    <div class="compare-grid">
+
+      <!-- OPTION A -->
+      <div class="option-card">
+        <div class="option-header">
+          <span class="option-label a">Option A — Dropdown Status</span>
+        </div>
+        <div class="form-mockup">
+          <div class="form-topbar"></div>
+          <div class="form-body">
+            <div class="form-title">Weekly Sales Report</div>
+            <div class="form-subtitle">Intan Pariwara · Update minggu ini</div>
+
+            <div class="form-field">
+              <label>Nama Sales <span>*</span></label>
+              <select class="form-select">
+                <option>— Pilih Nama —</option>
+                <option>Aldi Bontang</option>
+                <option>Dikky</option>
+                <option>Nanang Adhi Pratama</option>
+                <option>Tri Widodo</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label>Nama Project / Klien <span>*</span></label>
+              <input class="form-input" type="text" placeholder="Pengadaan Buku SD — Dinas Pendidikan Kota X">
+            </div>
+
+            <div class="form-field">
+              <label>Status Saat Ini <span>*</span></label>
+              <select class="form-select">
+                <option>— Pilih Status —</option>
+                <option>🔵 Pendekatan</option>
+                <option>🟣 Shortlisted</option>
+                <option>🟡 Pitching</option>
+                <option>🟠 Closing</option>
+                <option>🟢 Deal</option>
+                <option>🔴 Dead</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label>Nilai Forecast (Rp)</label>
+              <input class="form-input" type="text" placeholder="150.000.000">
+            </div>
+
+            <div class="form-field">
+              <label>Notes / Update Minggu Ini</label>
+              <textarea class="form-textarea" placeholder="Presentasi sudah dilakukan, menunggu keputusan PPK minggu depan..."></textarea>
+            </div>
+
+            <button class="form-submit" onclick="alert('✅ Response berhasil dikirim!')">Kirim Report</button>
+          </div>
+        </div>
+        <div class="pros-cons">
+          <div>
+            <div class="pro-item">Familiar, mirip Google Form biasa</div>
+            <div class="pro-item">Tidak ada salah ketik status</div>
+            <div class="pro-item">Simpel untuk semua usia</div>
+          </div>
+          <div>
+            <div class="con-item">Tidak langsung visual statusnya</div>
+            <div class="con-item">Harus scroll untuk lihat opsi</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- OPTION B -->
+      <div class="option-card recommended">
+        <div class="option-header">
+          <span class="option-label b">Option B — Visual Chips</span>
+          <span class="rec-badge">⭐ Recommended</span>
+        </div>
+        <div class="form-mockup">
+          <div class="form-topbar teal"></div>
+          <div class="form-body">
+            <div class="form-title">Weekly Sales Report</div>
+            <div class="form-subtitle">Intan Pariwara · Update minggu ini</div>
+
+            <div class="form-field">
+              <label>Nama Sales <span>*</span></label>
+              <select class="form-select">
+                <option>— Pilih Nama —</option>
+                <option>Aldi Bontang</option>
+                <option>Dikky</option>
+                <option>Nanang Adhi Pratama</option>
+                <option>Tri Widodo</option>
+              </select>
+            </div>
+
+            <div class="form-field">
+              <label>Nama Project / Klien <span>*</span></label>
+              <input class="form-input" type="text" placeholder="Pengadaan Buku SD — Dinas Pendidikan Kota X">
+            </div>
+
+            <div class="form-field">
+              <label>Status Saat Ini <span>*</span></label>
+              <div class="status-chips" id="chips">
+                <span class="chip pendekatan" onclick="selectChip(this)">🔵 Pendekatan</span>
+                <span class="chip shortlisted" onclick="selectChip(this)">🟣 Shortlisted</span>
+                <span class="chip pitching" onclick="selectChip(this)">🟡 Pitching</span>
+                <span class="chip closing" onclick="selectChip(this)">🟠 Closing</span>
+                <span class="chip deal" onclick="selectChip(this)">🟢 Deal</span>
+                <span class="chip dead" onclick="selectChip(this)">🔴 Dead</span>
+              </div>
+            </div>
+
+            <div class="form-field">
+              <label>Nilai Forecast (Rp)</label>
+              <input class="form-input" type="text" placeholder="150.000.000">
+            </div>
+
+            <div class="form-field">
+              <label>Notes / Update Minggu Ini</label>
+              <textarea class="form-textarea" placeholder="Presentasi sudah dilakukan, menunggu keputusan PPK minggu depan..."></textarea>
+            </div>
+
+            <button class="form-submit" onclick="alert('✅ Response berhasil dikirim!')">Kirim Report</button>
+          </div>
+        </div>
+        <div class="pros-cons">
+          <div>
+            <div class="pro-item">Visual langsung, satu klik</div>
+            <div class="pro-item">Warna = status, intuitif</div>
+            <div class="pro-item">Tidak bisa salah pilih</div>
+            <div class="pro-item">Lebih cepat ngisinya</div>
+          </div>
+          <div>
+            <div class="con-item">Perlu custom HTML form (bukan native GForm)</div>
+            <div class="con-item">Sedikit lebih kompleks setup-nya</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="note-box">
+      <strong>Catatan untuk presentasi:</strong> Option A bisa dibuat langsung di Google Forms native (zero setup). Option B perlu HTML form kecil yang submit ke Google Sheets via Apps Script — tapi hasilnya lebih polished dan ramah user. Keduanya menghasilkan data format yang sama di Sheet.
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════ PANEL: SHEET ════════════════════════ -->
+<div class="panel" id="panel-sheet">
+  <div class="content">
+
+    <div class="section-label">Struktur Google Sheet — 1 File, 2 Tab</div>
+
+    <!-- TAB 1: TRACKER -->
+    <div class="sheet-full">
+      <div class="sheet-full-header">
+        <div class="sheet-full-title">
+          <div class="sheet-icon">📄</div>
+          Tab 1 — TRACKER <span style="color:var(--text-muted);font-weight:400;font-size:12px;margin-left:4px">(hasil response Form dari sales)</span>
+        </div>
+        <div class="col-legend">
+          <span class="col-badge col-auto">● Auto</span>
+          <span class="col-badge col-user">● Sales isi</span>
+          <span class="col-badge col-calc">● Formula</span>
+        </div>
+      </div>
+      <div class="fst-wrap">
+        <table class="fst">
+          <thead>
+            <tr>
+              <th class="auto">Timestamp</th>
+              <th class="user">Nama Sales</th>
+              <th class="user">Nama Project</th>
+              <th class="user">Klien</th>
+              <th class="user">Status</th>
+              <th class="user">Nilai Forecast</th>
+              <th class="user">Notes</th>
+              <th class="calc">Week (auto)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="auto-val">03/03/2026 09.14</td>
+              <td class="user-val">Aldi Bontang</td>
+              <td class="user-val">Pengadaan TIK SD</td>
+              <td class="user-val">Dinas Pendidikan Kutai Timur</td>
+              <td style="color:#fbbf24">Pitching</td>
+              <td class="user-val">Rp 150.000.000</td>
+              <td class="user-val">Presentasi Senin depan</td>
+              <td class="calc-val">Week 10 2026</td>
+            </tr>
+            <tr>
+              <td class="auto-val">03/03/2026 10.32</td>
+              <td class="user-val">Dikky</td>
+              <td class="user-val">Pengadaan Seragam SD</td>
+              <td class="user-val">Dinas Pendidikan Probolinggo</td>
+              <td style="color:#fb923c">Closing</td>
+              <td class="user-val">Rp 450.000.000</td>
+              <td class="user-val">Menunggu tanda tangan PPK</td>
+              <td class="calc-val">Week 10 2026</td>
+            </tr>
+            <tr>
+              <td class="auto-val">03/03/2026 14.05</td>
+              <td class="user-val">Nanang Adhi Pratama</td>
+              <td class="user-val">Pengadaan Mebel RSUD</td>
+              <td class="user-val">RSUD Aji Muhammad Parikesit</td>
+              <td style="color:#4ade80">Deal</td>
+              <td class="user-val">Rp 23.500.000</td>
+              <td class="user-val">PO sudah keluar</td>
+              <td class="calc-val">Week 10 2026</td>
+            </tr>
+            <tr>
+              <td class="auto-val">04/03/2026 08.47</td>
+              <td class="user-val">Tri Widodo</td>
+              <td class="user-val">Pengadaan TIK PKBM</td>
+              <td class="user-val">Dinas Pendidikan Halmahera Utara</td>
+              <td style="color:#60a5fa">Pendekatan</td>
+              <td class="user-val">Rp 284.866.000</td>
+              <td class="user-val">Sudah perkenalan dengan PPK</td>
+              <td class="calc-val">Week 10 2026</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TAB 2: LEADS -->
+    <div class="sheet-full">
+      <div class="sheet-full-header">
+        <div class="sheet-full-title">
+          <div class="sheet-icon">📊</div>
+          Tab 2 — LEADS <span style="color:var(--text-muted);font-weight:400;font-size:12px;margin-left:4px">(data pipeline dashboard, kamu yang manage)</span>
+        </div>
+        <div class="col-legend">
+          <span class="col-badge col-user">● Tim manage</span>
+          <span class="col-badge col-calc">● Formula</span>
+        </div>
+      </div>
+      <div class="fst-wrap">
+        <table class="fst">
+          <thead>
+            <tr>
+              <th class="user">PIC</th>
+              <th class="user">Nama Paket</th>
+              <th class="user">K/L/P/D</th>
+              <th class="user">Wilayah</th>
+              <th class="user">Sumber Dana</th>
+              <th class="user">Nilai Brutto</th>
+              <th class="user">Forecast Netto</th>
+              <th class="user">T.K (%)</th>
+              <th class="user">Quarter</th>
+              <th class="user">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="user-val">Aldi Bontang</td>
+              <td class="user-val">Pengadaan Alat Olahraga SMK</td>
+              <td class="user-val">Dinas Pendidikan</td>
+              <td class="user-val">Kutai Timur</td>
+              <td class="user-val">DAK</td>
+              <td class="user-val">Rp 11.409.263.000</td>
+              <td class="user-val">Rp 9.100.000.000</td>
+              <td style="color:#fbbf24">50%</td>
+              <td class="user-val">Q2</td>
+              <td style="color:#fbbf24">Pitching</td>
+            </tr>
+            <tr>
+              <td class="user-val">Dikky</td>
+              <td class="user-val">Pengadaan Seragam SD</td>
+              <td class="user-val">Dinas Pendidikan</td>
+              <td class="user-val">Probolinggo</td>
+              <td class="user-val">APBD</td>
+              <td class="user-val">Rp 450.000.000</td>
+              <td class="user-val">Rp 382.500.000</td>
+              <td style="color:#fb923c">75%</td>
+              <td class="user-val">Q1</td>
+              <td style="color:#fb923c">Closing</td>
+            </tr>
+            <tr>
+              <td class="user-val">Nanang Adhi Pratama</td>
+              <td class="user-val">Pengadaan Mebel RSUD</td>
+              <td class="user-val">BLUD</td>
+              <td class="user-val">Kutai Kartanegara</td>
+              <td class="user-val">BLUD</td>
+              <td class="user-val">Rp 23.679.600</td>
+              <td class="user-val">Rp 18.963.435</td>
+              <td style="color:#4ade80">100%</td>
+              <td class="user-val">Q4</td>
+              <td style="color:#4ade80">Deal</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="note-box">
+      <strong>Kenapa dipisah 2 tab?</strong> Tab TRACKER adalah "kotak masuk" dari sales — append-only, tidak ada yang diedit manual. Tab LEADS adalah master pipeline yang kamu dan tim marketing kelola — lebih controlled, bisa ada validasi dan formula kompleks. Dashboard HTML nanti fetch dari kedua tab ini lewat satu Apps Script.
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════ PANEL: FLOW ════════════════════════ -->
+<div class="panel" id="panel-flow">
+  <div class="content">
+
+    <div class="section-label">Alur Sistem End-to-End</div>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(59,130,246,0.15)">📋</div>
+        <div class="flow-step-label">Sales buka Form</div>
+        <div class="flow-step-sub">Link WA / email</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(45,212,191,0.15)">✍️</div>
+        <div class="flow-step-label">Isi & submit</div>
+        <div class="flow-step-sub">Nama, status, notes</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(168,85,247,0.15)">⚙️</div>
+        <div class="flow-step-label">Apps Script cek</div>
+        <div class="flow-step-sub">Anti-duplikasi + auto Week</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(34,197,94,0.15)">📊</div>
+        <div class="flow-step-label">Masuk ke GSheet</div>
+        <div class="flow-step-sub">Tab TRACKER</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(234,179,8,0.15)">🌐</div>
+        <div class="flow-step-label">Apps Script serve</div>
+        <div class="flow-step-sub">JSON endpoint</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step">
+        <div class="flow-icon" style="background:rgba(249,115,22,0.15)">📱</div>
+        <div class="flow-step-label">Dashboard update</div>
+        <div class="flow-step-sub">Auto setiap 5 menit</div>
+      </div>
+    </div>
+
+    <div class="section-label">Access Control</div>
+
+    <div class="compare-grid">
+      <div class="option-card">
+        <div class="option-header">
+          <span class="option-label a">Google Form</span>
+        </div>
+        <div style="padding:16px 20px;font-size:12px;color:var(--text-dim);line-height:2">
+          <div>🔒 Hanya akun Google yang di-whitelist bisa submit</div>
+          <div>🔗 Link form dibagikan via WA/email internal</div>
+          <div>🛡️ Apps Script tolak submission duplikat per week</div>
+          <div>📧 Notifikasi email otomatis jika duplikat terdeteksi</div>
+          <div>⏰ Timestamp otomatis dicatat sistem</div>
+        </div>
+      </div>
+      <div class="option-card">
+        <div class="option-header">
+          <span class="option-label b">Google Sheet</span>
+        </div>
+        <div style="padding:16px 20px;font-size:12px;color:var(--text-dim);line-height:2">
+          <div>🔒 Share hanya ke email tim marketing</div>
+          <div>👁️ Sales: Viewer saja (tidak bisa edit langsung)</div>
+          <div>✏️ Tim marketing: Editor untuk tab LEADS</div>
+          <div>🌐 Dashboard HTML: fetch via Apps Script (private)</div>
+          <div>🔑 Apps Script pakai token sederhana sebagai auth</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-box" style="margin-top:8px">
+      <strong>Timeline setup estimasi:</strong> Dengan prompt Opus 4.6 di Antigravity — Form + Sheet + Apps Script + GitHub Pages bisa selesai dalam <strong>1 sesi kerja (~2-3 jam)</strong>. Hasilnya langsung production-ready untuk tim.
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function selectChip(el) {
+  document.querySelectorAll('#chips .chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+
+</body>
+</html>

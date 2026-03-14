@@ -68,6 +68,13 @@ function doGet(e) {
         var payload = params.payload ? JSON.parse(params.payload) : {};
         return successResponse(updateTracker(payload));
 
+      case 'getSettings':
+        return successResponse(getSettings());
+
+      case 'saveSettings':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(saveSettings(payload));
+
       default:
         return errorResponse('Aksi tidak dikenali: ' + action);
     }
@@ -400,6 +407,43 @@ function verifyAuth(username, password) {
   } catch (err) {
     throw new Error('Gagal memverifikasi kredensial: ' + err.message);
   }
+}
+function getSettings() {
+    var ss = SpreadsheetApp.openById('1pRr17d546bcTTZEzB4MGfb70Hr4xO-JvUKgEINYu3XQ');
+    var sheet = ss.getSheetByName('SETTINGS');
+    if (!sheet) return { picNames: [], principals: [], sumberDana: [] };
+    var data = sheet.getDataRange().getValues();
+    var result = { picNames: [], principals: [], sumberDana: [] };
+    for (var i = 1; i < data.length; i++) {
+        if (data[i][0]) result.picNames.push(String(data[i][0]).trim());
+        if (data[i][1]) result.principals.push(String(data[i][1]).trim());
+        if (data[i][2]) result.sumberDana.push(String(data[i][2]).trim());
+    }
+    return result;
+}
+
+function saveSettings(data) {
+    var ss = SpreadsheetApp.openById('1pRr17d546bcTTZEzB4MGfb70Hr4xO-JvUKgEINYu3XQ');
+    var sheet = ss.getSheetByName('SETTINGS');
+    if (!sheet) sheet = ss.insertSheet('SETTINGS');
+    sheet.clearContents();
+    sheet.getRange(1,1,1,3).setValues([['PIC Names','Principal','Sumber Dana']]);
+    var maxLen = Math.max(
+        (data.picNames || []).length,
+        (data.principals || []).length,
+        (data.sumberDana || []).length
+    );
+    if (maxLen === 0) return { success: true };
+    var rows = [];
+    for (var i = 0; i < maxLen; i++) {
+        rows.push([
+            (data.picNames || [])[i] || '',
+            (data.principals || [])[i] || '',
+            (data.sumberDana || [])[i] || ''
+        ]);
+    }
+    sheet.getRange(2, 1, rows.length, 3).setValues(rows);
+    return { success: true };
 }
 
 // =============================================================================

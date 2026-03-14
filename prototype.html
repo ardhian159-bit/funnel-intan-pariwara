@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- saved from url=(0115)file:///C:/Users/ASUS/AppData/Local/Temp/MicrosoftEdgeDownloads/766761bb-42fb-4e1e-8f73-a0f14768bc63/prototype.html -->
+
 <html lang="id" class="dark">
 
 <head>
@@ -7,6 +7,10 @@
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sales Management System - Intan Pariwara 2026</title>
+    <script src="assets/region-data.js"></script>
+    <script src="assets/api.js"></script>
+    <script src="assets/auth.js"></script>
+    <script src="assets/utils.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script
@@ -1602,6 +1606,10 @@
                     <button class="nav-btn hidden" onclick="switchMenu(&#39;control&#39;)" id="nav-control">⚙️ Control
                         Panel</button>
                 </div>
+                <a href="dashboard.html" id="btn-open-dashboard" class="nav-btn hidden" 
+   style="background:linear-gradient(135deg,#0d9488,#0ea5e9);color:white;border-color:transparent;">
+   📊 Buka Dashboard →
+</a>
                 <div class="flex items-center gap-2 ml-2">
                     <button id="btn-login" onclick="openLoginModal()"
                         class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-xs font-bold text-white border border-slate-600 transition">Login</button>
@@ -2570,37 +2578,7 @@
         // ============================================================
         // CONFIG: Google Sheets Integration
         // ============================================================
-        const CONFIG = {
-            APPS_SCRIPT_URL: 'https://script.google.com/macros/s/AKfycbxchhQHWthWjnmffOMGgDt1ShO3-D-T0XXOmpGNvP6jhgmtdCQZ5hiXcyymixjCRZOxNA/exec',
-            TOKEN: 'IPFUNNEL2026',
-            USE_MOCK_DATA: false  // set to true to use mock data fallback
-        };
-
-        // ============================================================
-        // API Helper Functions
-        // ============================================================
-        async function apiGet(action, params = {}) {
-            const url = new URL(CONFIG.APPS_SCRIPT_URL);
-            url.searchParams.set('action', action);
-            url.searchParams.set('token', CONFIG.TOKEN);
-            Object.entries(params).forEach(([k, v]) => url.searchParams.set(k, v));
-            const res = await fetch(url.toString());
-            const data = await res.json();
-            if (data.error) throw new Error(data.error);
-            return data;
-        }
-
-        async function apiPost(action, body = {}) {
-            const url = new URL(CONFIG.APPS_SCRIPT_URL);
-            url.searchParams.set('action', action);
-            url.searchParams.set('token', CONFIG.TOKEN);
-            url.searchParams.set('payload', JSON.stringify(body));
-            const res = await fetch(url.toString());
-            const data = await res.json();
-            if (data.error) throw new Error(data.error);
-            return data;
-        }
-
+        // CONFIG, apiGet, apiPost → lihat assets/api.js
         function showLoadingState(show) {
             const overlay = document.getElementById('loading-overlay');
             if (overlay) overlay.style.display = show ? 'flex' : 'none';
@@ -2621,20 +2599,7 @@
                 el.style.border = '1px solid rgba(20,184,166,0.4)';
             }
         }
-
-        async function verifyLogin(username, password) {
-            if (CONFIG.USE_MOCK_DATA) {
-                const cfg = AUTH_CONFIG[username];
-                return cfg && cfg.password === password ? cfg.role : null;
-            }
-            try {
-                const result = await apiGet('verifyAuth', { username, password });
-                return result.role || null;
-            } catch {
-                return null;
-            }
-        }
-
+// auth functions → lihat assets/auth.js
         // ============================================================
         // SECTION A: DROPDOWN MASTER DATA (from Excel)
         // ============================================================
@@ -2666,60 +2631,8 @@
         var nextUpdateId = 200;
         var nettoManuallyEdited = false;
 
-        var REGION_DATA = {
-            "Aceh": ["Kota Banda Aceh", "Kab. Aceh Jaya", "Kota Sabang", "Kab. Aceh Besar", "Kab. Aceh Selatan", "Kab. Aceh Tenggara", "Kab. Aceh Barat Daya", "Kota Subulussalam", "Kab. Aceh Singkil", "Kab. Aceh Barat", "Kab. Simeulue", "Kab. Pidie", "Kab. Pidie Jaya", "Kab. Nagan Raya", "Kab. Bireuen", "Kota Langsa", "Kab. Aceh Timur", "Kab. Aceh Tamiang", "Kab. Aceh Tengah", "Kab. Aceh Utara", "Kab. Bener Meriah", "Kota Lhokseumawe", "Kab. Gayo Lues", "Provinsi Aceh"],
-            "Bali": ["Kab. Gianyar", "Kab. Bangli", "Kab. Karangasem", "Kab. Buleleng", "Kota Denpasar", "Kab. Tabanan", "Kab. Badung", "Kab. Jembrana", "Kab. Klungkung", "Provinsi Bali"],
-            "Banten": ["Kota Serang", "Kab. Serang", "Kota Cilegon", "Kab. Lebak", "Kab. Pandeglang", "Kota Tangerang", "Kab. Tangerang", "Kota Tangerang Selatan", "Provinsi Banten"],
-            "Bengkulu": ["Kota Bengkulu", "Kab. Bengkulu Selatan", "Kab. Rejang Lebong", "Kab. Bengkulu Utara", "Kab. Kaur", "Kab. Seluma", "Kab. Mukomuko", "Kab. Lebong", "Kab. Kepahiang", "Kab. Bengkulu Tengah", "Provinsi Bengkulu"],
-            "DKI Jakarta": ["Kota Administrasi Jakarta Pusat", "Kota Administrasi Jakarta Barat", "Kota Administrasi Jakarta Selatan", "Kab. Administrasi Kepulauan Seribu", "Kota Administrasi Jakarta Utara", "Kota Administrasi Jakarta Timur", "Provinsi DKI Jakarta"],
-            "Daerah Istimewa Yogyakarta": ["Kab. Bantul", "Kota Yogyakarta", "Kab. Gunungkidul", "Kab. Sleman", "Kab. Kulon Progo", "Provinsi Daerah Istimewa Yogyakarta"],
-            "Gorontalo": ["Kota Gorontalo", "Kab. Gorontalo", "Kab. Boalemo", "Kab. Bone Bolango", "Kab. Pohuwato", "Kab. Gorontalo Utara", "Provinsi Gorontalo"],
-            "Jambi": ["Kota Jambi", "Kab. Muaro Jambi", "Kab. Batanghari", "Kab. Tanjung Jabung Barat", "Kab. Tanjung Jabung Timur", "Kab. Bungo", "Kab. Kerinci", "Kab. Merangin", "Kab. Sarolangun", "Kab. Tebo", "Kota Sungai Penuh", "Provinsi Jambi"],
-            "Jawa Barat": ["Kab. Karawang", "Kota Bogor", "Kab. Bogor", "Kota Bekasi", "Kab. Bekasi", "Kota Depok", "Kab. Subang", "Kab. Purwakarta", "Kota Sukabumi", "Kab. Sukabumi", "Kab. Cianjur", "Kota Bandung", "Kab. Bandung", "Kab. Bandung Barat", "Kota Cimahi", "Kab. Majalengka", "Kab. Sumedang", "Kab. Indramayu", "Kota Cirebon", "Kab. Kuningan", "Kab. Cirebon", "Kota Tasikmalaya", "Kab. Garut", "Kab. Tasikmalaya", "Kota Banjar", "Kab. Ciamis", "Kab. Pangandaran", "Provinsi Jawa Barat"],
-            "Jawa Tengah": ["Kab. Cilacap", "Kab. Banyumas", "Kab. Purbalingga", "Kab. Kebumen", "Kab. Purworejo", "Kab. Wonosobo", "Kab. Banjarnegara", "Kab. Batang", "Kab. Kendal", "Kota Pekalongan", "Kab. Pemalang", "Kab. Pekalongan", "Kota Magelang", "Kab. Magelang", "Kab. Temanggung", "Kota Tegal", "Kab. Tegal", "Kab. Brebes", "Kab. Boyolali", "Kab. Klaten", "Kab. Sukoharjo", "Kab. Wonogiri", "Kab. Pati", "Kab. Blora", "Kab. Rembang", "Kab. Kudus", "Kab. Jepara", "Kab. Demak", "Kab. Grobogan", "Kota Surakarta", "Kab. Karanganyar", "Kab. Sragen", "Kota Salatiga", "Kab. Semarang", "Kota Semarang", "Provinsi Jawa Tengah"],
-            "Jawa Timur": ["Kab. Pacitan", "Kab. Ponorogo", "Kab. Tulungagung", "Kab. Trenggalek", "Kab. Mojokerto", "Kota Mojokerto", "Kab. Lamongan", "Kab. Nganjuk", "Kab. Jombang", "Kab. Bojonegoro", "Kab. Ngawi", "Kota Kediri", "Kab. Kediri", "Kota Blitar", "Kab. Blitar", "Kota Malang", "Kota Batu", "Kota Madiun", "Kab. Madiun", "Kab. Magetan", "Kab. Malang", "Kab. Tuban", "Kab. Jember", "Kab. Bondowoso", "Kab. Banyuwangi", "Kab. Situbondo", "Kab. Sidoarjo", "Kab. Gresik", "Kab. Bangkalan", "Kab. Sampang", "Kab. Pamekasan", "Kab. Sumenep", "Kota Probolinggo", "Kab. Lumajang", "Kab. Probolinggo", "Kota Pasuruan", "Kab. Pasuruan", "Kota Surabaya", "Provinsi Jawa Timur"],
-            "Kalimantan Barat": ["Kota Pontianak", "Kab. Mempawah", "Kab. Kubu Raya", "Kota Singkawang", "Kab. Sambas", "Kab. Bengkayang", "Kab. Sanggau", "Kab. Landak", "Kab. Sekadau", "Kab. Sintang", "Kab. Melawi", "Kab. Kapuas Hulu", "Kab. Ketapang", "Kab. Kayong Utara", "Provinsi Kalimantan Barat"],
-            "Kalimantan Selatan": ["Kab. Hulu Sungai Selatan", "Kab. Tapin", "Kab. Hulu Sungai Tengah", "Kab. Tabalong", "Kab. Hulu Sungai Utara", "Kab. Balangan", "Kab. Tanah Bumbu", "Kab. Kotabaru", "Kota Banjarmasin", "Kab. Barito Kuala", "Kota Banjarbaru", "Kab. Tanah Laut", "Kab. Banjar", "Provinsi Kalimantan Selatan"],
-            "Kalimantan Tengah": ["Kab. Kotawaringin Barat", "Kab. Sukamara", "Kab. Lamandau", "Kab. Kotawaringin Timur", "Kab. Seruyan", "Kab. Barito Utara", "Kab. Barito Selatan", "Kab. Murung Raya", "Kab. Barito Timur", "Kota Palangkaraya", "Kab. Kapuas", "Kab. Katingan", "Kab. Gunung Mas", "Kab. Pulang Pisau", "Provinsi Kalimantan Tengah"],
-            "Kalimantan Timur": ["Kota Samarinda", "Kab. Kutai Barat", "Kab. Mahakam Ulu", "Kab. Kutai Kartanegara", "Kota Balikpapan", "Kab. Paser", "Kab. Penajam Paser Utara", "Kota Bontang", "Kab. Kutai Timur", "Kab. Berau", "Provinsi Kalimantan Timur"],
-            "Kalimantan Utara": ["Kab. Bulungan", "Kab. Malinau", "Kota Tarakan", "Kab. Nunukan", "Kab. Tana Tidung", "Provinsi Kalimantan Utara"],
-            "Kepulauan Bangka Belitung": ["Kota Pangkal Pinang", "Kab. Bangka", "Kab. Bangka Selatan", "Kab. Bangka Tengah", "Kab. Bangka Barat", "Kab. Belitung", "Kab. Belitung Timur", "Provinsi Kepulauan Bangka Belitung"],
-            "Kepulauan Riau": ["Kota Tanjung Pinang", "Kab. Bintan", "Kab. Lingga", "Kota Batam", "Kab. Natuna", "Kab. Karimun", "Kab. Kepulauan Anambas", "Provinsi Kepulauan Riau"],
-            "Lampung": ["Kota Bandar Lampung", "Kab. Lampung Selatan", "Kab. Pesawaran", "Kab. Lampung Utara", "Kab. Lampung Barat", "Kab. Way Kanan", "Kab. Tanggamus", "Kab. Pringsewu", "Kab. Pesisir Barat", "Kab. Tulang Bawang Barat", "Kab. Tulang Bawang", "Kab. Mesuji", "Kota Metro", "Kab. Lampung Tengah", "Kab. Lampung Timur", "Provinsi Lampung"],
-            "Maluku": ["Kab. Maluku Barat Daya", "Kota Ambon", "Kab. Kepulauan Tanimbar", "Kab. Buru", "Kab. Seram Bagian Timur", "Kab. Seram Bagian Barat", "Kab. Kepulauan Aru", "Kab. Buru Selatan", "Kota Tual", "Kab. Maluku Tengah", "Kab. Maluku Tenggara", "Provinsi Maluku"],
-            "Maluku Utara": ["Kota Ternate", "Kab. Halmahera Barat", "Kab. Halmahera Tengah", "Kab. Halmahera Utara", "Kab. Halmahera Selatan", "Kab. Kepulauan Sula", "Kab. Halmahera Timur", "Kab. Pulau Morotai", "Kab. Pulau Taliabu", "Kota Tidore Kepulauan", "Provinsi Maluku Utara"],
-            "Nanggroe Aceh Darussalam": ["Kota Banda Aceh", "Kab. Aceh Besar", "Kab. Pidie", "Kab. Aceh Utara", "Kota Lhokseumawe", "Kab. Aceh Timur", "Kota Langsa", "Kab. Aceh Tamiang", "Provinsi Nanggroe Aceh Darussalam"],
-            "Nusa Tenggara Barat": ["Kota Mataram", "Kab. Lombok Barat", "Kab. Lombok Tengah", "Kab. Lombok Timur", "Kab. Lombok Utara", "Kab. Sumbawa", "Kab. Sumbawa Barat", "Kota Bima", "Kab. Dompu", "Kab. Bima", "Provinsi Nusa Tenggara Barat"],
-            "Nusa Tenggara Timur": ["Kota Kupang", "Kab. Kupang", "Kab. Sabu Raijua", "Kab. Rote Ndao", "Kab. Alor", "Kab. Lembata", "Kab. Timor Tengah Selatan", "Kab. Timor Tengah Utara", "Kab. Belu", "Kab. Malaka", "Kab. Sikka", "Kab. Ende", "Kab. Flores Timur", "Kab. Ngada", "Kab. Manggarai Barat", "Kab. Nagekeo", "Kab. Manggarai", "Kab. Manggarai Timur", "Kab. Sumba Timur", "Kab. Sumba Barat", "Kab. Sumba Tengah", "Kab. Sumba Barat Daya", "Provinsi Nusa Tenggara Timur"],
-            "Papua": ["Kab. Biak Numfor", "Kab. Supiori", "Kab. Kepulauan Yapen", "Kab. Waropen", "Kota Jayapura", "Kab. Jayapura", "Kab. Sarmi", "Kab. Keerom", "Kab. Mamberamo Raya", "Provinsi Papua"],
-            "Papua Barat": ["Kab. Manokwari", "Kab. Teluk Bintuni", "Kab. Manokwari Selatan", "Kab. Pegunungan Arfak", "Kab. Teluk Wondama", "Kab. Fak Fak", "Kab. Kaimana", "Provinsi Papua Barat"],
-            "Papua Barat Daya": ["Kota Sorong", "Kab. Sorong", "Kab. Sorong Selatan", "Kab. Raja Ampat", "Kab. Tambrauw", "Kab. Maybrat", "Provinsi Papua Barat Daya"],
-            "Papua Pegunungan": ["Kab. Jayawijaya", "Kab. Lanny Jaya", "Kab. Nduga", "Kab. Pegunungan Bintang", "Kab. Yahukimo", "Kab. Tolikara", "Kab. Mamberamo Tengah", "Kab. Yalimo", "Provinsi Papua Pegunungan"],
-            "Papua Selatan": ["Kab. Merauke", "Kab. Boven Digoel", "Kab. Mappi", "Kab. Asmat", "Provinsi Papua Selatan"],
-            "Papua Tengah": ["Kab. Puncak Jaya", "Kab. Puncak", "Kab. Intan Jaya", "Kab. Deiyai", "Kab. Mimika", "Kab. Nabire", "Kab. Paniai", "Kab. Dogiyai", "Provinsi Papua Tengah"],
-            "Riau": ["Kota Pekanbaru", "Kab. Pelalawan", "Kab. Siak", "Kab. Kepulauan Meranti", "Kab. Kampar", "Kab. Rokan Hulu", "Kab. Indragiri Hulu", "Kab. Indragiri Hilir", "Kab. Kuantan Singingi", "Kota Dumai", "Kab. Bengkalis", "Kab. Rokan Hilir", "Provinsi Riau"],
-            "Sulawesi Barat": ["Kab. Mamuju", "Kab. Pasangkayu", "Kab. Mamuju Tengah", "Kab. Polewali Mandar", "Kab. Mamasa", "Kab. Majene", "Provinsi Sulawesi Barat"],
-            "Sulawesi Selatan": ["Kota Makassar", "Kab. Takalar", "Kab. Gowa", "Kab. Maros", "Kab. Pangkajene dan Kepulauan", "Kab. Bone", "Kab. Soppeng", "Kab. Wajo", "Kota Parepare", "Kab. Barru", "Kab. Sidenreng Rappang", "Kab. Pinrang", "Kab. Enrekang", "Kab. Bulukumba", "Kab. Kepulauan Selayar", "Kab. Bantaeng", "Kab. Jeneponto", "Kab. Sinjai", "Kota Palopo", "Kab. Luwu", "Kab. Tana Toraja", "Kab. Luwu Utara", "Kab. Luwu Timur", "Kab. Toraja Utara", "Provinsi Sulawesi Selatan"],
-            "Sulawesi Tengah": ["Kota Palu", "Kab. Donggala", "Kab. Parigi Moutong", "Kab. Sigi", "Kab. Banggai", "Kab. Banggai Kepulauan", "Kab. Banggai Laut", "Kab. Poso", "Kab. Morowali", "Kab. Tojo Una Una", "Kab. Morowali Utara", "Kab. Toli-Toli", "Kab. Buol", "Provinsi Sulawesi Tengah"],
-            "Sulawesi Tenggara": ["Kota Kendari", "Kab. Konawe", "Kab. Konawe Selatan", "Kab. Konawe Utara", "Kab. Konawe Kepulauan", "Kab. Kolaka", "Kab. Bombana", "Kab. Kolaka Utara", "Kab. Kolaka Timur", "Kota Bau Bau", "Kab. Muna", "Kab. Buton", "Kab. Wakatobi", "Kab. Buton Utara", "Kab. Muna Barat", "Kab. Buton Tengah", "Kab. Buton Selatan", "Provinsi Sulawesi Tenggara"],
-            "Sulawesi Utara": ["Kota Manado", "Kab. Kepulauan Siau Tagulandang Biaro", "Kab. Kepulauan Sangihe", "Kab. Kepulauan Talaud", "Kab. Minahasa Selatan", "Kab. Minahasa", "Kab. Minahasa Utara", "Kab. Bolaang Mongondow", "Kab. Minahasa Tenggara", "Kab. Bolaang Mongondow Utara", "Kab. Bolaang Mongondow Timur", "Kab. Bolaang Mongondow Selatan", "Kota Bitung", "Kota Tomohon", "Kota Kotamobagu", "Provinsi Sulawesi Utara"],
-            "Sumatera Barat": ["Kota Padang", "Kab. Padang Pariaman", "Kota Pariaman", "Kab. Pesisir Selatan", "Kab. Kepulauan Mentawai", "Kota Solok", "Kab. Solok", "Kab. Sijunjung", "Kab. Dharmasraya", "Kab. Solok Selatan", "Kota Sawahlunto", "Kota Bukittinggi", "Kota Padang Panjang", "Kab. Agam", "Kab. Pasaman", "Kab. Pasaman Barat", "Kota Payakumbuh", "Kab. Tanah Datar", "Kab. Lima Puluh Kota", "Provinsi Sumatera Barat"],
-            "Sumatera Selatan": ["Kota Palembang", "Kab. Musi Banyuasin", "Kab. Banyuasin", "Kota Lubuk Linggau", "Kab. Musi Rawas", "Kab. Musi Rawas Utara", "Kab. Lahat", "Kab. Muara Enim", "Kab. Empat Lawang", "Kota Pagar Alam", "Kab. Ogan Komering Ulu Timur", "Kab. Ogan Komering Ulu", "Kab. Ogan Komering Ulu Selatan", "Kab. Ogan Ilir", "Kab. Ogan Komering Ilir", "Kab. Penukal Abab Lematang Ilir", "Kota Prabumulih", "Provinsi Sumatera Selatan"],
-            "Sumatera Utara": ["Kota Medan", "Kab. Langkat", "Kab. Karo", "Kota Binjai", "Kab. Dairi", "Kab. Pakpak Bharat", "Kab. Deli Serdang", "Kab. Serdang Bedagai", "Kota Tebing Tinggi", "Kab. Asahan", "Kab. Batu Bara", "Kota Tanjungbalai", "Kab. Labuhanbatu", "Kab. Labuhanbatu Selatan", "Kab. Labuhanbatu Utara", "Kab. Padang Lawas", "Kota Pematangsiantar", "Kab. Simalungun", "Kab. Toba", "Kab. Humbang Hasundutan", "Kab. Samosir", "Kota Padangsidimpuan", "Kab. Tapanuli Selatan", "Kab. Tapanuli Tengah", "Kab. Tapanuli Utara", "Kab. Mandailing Natal", "Kab. Padang Lawas Utara", "Kota Sibolga", "Kota Gunungsitoli", "Kab. Nias", "Kab. Nias Selatan", "Kab. Nias Utara", "Kab. Nias Barat", "Provinsi Sumatera Utara"]
-        };
-        var provinsiList = Object.keys(REGION_DATA).sort();
-
-        // Helper: current ISO week
-        function getISOWeek(d) {
-            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
-            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-        }
-        var today = new Date(2026, 2, 7); // March 7 2026
-        var currentWeek = getISOWeek(today);
-        var currentYear = 2026;
-        var currentWeekLabel = `W${currentWeek}-${currentYear}`;
+       // REGION_DATA & provinsiList → lihat assets/region-data.js
+    // utility functions → lihat assets/utils.js
 
         // ============================================================
         // SECTION C: MOCK FUNNEL DATA (from Excel - 15 real entries)
@@ -2775,86 +2688,18 @@
         // ============================================================
         // SECTION E: UTILITY FUNCTIONS
         // ============================================================
-        function fmtRp(n) {
-            if (n === null || n === undefined || isNaN(n)) return 'Rp 0';
-            return 'Rp ' + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
-        function parseCurrency(s) {
-            if (!s) return 0;
-            const val = parseInt(s.toString().replace(/[^\d]/g, ''));
-            return isNaN(val) ? 0 : val;
-        }
-        function formatCurrency(el) {
-            let v = el.value.replace(/[^\d]/g, '');
-            el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        }
-     
-function calcForecast() {
-    if (nettoManuallyEdited) return;
-    const brutto = parseCurrency(document.getElementById('f-brutto').value);
-    const ppn = document.getElementById('f-ppn').value;
-    const cbInput = document.getElementById('f-cb').value;
-    const cbVal = cbInput ? parseFloat(cbInput) : 0;
-    const cbDecimal = cbVal / 100;
-    const dpp = ppn === 'PPN' ? Math.round(brutto / 1.11) : brutto;
-    const netto = Math.round(dpp * (1 - cbDecimal));
-    document.getElementById('f-netto').value = netto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    document.getElementById('f-netto-hint').textContent = `DPP: ${fmtRp(dpp)} → Netto: ${fmtRp(netto)} (CB: ${cbVal}%)`;
-}
-
-        function manualNettoEdit(el) {
-            nettoManuallyEdited = true;
-            formatCurrency(el);
-            document.getElementById('f-netto-hint').textContent = "(diisi manual)";
-        }
-
-        function generateFunnelId(picName) {
-            if (!picName) return '';
-            const initials = picName.split(' ').map(n => n[0]).join('').toUpperCase();
-            const picEntries = funnelData.filter(f => f.pic === picName);
-            const seq = (picEntries.length + 1).toString().padStart(4, '0');
-            return `${initials}-${seq}`;
-        }
-        function getStatusBadgeClass(s) {
-            const map = { Deal: 'badge-deal', Closing: 'badge-closing', Pitching: 'badge-pitching', Shortlisted: 'badge-shortlisted', Pendekatan: 'badge-pendekatan', Dead: 'badge-dead' };
-            return map[s] || 'badge-pendekatan';
-        }
-        function getStatusRowClass(s) {
-            const map = { Deal: 'status-row-deal', Closing: 'status-row-closing', Pitching: 'status-row-pitching', Shortlisted: 'status-row-shortlisted', Pendekatan: 'status-row-pendekatan', Dead: 'status-row-dead' };
-            return map[s] || '';
-        }
-        function getTKBadgeClass(tk) {
-            const v = parseInt(tk);
-            if (v >= 100) return 'badge-100';
-            if (v >= 75) return 'badge-75';
-            if (v >= 50) return 'badge-50';
-            if (v >= 25) return 'badge-25';
-            if (v >= 10) return 'badge-10';
-            return 'badge-5';
-        }
-        function showToast(msg, type = 'success') {
-            const t = document.getElementById('toast');
-            t.textContent = msg;
-            t.className = `toast toast-${type} show`;
-            setTimeout(() => t.classList.remove('show'), 3000);
-        }
-        function logActivity(action) {
-            const now = today.toLocaleDateString('id-ID');
-            const roleStr = currentRole ? currentRole.toUpperCase() : 'SYSTEM';
-            activityLog.unshift({ time: now + ' ' + new Date().toLocaleTimeString('id-ID'), role: roleStr, action });
-            if (activityLog.length > 50) activityLog.pop();
-        }
-        function canSeeAllData() { return ['admin', 'superadmin'].includes(currentRole); }
-        function canDelete() { return ['superadmin'].includes(currentRole); }
-        function canExportCSV() { return ['superadmin'].includes(currentRole); }
-        function canEditDropdowns() { return ['admin', 'superadmin'].includes(currentRole); }
-        function isSuperAdmin() { return currentRole === 'superadmin'; }
+// utility functions → lihat assets/utils.js
+var today = new Date(2026, 2, 7); // March 7 2026
+var currentWeek = getISOWeek(today);
+var currentYear = 2026;
+var currentWeekLabel = `W${currentWeek}-${currentYear}`;
+        // auth functions → lihat assets/auth.js
         function getVisibleFunnel() {
-            if (canSeeAllData()) return funnelData;
+            if (canSeeAllData() && currentSalesUser === 'ALL') return funnelData;
             return funnelData.filter(f => f.pic === currentSalesUser);
         }
         function getVisibleUpdates() {
-            if (canSeeAllData()) return weeklyUpdates;
+            if (canSeeAllData() && currentSalesUser === 'ALL') return weeklyUpdates;
             return weeklyUpdates.filter(u => u.pic === currentSalesUser);
         }
         async function loadPipelineData() {
@@ -2939,67 +2784,7 @@ function calcForecast() {
             logActivity('Changed active sales to ' + name);
         }
         // ===== AUTH LOGIC =====
-        function openLoginModal() { document.getElementById('login-modal').classList.add('open'); }
-        function closeLoginModal() {
-            document.getElementById('login-modal').classList.remove('open');
-            document.getElementById('login-error').style.display = 'none';
-            document.getElementById('login-form').reset();
-        }
-        async function handleLogin(e) {
-            e.preventDefault();
-            const u = document.getElementById('login-username').value.trim().toLowerCase();
-            const p = document.getElementById('login-password').value;
-
-            const role = await verifyLogin(u, p);
-            if (role) {
-                currentSession = { role: role, username: u };
-                currentRole = currentSession.role;
-                closeLoginModal();
-                showToast(`✅ Berhasil login sebagai ${u.toUpperCase()}`);
-                logActivity(`Logged in as ${u}`);
-                updateNavVisibility();
-                switchMenu('dashboard');
-            } else {
-                document.getElementById('login-error').style.display = 'block';
-            }
-            return false;
-        }
-        function logout() {
-            currentSession = { role: null, username: null };
-            currentRole = 'sales';
-            showToast('👋 Berhasil logout!', 'success');
-            logActivity('Logged out');
-            updateNavVisibility();
-            switchMenu('update');
-        }
-        function updateNavVisibility() {
-            const isLogged = !!currentSession.role;
-            const isSuper = currentSession.role === 'superadmin';
-
-            document.getElementById('btn-login').classList.toggle('hidden', isLogged);
-            const btnLogout = document.getElementById('btn-logout');
-            btnLogout.classList.toggle('hidden', !isLogged);
-            if (isLogged) btnLogout.textContent = `Logout [${currentSession.username}]`;
-
-            document.getElementById('nav-dashboard').classList.toggle('hidden', !isLogged);
-            document.getElementById('nav-monitoring').classList.toggle('hidden', !isLogged);
-            document.getElementById('nav-control').classList.toggle('hidden', !isSuper);
-
-            const sp = document.getElementById('sales-name-picker');
-            if (sp) {
-                sp.innerHTML = '';
-                if (isLogged) {
-                    sp.innerHTML = '<option value="ALL">Semua Sales</option>';
-                    picNames.forEach(n => sp.innerHTML += `<option value="${n}">${n}</option>`);
-                    sp.value = 'ALL';
-                    currentSalesUser = 'ALL';
-                } else {
-                    picNames.forEach(n => sp.innerHTML += `<option value="${n}">${n}</option>`);
-                    currentSalesUser = picNames[0];
-                    sp.value = currentSalesUser;
-                }
-            }
-        }
+        // auth functions → lihat assets/auth.js
 
         // ===== CUSTOM DROPDOWNS LOGIC =====
         function toggleCustomDropdown(id) {
