@@ -13,6 +13,7 @@
     <script src="assets/utils.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script
         src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script>
@@ -1583,42 +1584,12 @@
     <div id="toast" class="toast toast-success"></div>
 
     <!-- ===== NAVBAR ===== -->
-    <nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-700 px-4 py-3">
-        <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-            <div class="flex items-center gap-4">
-                <h1
-                    class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">
-                    SALES MANAGEMENT SYSTEM</h1>
-                <span class="text-slate-500 text-sm font-semibold hidden md:inline">INTAN PARIWARA 2026</span>
-                <span id="connection-status"
-                    class="text-xs font-semibold px-2 py-0.5 rounded-full ml-2 hidden md:inline-flex items-center gap-1"></span>
-            </div>
-            <div class="flex items-center gap-3 flex-wrap">
-                <div class="flex gap-2 flex-wrap" id="nav-menu">
-                    <button class="nav-btn active" onclick="switchMenu(&#39;input&#39;)" id="nav-input">📝 Input
-                        Funnel</button>
-                    <button class="nav-btn" onclick="switchMenu(&#39;update&#39;)" id="nav-update">🔄 Update
-                        Funnel</button>
-                    <button class="nav-btn hidden" onclick="switchMenu(&#39;dashboard&#39;)" id="nav-dashboard">📊
-                        Dashboard</button>
-                    <button class="nav-btn hidden" onclick="switchMenu(&#39;monitoring&#39;)" id="nav-monitoring">📋
-                        Monitoring</button>
-                    <button class="nav-btn hidden" onclick="switchMenu(&#39;control&#39;)" id="nav-control">⚙️ Control
-                        Panel</button>
-                </div>
-                <a href="dashboard.html" id="btn-open-dashboard" class="nav-btn hidden" 
-   style="background:linear-gradient(135deg,#0d9488,#0ea5e9);color:white;border-color:transparent;">
-   📊 Buka Dashboard →
-</a>
-                <div class="flex items-center gap-2 ml-2">
-                    <button id="btn-login" onclick="openLoginModal()"
-                        class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-xs font-bold text-white border border-slate-600 transition">Login</button>
-                    <button id="btn-logout" onclick="logout()"
-                        class="hidden px-3 py-1.5 bg-red-900/40 hover:bg-red-800/60 rounded text-xs font-bold text-red-400 border border-red-800/50 transition">Logout</button>
-                </div>
-            </div>
-        </div>
-    </nav>
+ <!-- ===== NAVBAR (via htmx) ===== -->
+    <div id="navbar-container"
+         hx-get="navbar.html"
+         hx-trigger="load"
+         hx-swap="innerHTML">
+    </div>
 
     <!-- ===== MAIN CONTENT ===== -->
     <main class="flex-1 p-4 md:p-6 lg:p-8 max-w-[1400px] mx-auto w-full">
@@ -2203,190 +2174,6 @@
                 </div>
             </div>
         </section><!-- ===== SECTION 3: DASHBOARD & STATISTIK MP ===== -->
-        <section id="section-dashboard" class="hidden">
-            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                <div>
-                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">📊 Dashboard &amp; Statistik MP
-                    </h2>
-                    <p class="text-slate-400 text-sm mt-1">Ringkasan performa pipeline sales</p>
-                </div>
-            </div>
-            <!-- FILTER BAR -->
-            <div class="card p-4 md:p-6 mb-8 border-l-4 border-l-blue-500 w-full">
-                <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 mb-5">
-                    <h2 class="text-lg font-bold text-white flex items-center gap-2">
-                        <span class="text-blue-400">🔍</span> Filter Data
-                    </h2>
-                    <button onclick="resetFilters()"
-                        class="text-sm px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors border border-slate-600 text-white font-medium flex items-center gap-2">
-                        Reset Filters
-                    </button>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <!-- Filter Quarter -->
-                    <div>
-                        <label
-                            class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">QUARTER</label>
-                        <div class="flex flex-wrap gap-2" id="filter-quarter">
-                            <button
-                                class="filter-btn active px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
-                                data-val="ALL" onclick="setFilter(&#39;quarter&#39;, &#39;ALL&#39;, this)">ALL</button>
-                            <button
-                                class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
-                                data-val="Q1" onclick="setFilter(&#39;quarter&#39;, &#39;Q1&#39;, this)">Q1</button>
-                            <button
-                                class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
-                                data-val="Q2" onclick="setFilter(&#39;quarter&#39;, &#39;Q2&#39;, this)">Q2</button>
-                            <button
-                                class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
-                                data-val="Q3" onclick="setFilter(&#39;quarter&#39;, &#39;Q3&#39;, this)">Q3</button>
-                            <button
-                                class="filter-btn px-3 py-1.5 rounded-full border border-slate-600 text-sm font-medium"
-                                data-val="Q4" onclick="setFilter(&#39;quarter&#39;, &#39;Q4&#39;, this)">Q4</button>
-                        </div>
-                    </div>
-                    <!-- Filter Sumber Dana -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">SUMBER
-                            DANA</label>
-                        <div class="flex flex-wrap gap-2" id="filter-sumberdana">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                    <!-- Filter PIC & Provinsi -->
-                    <div class="flex flex-col gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">PIC
-                                (Sales)</label>
-                            <select id="filter-pic"
-                                class="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2"
-                                onchange="setFilter(&#39;pic&#39;, this.value, null)">
-                                <option value="ALL">Semua PIC</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label
-                                class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Provinsi</label>
-                            <select id="filter-provinsi"
-                                class="w-full bg-slate-800 border border-slate-700 text-white text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 block p-2"
-                                onchange="setFilter(&#39;provinsi&#39;, this.value, null)">
-                                <option value="ALL">Semua Provinsi</option>
-                            </select>
-                        </div>
-                    </div>
-                    <!-- Filter T.K. -->
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">STAGE
-                            FUNNEL (T.K)</label>
-                        <div class="flex flex-wrap gap-2" id="filter-tk">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- KPI Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-                <div class="card p-6">
-                    <div class="flex justify-between items-start">
-                        <h3 class="text-slate-400 font-semibold uppercase tracking-wider text-xs">Total Nilai Brutto
-                        </h3>
-                        <div class="p-2 bg-blue-500/10 rounded-lg text-blue-400"><svg class="w-5 h-5" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                                </path>
-                            </svg></div>
-                    </div>
-                    <div class="mt-3"><span class="text-2xl font-bold text-white" id="kpi-brutto">Rp 0</span></div>
-                </div>
-                <div class="card p-6 border-b-4 border-b-teal-500">
-                    <div class="flex justify-between items-start">
-                        <h3 class="text-slate-300 font-bold uppercase tracking-wider text-xs">Total Forecast Netto
-                        </h3>
-                        <div class="p-2 bg-teal-500/10 rounded-lg text-teal-400"><svg class="w-5 h-5" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg></div>
-                    </div>
-                    <div class="mt-3"><span
-                            class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400"
-                            id="kpi-netto">Rp 0</span></div>
-                </div>
-                <div class="card p-6">
-                    <div class="flex justify-between items-start">
-                        <h3 class="text-slate-400 font-semibold uppercase tracking-wider text-xs">Total Pipeline
-                        </h3>
-                        <div class="p-2 bg-purple-500/10 rounded-lg text-purple-400"><svg class="w-5 h-5" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg></div>
-                    </div>
-                    <div class="mt-3"><span class="text-2xl font-bold text-white" id="kpi-pipeline">0</span> <span
-                            class="text-slate-400 text-sm">Paket</span></div>
-                </div>
-                <div class="card p-6">
-                    <div class="flex justify-between items-start">
-                        <h3 class="text-slate-400 font-semibold uppercase tracking-wider text-xs">Deal / Closing
-                        </h3>
-                        <div class="p-2 bg-green-500/10 rounded-lg text-green-400"><svg class="w-5 h-5" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg></div>
-                    </div>
-                    <div class="mt-3"><span class="text-2xl font-bold text-green-400" id="kpi-closing">0</span>
-                        <span class="text-slate-400 text-sm" id="kpi-closing-val">(Rp 0)</span>
-                    </div>
-                </div>
-            </div>
-            <!-- Top 5 Closing + Status Comparison -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="card p-5">
-                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">🏆 Top 5 Project
-                        Closing</h3>
-                    <div id="top-5-closing" class="mt-4 space-y-3">
-                        <!-- Populated by JS -->
-                    </div>
-                </div>
-                <div class="card p-5">
-                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">📊 Status: Minggu Ini
-                        vs Minggu Lalu</h3>
-                    <div class="chart-container" style="height:220px"><canvas id="statusCompareChart"></canvas></div>
-                </div>
-            </div>
-            <!-- Charts Row 1 -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="card p-5">
-                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Sales Funnel (Nilai
-                        Netto per Stage)</h3>
-                    <div class="chart-container"><canvas id="funnelChart"></canvas></div>
-                </div>
-                <div class="card p-5">
-                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Forecast Netto
-                        Aktual
-                        per Quarter</h3>
-                    <div class="chart-container"><canvas id="quarterChart"></canvas></div>
-                </div>
-            </div>
-            <!-- Charts Row 2 -->
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-6 mb-8">
-                <div class="card p-5 lg:col-span-3">
-                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Top 10 PIC
-                        (Berdasarkan
-                        Forecast Netto)</h3>
-                    <div class="chart-container"><canvas id="picChart"></canvas></div>
-                </div>
-                <div class="card p-5 lg:col-span-2">
-                    <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Proporsi Sumber
-                        Dana
-                    </h3>
-                    <div class="chart-container"><canvas id="sumberDanaChart"></canvas></div>
-                </div>
-            </div>
-        </section>
-
         <!-- ===== SECTION 4: MONITORING WEEKLY MP ===== -->
         <section id="section-monitoring" class="hidden">
             <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -3627,6 +3414,18 @@ tambah catatan admin.`;
         // SECTION L: INITIALIZATION
         // ============================================================
         async function init() {
+            // Restore session dari sessionStorage (misal: back dari dashboard.html)
+            const savedSession = sessionStorage.getItem('ip_session');
+            if (savedSession) {
+                try {
+                    const parsed = JSON.parse(savedSession);
+                    currentSession = parsed;
+                    currentRole = parsed.role;
+                } catch(e) {
+                    sessionStorage.removeItem('ip_session');
+                }
+            }
+
             // Show connection status indicator
             updateConnectionStatus();
 
@@ -3657,7 +3456,11 @@ tambah catatan admin.`;
 
             logActivity('System initialized');
             updateNavVisibility();
-            switchMenu(currentSession.role ? 'dashboard' : 'update');
+           // Baca ?menu= dari URL, fallback ke 'update'
+            const urlParams = new URLSearchParams(window.location.search);
+            const menuParam = urlParams.get('menu');
+            const validMenus = ['input', 'update', 'monitoring', 'control'];
+            switchMenu(validMenus.includes(menuParam) ? menuParam : 'update');
             console.log('Sales Management System - Intan Pariwara 2026 initialized');
             console.log('Current Week:', currentWeekLabel);
             console.log('Funnel entries:', funnelData.length);
@@ -3665,6 +3468,19 @@ tambah catatan admin.`;
         }
         // Run on load
         document.addEventListener('DOMContentLoaded', init);
+        // ===== NAVBAR HTMX HANDLER =====
+        document.addEventListener('htmx:afterSwap', function(evt) {
+            if (evt.target.id !== 'navbar-container') return;
+            // Sembunyikan btn-go-prototype (tidak relevan di halaman ini)
+            const goProto = document.getElementById('btn-go-prototype');
+            if (goProto) goProto.classList.add('hidden');
+            // Re-apply session state ke navbar yang baru di-inject
+            if (typeof updateNavVisibility === 'function') updateNavVisibility();
+            // Re-apply active state tombol sesuai menu aktif saat ini
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const activeBtn = document.getElementById('nav-' + currentMenu);
+            if (activeBtn) activeBtn.classList.add('active');
+        });
     </script>
 
 

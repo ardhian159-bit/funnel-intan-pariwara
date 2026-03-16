@@ -1,0 +1,92 @@
+<!-- ============================================================
+     navbar.html — Shared Navbar | Intan Pariwara Sales Management
+     Dipakai oleh: prototype.html, dashboard.html, sales.html (Step 7)
+     Di-inject via htmx: hx-get="navbar.html" hx-trigger="load"
+
+     Visibility rules:
+     - Input Funnel  : always visible
+     - Update Funnel : always visible
+     - Dashboard     : always visible → link ke dashboard.html
+     - Monitoring    : hidden, muncul setelah login (admin/superadmin)
+     - Control Panel : hidden, muncul setelah login superadmin only
+     ============================================================ -->
+
+<nav class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur border-b border-slate-700 px-4 py-3">
+    <div class="max-w-[1400px] mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+
+        <!-- ===== LEFT: Logo + Connection Status ===== -->
+        <div class="flex items-center gap-4">
+            <h1 class="text-xl md:text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">
+                SALES MANAGEMENT SYSTEM
+            </h1>
+            <span class="text-slate-500 text-sm font-semibold hidden md:inline">INTAN PARIWARA 2026</span>
+            <span id="connection-status"
+                  class="text-xs font-semibold px-2 py-0.5 rounded-full ml-2 hidden md:inline-flex items-center gap-1">
+            </span>
+        </div>
+
+        <!-- ===== RIGHT: Menu + Auth ===== -->
+        <div class="flex items-center gap-3 flex-wrap">
+
+            <div class="flex gap-2 flex-wrap" id="nav-menu">
+
+                <!-- Selalu visible -->
+                <button class="nav-btn"
+                        onclick="if(typeof switchMenu==='function') switchMenu('input'); else window.location.href='prototype.html?menu=input'"
+                        id="nav-input">
+                    📝 Input Funnel
+                </button>
+
+                <button class="nav-btn"
+                        onclick="if(typeof switchMenu==='function') switchMenu('update'); else window.location.href='prototype.html?menu=update'"
+                        id="nav-update">
+                    🔄 Update Funnel
+                </button>
+
+                <!-- Selalu visible, langsung ke dashboard.html -->
+                <button class="nav-btn"
+                        onclick="window.location.href='dashboard.html'"
+                        id="nav-dashboard">
+                    📊 Dashboard
+                </button>
+
+                <!-- Hidden sampai login (admin/superadmin) -->
+                <button class="nav-btn hidden"
+                        onclick="if(typeof switchMenu==='function') switchMenu('monitoring'); else window.location.href='prototype.html?menu=monitoring'"
+                        id="nav-monitoring">
+                    📋 Monitoring
+                </button>
+
+                <!-- Hidden sampai login superadmin -->
+                <button class="nav-btn hidden"
+                        onclick="if(typeof switchMenu==='function') switchMenu('control'); else window.location.href='prototype.html?menu=control'"
+                        id="nav-control">
+                    ⚙️ Control Panel
+                </button>
+
+            </div>
+
+            <!-- Tombol kembali ke prototype (dipakai di dashboard.html) -->
+            <!-- Hidden by default, ditampilkan via htmx:afterSwap di dashboard.html -->
+            <a href="prototype.html" id="btn-go-prototype" class="nav-btn hidden"
+               style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);color:white;border-color:transparent;">
+                ✏️ Input / Update →
+            </a>
+
+            <!-- Login / Logout -->
+            <div class="flex items-center gap-2 ml-2">
+                <button id="btn-login"
+                        onclick="if(typeof openLoginModal==='function') openLoginModal()"
+                        class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded text-xs font-bold text-white border border-slate-600 transition">
+                    Login
+                </button>
+                <button id="btn-logout"
+                        onclick="if(typeof logout==='function') logout()"
+                        class="hidden px-3 py-1.5 bg-red-900/40 hover:bg-red-800/60 rounded text-xs font-bold text-red-400 border border-red-800/50 transition">
+                    Logout
+                </button>
+            </div>
+
+        </div>
+    </div>
+</nav>

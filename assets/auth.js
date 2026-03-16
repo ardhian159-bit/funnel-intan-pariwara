@@ -37,7 +37,7 @@
                 showToast(`✅ Berhasil login sebagai ${u.toUpperCase()}`);
                 logActivity(`Logged in as ${u}`);
                 updateNavVisibility();
-                switchMenu('dashboard');
+               window.location.href = 'dashboard.html';
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -56,8 +56,6 @@
         
             const isLogged = !!currentSession.role;
             const isSuper = currentSession.role === 'superadmin';
-            const dbBtn = document.getElementById('btn-open-dashboard');
-            if (dbBtn) dbBtn.classList.toggle('hidden', !isLogged);
             document.getElementById('btn-login').classList.toggle('hidden', isLogged);
             const btnLogout = document.getElementById('btn-logout');
             btnLogout.classList.toggle('hidden', !isLogged);
