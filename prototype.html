@@ -36,7 +36,13 @@
                 opacity: 1;
             }
         }
-
+        @keyframes sectionFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .section-fade-in {
+            animation: sectionFadeIn 0.25s ease forwards;
+        }
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -2550,13 +2556,24 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
         }// ============================================================
         // SECTION F: NAVIGATION & ROLE SYSTEM
         // ============================================================
-        function switchMenu(menu) {
+function switchMenu(menu) {
             if (typeof currentMenu === 'undefined') return;
             currentMenu = menu;
+            if (window.location.hash !== '#' + menu) {
+                history.replaceState(null, '', '#' + menu);
+            }
             ['input', 'update', 'dashboard', 'monitoring', 'control'].forEach(m => {
                 const sec = document.getElementById('section-' + m);
                 const btn = document.getElementById('nav-' + m);
-                if (sec) sec.classList.toggle('hidden', m !== menu);
+                if (sec) {
+                    const show = m === menu;
+                    sec.classList.toggle('hidden', !show);
+                    if (show) {
+                        sec.classList.remove('section-fade-in');
+                        void sec.offsetWidth; // force reflow
+                        sec.classList.add('section-fade-in');
+                    }
+                }
                 if (btn) btn.classList.toggle('active', m === menu);
             });
             if (menu === 'input') { populateDropdowns(); renderPipelineTable(); }
@@ -3456,11 +3473,15 @@ tambah catatan admin.`;
 
             logActivity('System initialized');
             updateNavVisibility();
-           // Baca ?menu= dari URL, fallback ke 'update'
+           // Baca menu: prioritas hash > ?menu= > default 'update'
+            const validMenus = ['input', 'update', 'monitoring', 'control'];
+            const hash = window.location.hash.replace('#', '');
             const urlParams = new URLSearchParams(window.location.search);
             const menuParam = urlParams.get('menu');
-            const validMenus = ['input', 'update', 'monitoring', 'control'];
-            switchMenu(validMenus.includes(menuParam) ? menuParam : 'update');
+            const initialMenu = validMenus.includes(hash)      ? hash
+                              : validMenus.includes(menuParam) ? menuParam
+                              : 'update';
+            switchMenu(initialMenu);
             console.log('Sales Management System - Intan Pariwara 2026 initialized');
             console.log('Current Week:', currentWeekLabel);
             console.log('Funnel entries:', funnelData.length);
@@ -3468,18 +3489,20 @@ tambah catatan admin.`;
         }
         // Run on load
         document.addEventListener('DOMContentLoaded', init);
+        window.addEventListener('hashchange', function() {
+            const hash = window.location.hash.replace('#', '');
+            const validMenus = ['input', 'update', 'monitoring', 'control'];
+            if (validMenus.includes(hash)) switchMenu(hash);
+        });
         // ===== NAVBAR HTMX HANDLER =====
         document.addEventListener('htmx:afterSwap', function(evt) {
-            if (evt.target.id !== 'navbar-container') return;
-            // Sembunyikan btn-go-prototype (tidak relevan di halaman ini)
-            const goProto = document.getElementById('btn-go-prototype');
-            if (goProto) goProto.classList.add('hidden');
-            // Re-apply session state ke navbar yang baru di-inject
-            if (typeof updateNavVisibility === 'function') updateNavVisibility();
-            // Re-apply active state tombol sesuai menu aktif saat ini
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            const activeBtn = document.getElementById('nav-' + currentMenu);
-            if (activeBtn) activeBtn.classList.add('active');
+    if (evt.target.id !== 'navbar-container') return;
+    const goProto = document.getElementById('btn-go-prototype');
+    if (goProto) goProto.classList.add('hidden');
+    // Pastikan Dashboard button selalu visible
+    const navDb = document.getElementById('nav-dashboard');
+    if (navDb) navDb.classList.remove('hidden');
+    if (typeof updateNavVisibility === 'function') updateNavVisibility();
         });
     </script>
 

@@ -11,8 +11,8 @@
                 return cfg && cfg.password === password ? cfg.role : null;
             }
             try {
-                const result = await apiGet('verifyAuth', { username, password });
-                return result.role || null;
+                 const result = await apiGet('verifyAuth', { username, password });
+        return result.role ? result : null;
             } catch {
                 return null;
             }
@@ -28,16 +28,22 @@
             const u = document.getElementById('login-username').value.trim().toLowerCase();
             const p = document.getElementById('login-password').value;
 
-            const role = await verifyLogin(u, p);
+            const result = await verifyLogin(u, p);
+            const role = result?.role || null;
             if (role) {
-                currentSession = { role: role, username: u };
-                sessionStorage.setItem('ip_session', JSON.stringify({ role: role, username: u }));
-                currentRole = currentSession.role;
+                const picName = result?.picName || u.toUpperCase();
+                currentSession = { role: role, username: u, picName: picName };
+                sessionStorage.setItem('ip_session', JSON.stringify({ role: role, username: u, picName: picName }));
+                currentRole = role;
                 closeLoginModal();
                 showToast(`✅ Berhasil login sebagai ${u.toUpperCase()}`);
                 logActivity(`Logged in as ${u}`);
                 updateNavVisibility();
-               window.location.href = 'dashboard.html';
+              if (role === 'sales') {
+    window.location.href = 'sales.html';
+} else {
+    window.location.href = 'dashboard.html';
+}
             } else {
                 document.getElementById('login-error').style.display = 'block';
             }
@@ -60,8 +66,6 @@
             const btnLogout = document.getElementById('btn-logout');
             btnLogout.classList.toggle('hidden', !isLogged);
             if (isLogged) btnLogout.textContent = `Logout [${currentSession.username}]`;
-
-            document.getElementById('nav-dashboard').classList.toggle('hidden', !isLogged);
             document.getElementById('nav-monitoring').classList.toggle('hidden', !isLogged);
             document.getElementById('nav-control').classList.toggle('hidden', !isSuper);
 

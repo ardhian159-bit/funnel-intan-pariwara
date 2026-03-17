@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Portal — Intan Pariwara 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+    <script src="assets/region-data.js"></script>
+    <script src="assets/api.js"></script>
+    <script src="assets/utils.js"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <style>
+        body {
+            background: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', system-ui, sans-serif;
+            opacity: 0;
+            animation: fadeIn .8s ease forwards;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+        @keyframes sectionFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .section-fade-in { animation: sectionFadeIn 0.25s ease forwards; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,.1);
+            transition: transform .2s;
+        }
+
+        /* Shared navbar button styles (diperlukan karena navbar.html pakai class ini) */
+        .nav-btn {
+            padding: .5rem 1rem;
+            border-radius: .5rem;
+            font-size: .875rem;
+            font-weight: 600;
+            transition: all .2s;
+            cursor: pointer;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+        .nav-btn:hover { background: #334155; color: #e2e8f0; }
+        .nav-btn.active {
+            background: linear-gradient(135deg, #0d9488, #0ea5e9);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Tab navigation sales-specific */
+        .tab-btn {
+            padding: .625rem 1.25rem;
+            border-radius: .5rem;
+            font-size: .875rem;
+            font-weight: 700;
+            transition: all .2s;
+            cursor: pointer;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: #94a3b8;
+        }
+        .tab-btn:hover { background: #334155; color: #e2e8f0; }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #0d9488, #0ea5e9);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Project list cards */
+        .project-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-left: 3px solid #f59e0b; /* default: pending */
+            border-radius: .625rem;
+            padding: .875rem 1rem;
+            cursor: pointer;
+            transition: all .2s;
+            margin-bottom: .5rem;
+        }
+        .project-card:hover { border-color: #0d9488; background: rgba(13,148,136,.06); }
+        .project-card.selected { border-color: #0d9488 !important; background: rgba(13,148,136,.1); }
+        .project-card.updated { border-left-color: #4ade80; }
+
+        /* Badges */
+        .badge {
+            padding: .25rem .6rem;
+            border-radius: 9999px;
+            font-size: .75rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: .25rem;
+            white-space: nowrap;
+        }
+        .badge-deal        { background: rgba(34,197,94,.2);   color: #4ade80;  border: 1px solid rgba(34,197,94,.5); }
+        .badge-closing     { background: rgba(8,145,178,.2);   color: #22d3ee;  border: 1px solid rgba(8,145,178,.5); }
+        .badge-pitching    { background: rgba(147,51,234,.2);  color: #c084fc;  border: 1px solid rgba(147,51,234,.5); }
+        .badge-shortlisted { background: rgba(217,119,6,.2);   color: #fbbf24;  border: 1px solid rgba(217,119,6,.5); }
+        .badge-pendekatan  { background: rgba(71,85,105,.2);   color: #94a3b8;  border: 1px solid rgba(71,85,105,.5); }
+        .badge-dead        { background: rgba(220,38,38,.2);   color: #f87171;  border: 1px solid rgba(220,38,38,.5); }
+        .badge-100  { background: rgba(34,197,94,.2);  color: #4ade80;  border: 1px solid rgba(34,197,94,.5); }
+        .badge-75   { background: rgba(132,204,22,.2); color: #a3e635;  border: 1px solid rgba(132,204,22,.5); }
+        .badge-50   { background: rgba(234,179,8,.2);  color: #facc15;  border: 1px solid rgba(234,179,8,.5); }
+        .badge-25   { background: rgba(249,115,22,.2); color: #fb923c;  border: 1px solid rgba(249,115,22,.5); }
+        .badge-10   { background: rgba(239,68,68,.2);  color: #f87171;  border: 1px solid rgba(239,68,68,.5); }
+        .badge-5    { background: rgba(239,68,68,.2);  color: #fca5a5;  border: 1px solid rgba(239,68,68,.5); }
+
+        /* Form inputs */
+        .form-input {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: .5rem;
+            padding: .5rem .75rem;
+            color: #f8fafc;
+            font-size: .875rem;
+            transition: border-color .2s;
+            box-sizing: border-box;
+        }
+        .form-input:focus { outline: none; border-color: #0d9488; }
+        .form-input:disabled, .form-input[readonly] {
+            opacity: .55;
+            cursor: not-allowed;
+            background: #1a2332;
+        }
+        .form-label {
+            display: block;
+            font-size: .75rem;
+            font-weight: 600;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            margin-bottom: .375rem;
+        }
+        select.form-input option { background: #1e293b; }
+        textarea.form-input { resize: vertical; }
+
+        /* Data table */
+        .data-table { width: 100%; font-size: .8rem; text-align: left; color: #cbd5e1; border-collapse: separate; border-spacing: 0; }
+        .data-table thead th { background: rgba(30,41,59,.8); color: #64748b; font-size: .7rem; text-transform: uppercase; letter-spacing: .05em; padding: .625rem .75rem; border-bottom: 1px solid #334155; }
+        .data-table tbody tr { border-bottom: 1px solid rgba(51,65,85,.5); transition: background .15s; }
+        .data-table tbody tr:hover { background: rgba(51,65,85,.3); }
+        .data-table tbody td { padding: .625rem .75rem; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            padding: .75rem 1.25rem;
+            border-radius: .75rem;
+            font-size: .875rem;
+            font-weight: 600;
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(1rem);
+            transition: all .3s ease;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast-success { background: #064e3b; color: #6ee7b7; border: 1px solid #065f46; }
+        .toast-error   { background: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d; }
+
+        /* Loading spinner */
+        .loading-spinner {
+            width: 2rem; height: 2rem;
+            border: 3px solid #334155;
+            border-top-color: #0d9488;
+            border-radius: 50%;
+            animation: spin .8s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media(max-width:768px) {
+            .tab-btn  { font-size: .75rem; padding: .375rem .75rem; }
+            .nav-btn  { font-size: .75rem; padding: .375rem .75rem; }
+        }
+
+        /* Login Modal */
+        .modal-overlay {
+            position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+            background: rgba(0,0,0,.65); z-index: 10000;
+            opacity: 0; pointer-events: none; transition: opacity .3s ease;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: all; }
+        .modal-content {
+            background: #1e293b; border: 1px solid #334155; border-radius: .75rem;
+            padding: 2rem; width: 100%; max-width: 400px;
+            transform: translateY(-12px); transition: transform .3s ease;
+        }
+        .modal-overlay.open .modal-content { transform: translateY(0); }
+        .input-field {
+            width: 100%; background: #0f172a; border: 1px solid #334155;
+            border-radius: .5rem; padding: .5rem .75rem; color: #f8fafc;
+            font-size: .875rem; transition: border-color .2s; box-sizing: border-box;
+        }
+        .input-field:focus { outline: none; border-color: #0d9488; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- ===== LOGIN MODAL ===== -->
+<div id="login-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="text-xl font-bold text-white mb-1">Sales Portal</h2>
+        <p class="text-slate-400 text-sm mb-6">Masuk dengan akun Anda</p>
+        <form onsubmit="return handleSalesLogin(event)">
+            <div class="mb-4">
+                <label class="form-label">Username</label>
+                <input type="text" id="login-username" class="input-field" placeholder="Username" autocomplete="username" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password</label>
+                <input type="password" id="login-password" class="input-field" placeholder="Password" autocomplete="current-password" required>
+            </div>
+            <div id="login-error" class="text-red-400 text-sm mb-4 hidden"></div>
+            <button type="submit"
+                    class="w-full py-2.5 rounded-lg font-bold text-white text-sm transition"
+                    style="background: linear-gradient(135deg, #0d9488, #0ea5e9);">
+                Masuk
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- ===== NAVBAR via htmx ===== -->
+<div id="navbar-container" hx-get="navbar.html" hx-trigger="load" hx-swap="innerHTML"></div>
+
+<!-- ===== MAIN CONTENT ===== -->
+<div class="p-4 md:p-6 lg:p-8 flex-1">
+
+    <!-- HEADER -->
+    <div class="mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+        <div>
+            <h2 class="text-2xl font-extrabold text-white">
+                👋 Halo, <span id="sales-display-name"
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-400"></span>
+            </h2>
+            <p class="text-slate-400 text-sm mt-1">
+                Minggu saat ini:
+                <span class="font-bold text-teal-400" id="week-label"></span>
+            </p>
+        </div>
+        <div id="update-status-summary"></div>
+    </div>
+
+    <!-- TAB NAVIGATION -->
+    <div class="flex gap-2 mb-6 flex-wrap">
+        <button class="tab-btn active" id="tab-update"    onclick="switchTab('update')">🔄 Update Funnel</button>
+        <button class="tab-btn"        id="tab-input"     onclick="switchTab('input')">📝 Input Funnel</button>
+        <button class="tab-btn"        id="tab-statistik" onclick="switchTab('statistik')">📊 Statistik</button>
+    </div>
+
+    <!-- ================================================================
+         SECTION: UPDATE FUNNEL
+    ================================================================ -->
+    <section id="section-update" class="section-fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+
+            <!-- LEFT: Daftar Project -->
+            <div class="lg:col-span-2">
+                <div class="card p-4">
+                    <div class="flex items-center justify-between mb-3 gap-2">
+                        <h3 class="font-bold text-white text-sm uppercase tracking-wider">Daftar Project</h3>
+                        <input type="text" id="project-search" placeholder="🔍 Cari..."
+                               oninput="filterProjectList()"
+                               class="form-input w-36 text-sm py-1.5">
+                    </div>
+                    <div id="project-list" class="max-h-[65vh] overflow-y-auto pr-1">
+                        <div class="flex flex-col items-center py-10 text-slate-500">
+                            <div class="loading-spinner mb-3"></div>
+                            <span class="text-sm">Memuat data...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Form Update -->
+            <div class="lg:col-span-3">
+                <div class="card p-5" id="update-form-container">
+                    <div class="flex flex-col items-center justify-center py-16 text-slate-500">
+                        <svg class="w-14 h-14 mb-3 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                        </svg>
+                        <p class="font-semibold text-base">Pilih project dari daftar kiri</p>
+                        <p class="text-sm mt-1 text-slate-600">untuk mulai mengisi update mingguan</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- ================================================================
+         SECTION: INPUT FUNNEL
+    ================================================================ -->
+    <section id="section-input" class="hidden">
+
+        <!-- Form Input -->
+        <div class="card p-5 mb-6">
+            <h3 class="text-base font-bold text-white mb-5 flex items-center gap-2 border-b border-slate-700 pb-3">
+                📝 Input Funnel Baru
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+                <div>
+                    <label class="form-label">Principal *</label>
+                    <select id="fi-principal" class="form-input">
+                        <option value="">-- Pilih Principal --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Sumber Dana *</label>
+                    <select id="fi-sumberdana" class="form-input">
+                        <option value="">-- Pilih --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Quarter *</label>
+                    <select id="fi-quarter" class="form-input">
+                        <option value="">-- Pilih --</option>
+                        <option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option>
+                    </select>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="form-label">Nama Paket / Rencana Pengadaan *</label>
+                    <input type="text" id="fi-namapaket" class="form-input" placeholder="Nama paket pengadaan...">
+                </div>
+
+                <div>
+                    <label class="form-label">K/L/P/D (Instansi) *</label>
+                    <input type="text" id="fi-instansi" class="form-input" placeholder="Nama instansi...">
+                </div>
+
+                <div>
+                    <label class="form-label">Provinsi *</label>
+                    <select id="fi-provinsi" class="form-input" onchange="onInputProvinsiChange()">
+                        <option value="">-- Pilih Provinsi --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Kabupaten / Kota</label>
+                    <select id="fi-wilayah" class="form-input">
+                        <option value="">-- Pilih Kab/Kota --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Status *</label>
+                    <select id="fi-status" class="form-input">
+                        <option value="">-- Pilih --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">TK (%) *</label>
+                    <select id="fi-tk" class="form-input">
+                        <option value="">-- Pilih --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Nilai Brutto / Anggaran (Rp) *</label>
+                    <input type="text" id="fi-brutto" class="form-input" placeholder="0"
+                           oninput="inputFormatCurrency(this); calcInputForecast()">
+                </div>
+
+                <div>
+                    <label class="form-label">PPN / Non PPN</label>
+                    <select id="fi-ppn" class="form-input" onchange="calcInputForecast()">
+                        <option value="PPN">PPN</option>
+                        <option value="Non PPN">Non PPN</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Perkiraan CB (%)</label>
+                    <input type="number" id="fi-cb" class="form-input" placeholder="Contoh: 20.00"
+                           oninput="calcInputForecast()">
+                </div>
+
+                <div class="md:col-span-2">
+                    <label class="form-label">Forecast Netto (Rp) <span class="text-teal-400 normal-case">(AUTO)</span></label>
+                    <input type="text" id="fi-netto" class="form-input" placeholder="0"
+                           oninput="inputFormatCurrency(this); inputNettoManual = true;">
+                    <p class="text-xs text-slate-500 mt-1" id="fi-netto-hint"></p>
+                </div>
+
+                <div>
+                    <label class="form-label">Jenis Produk *</label>
+                    <select id="fi-jenisproduk" class="form-input">
+                        <option value="">-- Pilih --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="form-label">Produk Spesifik</label>
+                    <input type="text" id="fi-produk" class="form-input" placeholder="Nama produk spesifik...">
+                </div>
+
+                <div>
+                    <label class="form-label">QTY</label>
+                    <input type="number" id="fi-qty" class="form-input" placeholder="Jumlah" min="0">
+                </div>
+
+                <div>
+                    <label class="form-label">Satuan</label>
+                    <input type="text" id="fi-satuan" class="form-input" placeholder="Unit, Set...">
+                </div>
+
+                <div>
+                    <label class="form-label">Keterangan / Notes</label>
+                    <textarea id="fi-keterangan" class="form-input" rows="2" placeholder="Catatan tambahan..."></textarea>
+                </div>
+
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button onclick="resetInputForm()"
+                        class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold text-slate-300 border border-slate-600 transition">
+                    Reset
+                </button>
+                <button onclick="handleInputSubmit()"
+                        class="px-5 py-2 rounded-lg text-sm font-bold text-white transition"
+                        style="background: linear-gradient(135deg, #0d9488, #0ea5e9);">
+                    ➕ Tambah ke Pipeline
+                </button>
+            </div>
+        </div>
+
+        <!-- Pipeline Table -->
+        <div class="card p-5">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    📋 Pipeline Saya
+                </h3>
+                <span id="pipeline-count" class="text-sm text-slate-400"></span>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="px-3 py-2">NO</th>
+                            <th class="px-3 py-2">NAMA PAKET</th>
+                            <th class="px-3 py-2">INSTANSI</th>
+                            <th class="px-3 py-2">SUMBER DANA</th>
+                            <th class="px-3 py-2 text-right">NILAI BRUTTO</th>
+                            <th class="px-3 py-2 text-right">FORECAST NETTO</th>
+                            <th class="px-3 py-2">TK</th>
+                            <th class="px-3 py-2">STATUS</th>
+                            <th class="px-3 py-2">QUARTER</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pipeline-table-body">
+                        <tr><td colspan="9" class="text-center py-8 text-slate-500">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+    <!-- ================================================================
+         SECTION: STATISTIK
+    ================================================================ -->
+    <section id="section-statistik" class="hidden">
+
+        <!-- KPI Mini Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div class="card p-5">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Brutto Saya</p>
+                <p class="text-2xl font-bold text-white mt-3" id="stat-brutto">Rp 0</p>
+            </div>
+            <div class="card p-5 border-b-4 border-b-teal-500">
+                <p class="text-slate-300 text-xs font-bold uppercase tracking-wider">Total Forecast Netto</p>
+                <p class="text-2xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-emerald-400 mt-3"
+                   id="stat-netto">Rp 0</p>
+            </div>
+            <div class="card p-5">
+                <p class="text-slate-400 text-xs font-semibold uppercase tracking-wider">Total Pipeline</p>
+                <p class="text-2xl font-bold text-white mt-3">
+                    <span id="stat-pipeline">0</span>
+                    <span class="text-slate-400 text-sm font-normal"> Paket</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Chart + Top Closing -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="card p-5">
+                <h3 class="text-base font-bold text-white mb-4 border-b border-slate-700 pb-2">
+                    Sales Funnel — Pipeline Saya
+                </h3>
+                <div style="position:relative; height:280px;">
+                    <canvas id="my-funnel-chart"></canvas>
+                </div>
+            </div>
+            <div class="card p-5">
+                <h3 class="text-base font-bold text-white mb-4 border-b border-slate-700 pb-2">
+                    📊 Rekap Pipeline per Stage
+                </h3>
+                <div id="status-rekap" class="flex flex-col gap-2"></div>
+            </div>
+
+        <!-- History Update Mingguan -->
+        <div class="card p-5">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 border-b border-slate-700 pb-3">
+                <h3 class="text-base font-bold text-white">📅 History Update Mingguan</h3>
+                <div class="flex gap-2 flex-wrap">
+                    <select id="hist-filter-wilayah" class="form-input text-xs py-1.5 w-40" onchange="renderHistoryTable()">
+                        <option value="ALL">Semua Wilayah</option>
+                    </select>
+                    <select id="hist-filter-status" class="form-input text-xs py-1.5 w-40" onchange="renderHistoryTable()">
+                        <option value="ALL">Semua Status</option>
+                    </select>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="px-3 py-2">WEEK</th>
+                            <th class="px-3 py-2">NAMA PROJECT</th>
+                            <th class="px-3 py-2">STATUS</th>
+                            <th class="px-3 py-2 text-right">NILAI FORECAST</th>
+                            <th class="px-3 py-2">NOTES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-table-body">
+                        <tr><td colspan="5" class="text-center py-8 text-slate-500">Memuat data...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </section>
+
+</div><!-- end main content -->
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<!-- ================================================================
+     JAVASCRIPT
+================================================================ -->
+<script>
+// =============================================
+// COMPATIBILITY VARS (required by utils.js)
+// =============================================
+var today        = new Date();
+var currentRole  = 'sales';
+var activityLog  = [];
+var funnelData   = [];
+var nettoManuallyEdited = false; // used by utils.js calcForecast (not used here)
+
+// =============================================
+// GLOBALS
+// =============================================
+var SESSION          = null;
+var salesPicName     = '';   // display name, e.g. "GIRI SURYANTO"
+                             // TODO: perlu picName di sessionStorage
+                             //       Update Code.gs verifyAuth agar return picName
+                             //       Update auth.js handleLogin agar simpan picName
+var weeklyUpdates    = [];
+var selectedProjectId = null;
+var currentTab       = 'update';
+var inputNettoManual = false;
+var myFunnelChart    = null;
+
+var currentWeek      = getISOWeek(today);
+var currentYear      = today.getFullYear();
+var currentWeekLabel = 'W' + currentWeek + '-' + currentYear;
+
+// Dropdown lists (diisi dari getSettings)
+var statusList    = ['Pendekatan', 'Shortlisted', 'Pitching', 'Closing', 'Deal', 'Dead'];
+var tkValues      = ['5', '10', '25', '50', '75', '100'];
+var picNames      = [];
+var principals    = [];
+var sumberDanaList = [];
+var jenisProdukList = [
+    'Mebel / Furnitur','Alat Tulis Kantor','TIK & Periperal','Buku Non Teks HET',
+    'Buku Teks Pendamping HET','Buku Teks Pendamping','Buku Non Teks','Buku PAUD',
+    'Cetak, Kertas, dan Buku Tulis','Alat Olahraga','Alat Kesehatan / Kebersihan',
+    'Alat Praktik','Alat Praktik SMK','Alat Peraga APE Luar','Alat Peraga APE Dalam',
+    'Alat Peraga LAB IPA','Pakaian dan Seragam','Elektronik','Paket Project'
+];
+
+// =============================================
+// AUTH GUARD
+// =============================================
+function checkAuth() {
+    var saved = sessionStorage.getItem('ip_session');
+    if (!saved) { showLoginModal(); return false; }
+    try {
+        SESSION = JSON.parse(saved);
+        if (SESSION.role !== 'sales') {
+            showLoginModal();
+            return false;
+        }
+        // picName disimpan saat login (lihat TODO di atas)
+        // Fallback: username.toUpperCase() jika picName belum ada
+        salesPicName = SESSION.picName || SESSION.username.toUpperCase();
+        return true;
+    } catch(e) {
+        sessionStorage.removeItem('ip_session');
+        showLoginModal();
+        return false;
+    }
+}
+
+function showLoginModal() {
+    var modal = document.getElementById('login-modal');
+    if (modal) modal.classList.add('open');
+    var main = document.querySelector('.p-4');
+    if (main) main.style.display = 'none';
+}
+
+async function handleSalesLogin(event) {
+    event.preventDefault();
+    var username = document.getElementById('login-username').value.trim();
+    var password = document.getElementById('login-password').value;
+    var errEl    = document.getElementById('login-error');
+    if (errEl) errEl.classList.add('hidden');
+
+    try {
+        var result = await apiGet('verifyAuth', { username: username, password: password });
+        var role = result.role || '';
+        if (role === 'sales') {
+            sessionStorage.setItem('ip_session', JSON.stringify(result));
+            SESSION      = result;
+            salesPicName = result.picName || result.username.toUpperCase();
+            try {
+                var settings = await apiGet('getSettings');
+                if (settings.picNames?.length)   picNames       = settings.picNames;
+                if (settings.principals?.length) principals     = settings.principals;
+                if (settings.sumberDana?.length) sumberDanaList = settings.sumberDana;
+            } catch(e) {}
+            populateInputDropdowns();
+            var modal = document.getElementById('login-modal');
+            if (modal) modal.classList.remove('open');
+            var main = document.querySelector('.p-4, .p-6, .p-8');
+            if (main) main.style.display = '';
+            await loadData();
+            updateHeader();
+            var hash = window.location.hash.replace('#', '');
+            switchTab(['update','input','statistik'].includes(hash) ? hash : 'update');
+        } else if (role === 'admin' || role === 'superadmin') {
+            sessionStorage.setItem('ip_session', JSON.stringify(result));
+            window.location.href = 'prototype.html';
+        } else {
+            throw new Error('Akses ditolak. Hanya akun sales yang dapat masuk di sini.');
+        }
+    } catch(e) {
+        if (errEl) {
+            errEl.textContent = e.message || 'Login gagal. Periksa username dan password.';
+            errEl.classList.remove('hidden');
+        }
+    }
+    return false;
+}
+
+// =============================================
+// TAB SWITCHING + HASH ROUTING
+// =============================================
+function switchTab(tab) {
+    currentTab = tab;
+    if (window.location.hash !== '#' + tab) {
+        history.replaceState(null, '', '#' + tab);
+    }
+    ['update','input','statistik'].forEach(function(t) {
+        var sec = document.getElementById('section-' + t);
+        var btn = document.getElementById('tab-' + t);
+        if (sec) {
+            sec.classList.toggle('hidden', t !== tab);
+            if (t === tab) {
+                sec.classList.remove('section-fade-in');
+                void sec.offsetWidth; // force reflow
+                sec.classList.add('section-fade-in');
+            }
+        }
+        if (btn) btn.classList.toggle('active', t === tab);
+    });
+    if (tab === 'update')    renderProjectList();
+    if (tab === 'input')     { populateInputDropdowns(); renderPipelineTable(); }
+    if (tab === 'statistik') renderStatistik();
+}
+
+window.addEventListener('hashchange', function() {
+    var hash = window.location.hash.replace('#', '');
+    if (['update','input','statistik'].includes(hash)) switchTab(hash);
+});
+
+// =============================================
+// DATA LOADING
+// =============================================
+async function loadData() {
+    try {
+        var leads = await apiGet('getLeads');
+        var rawLeads = Array.isArray(leads) ? leads : (leads.data || []);
+        // Filter by PIC name
+        funnelData = rawLeads.filter(function(l) {
+            return l.pic && l.pic.toUpperCase() === salesPicName.toUpperCase();
+        }).map(function(l) {
+            return Object.assign(l, {
+                brutto:    l.nilaiAnggaran  || l.brutto   || 0,
+                netto:     l.forecastNetto  || l.netto    || 0,
+                namaPaket: l.namaPatek      || l.namaPaket || '',
+                kabKota:   l.kabupatenKota  || l.kabKota  || '',
+                ppn:       l.ppnNon         || l.ppn      || '',
+                cb:        l.perkiraanCb    || l.cb       || 0,
+            });
+        });
+    } catch(e) {
+        console.warn('Gagal load leads:', e);
+        funnelData = [];
+    }
+
+    try {
+        var trackers = await apiGet('getTrackers');
+        var rawTrackers = Array.isArray(trackers) ? trackers : (trackers.data || []);
+        weeklyUpdates = rawTrackers.filter(function(t) {
+            return t.pic && t.pic.toUpperCase() === salesPicName.toUpperCase();
+        });
+    } catch(e) {
+        console.warn('Gagal load trackers:', e);
+        weeklyUpdates = [];
+    }
+}
+
+// =============================================
+// HEADER
+// =============================================
+function updateHeader() {
+    var nameEl   = document.getElementById('sales-display-name');
+    var weekEl   = document.getElementById('week-label');
+    var summary  = document.getElementById('update-status-summary');
+    if (nameEl) nameEl.textContent = salesPicName;
+    if (weekEl) weekEl.textContent = currentWeekLabel;
+
+    if (summary && funnelData.length > 0) {
+        var updatedIds = new Set(
+            weeklyUpdates
+                .filter(function(u) { return u.week === currentWeekLabel; })
+                .map(function(u) { return u.funnelId; })
+        );
+        var updatedCount = updatedIds.size;
+        var total = funnelData.length;
+        var pct   = Math.round(updatedCount / total * 100);
+        var colorClass = pct >= 80 ? 'bg-green-900/50 text-green-400'
+                       : pct >= 50 ? 'bg-yellow-900/50 text-yellow-400'
+                       : 'bg-red-900/50 text-red-400';
+        summary.innerHTML =
+            '<div class="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700">' +
+            '<span class="text-slate-400 text-xs">Update minggu ini</span>' +
+            '<span class="font-bold text-teal-400">' + updatedCount + '/' + total + '</span>' +
+            '<span class="text-xs px-2 py-0.5 rounded-full ' + colorClass + '">' + pct + '%</span>' +
+            '</div>';
+    }
+}
+
+// =============================================
+// UPDATE FUNNEL — PROJECT LIST
+// =============================================
+function isUpdatedThisWeek(funnelId) {
+    return weeklyUpdates.some(function(u) {
+        return u.funnelId === funnelId && u.week === currentWeekLabel;
+    });
+}
+
+function renderProjectList() {
+    var container = document.getElementById('project-list');
+    if (!container) return;
+
+    if (funnelData.length === 0) {
+        container.innerHTML =
+            '<div class="text-center py-10 text-slate-500">' +
+            '<p class="text-3xl mb-2">📭</p>' +
+            '<p class="text-sm font-semibold">Belum ada project di pipeline</p>' +
+            '<p class="text-xs mt-1">Gunakan tab Input Funnel untuk menambahkan</p>' +
+            '</div>';
+        return;
+    }
+
+    // Sort: newest first (reverse karena LIFO input)
+    var sorted = funnelData.slice().reverse();
+    container.innerHTML = sorted.map(function(p) {
+        var updated    = isUpdatedThisWeek(p.funnelId);
+        var isSelected = p.funnelId === selectedProjectId;
+        var statusCls  = getStatusBadgeClass(p.status);
+        var tkCls      = getTKBadgeClass(parseInt(p.tk));
+        var netto      = p.netto || p.forecastNetto || 0;
+
+        return '<div class="project-card ' + (updated ? 'updated' : '') + ' ' + (isSelected ? 'selected' : '') + '"' +
+               ' onclick="selectProject(\'' + p.funnelId + '\')" id="pcard-' + p.funnelId + '">' +
+               '<div class="flex items-start justify-between gap-2 mb-1.5">' +
+               '<p class="font-semibold text-white text-sm leading-snug flex-1">' + (p.namaPaket || p.namapaket || '-') + '</p>' +
+               '<span class="badge ' + statusCls + ' shrink-0">' + (p.status || '-') + '</span>' +
+               '</div>' +
+               '<div class="flex items-center gap-2 text-xs text-slate-400 mb-2">' +
+               '<span class="bg-slate-700/70 px-1.5 py-0.5 rounded font-mono text-teal-400 text-xs">' + (p.funnelId || '') + '</span>' +
+               '<span class="truncate">' + (p.instansi || '-') + '</span>' +
+               '</div>' +
+               '<div class="flex items-center justify-between">' +
+               '<span class="text-teal-400 font-semibold text-sm">' + fmtRp(netto) + '</span>' +
+               '<div class="flex items-center gap-2">' +
+               '<span class="badge ' + tkCls + '">' + (p.tk || 0) + '%</span>' +
+               (updated
+                   ? '<span class="text-xs text-green-400 font-semibold">✓ Updated</span>'
+                   : '<span class="text-xs text-amber-400 font-semibold">⏳ Pending</span>') +
+               '</div></div></div>';
+    }).join('');
+}
+
+function filterProjectList() {
+    var q = (document.getElementById('project-search')?.value || '').toLowerCase();
+    document.querySelectorAll('.project-card').forEach(function(card) {
+        card.style.display = card.textContent.toLowerCase().includes(q) ? '' : 'none';
+    });
+}
+
+function selectProject(funnelId) {
+    selectedProjectId = funnelId;
+    document.querySelectorAll('.project-card').forEach(function(c) { c.classList.remove('selected'); });
+    var card = document.getElementById('pcard-' + funnelId);
+    if (card) card.classList.add('selected');
+    var project = funnelData.find(function(p) { return p.funnelId === funnelId; });
+    if (project) renderUpdateForm(project);
+}
+
+function renderUpdateForm(project) {
+    var container = document.getElementById('update-form-container');
+    if (!container) return;
+
+    // Ambil update terakhir minggu ini
+    var thisWeekUpdates = weeklyUpdates
+        .filter(function(u) { return u.funnelId === project.funnelId && u.week === currentWeekLabel; })
+        .sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); });
+    var lastUpdate = thisWeekUpdates[0] || null;
+
+    // Ambil admin note terbaru (dari semua week)
+    var adminNoteEntry = weeklyUpdates
+        .filter(function(u) { return u.funnelId === project.funnelId && u.adminNotes; })
+        .sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); })[0] || null;
+
+    var currentStatus   = lastUpdate ? lastUpdate.status   : (project.status || '');
+    var currentForecast = lastUpdate ? lastUpdate.forecast  : (project.netto || project.forecastNetto || 0);
+    var currentNotes    = lastUpdate ? lastUpdate.notes     : '';
+    var adminNoteText   = adminNoteEntry ? adminNoteEntry.adminNotes : '';
+
+    var forecastStr = currentForecast.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    var statusOptions = statusList.map(function(s) {
+        return '<option value="' + s + '"' + (s === currentStatus ? ' selected' : '') + '>' + s + '</option>';
+    }).join('');
+
+    container.innerHTML =
+        '<div>' +
+        // Header
+        '<div class="mb-5 pb-4 border-b border-slate-700">' +
+        '<h3 class="text-lg font-bold text-white mb-1">' + (project.namaPaket || project.namapaket || '-') + '</h3>' +
+        '<div class="flex flex-wrap gap-x-3 gap-y-1 text-sm text-slate-400">' +
+        '<span>' + (project.instansi || '-') + '</span>' +
+        '<span>•</span>' +
+        '<span>' + (project.kabKota || project.wilayah || '-') + '</span>' +
+        '<span>•</span>' +
+        '<span class="text-teal-400 font-semibold">' + (project.principal || '-') + '</span>' +
+        '</div>' +
+        '<div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">' +
+        '<span>Produk: <span class="text-slate-300">' + (project.jenisProduk || '-') + '</span></span>' +
+        '<span>Sumber Dana: <span class="text-slate-300">' + (project.sumberDana || '-') + '</span></span>' +
+        '<span>Quarter: <span class="text-slate-300">' + (project.quarter || '-') + '</span></span>' +
+        '</div>' +
+        '</div>' +
+
+        // Brutto (readonly)
+        '<div class="mb-4 p-3 rounded-lg bg-slate-800/60 border border-slate-700 flex items-center justify-between">' +
+        '<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nilai Brutto / Anggaran</span>' +
+        '<span class="font-bold text-white">' + fmtRp(project.brutto || 0) + '</span>' +
+        '</div>' +
+
+        // Form
+        '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">' +
+        '<div>' +
+        '<label class="form-label">Status Terbaru *</label>' +
+        '<select id="uf-status" class="form-input">' + statusOptions + '</select>' +
+        '</div>' +
+        '<div>' +
+        '<label class="form-label">Nilai Forecast Update (Rp)</label>' +
+        '<input type="text" id="uf-forecast" class="form-input" value="' + forecastStr + '" readonly>' +
+        '</div>' +
+        '</div>' +
+        '<div class="mb-4">' +
+        '<label class="form-label">Notes Minggu Ini</label>' +
+        '<textarea id="uf-notes" class="form-input" rows="3" placeholder="Progress minggu ini...">' + currentNotes + '</textarea>' +
+        '</div>' +
+        '<div class="mb-5">' +
+        '<label class="form-label">🔴 Catatan Admin</label>' +
+        '<textarea class="form-input" rows="2" readonly placeholder="Belum ada catatan dari admin...">' + adminNoteText + '</textarea>' +
+        '</div>' +
+        '<div class="flex justify-end">' +
+        '<button onclick="submitUpdate()" class="px-6 py-2.5 rounded-lg font-bold text-white text-sm transition"' +
+        ' style="background:linear-gradient(135deg,#0d9488,#0ea5e9);">☁️ Submit Update</button>' +
+        '</div>' +
+        '</div>';
+}
+
+async function submitUpdate() {
+    var project = funnelData.find(function(p) { return p.funnelId === selectedProjectId; });
+    if (!project) return;
+
+    var statusEl   = document.getElementById('uf-status');
+    var forecastEl = document.getElementById('uf-forecast');
+    var notesEl    = document.getElementById('uf-notes');
+
+    var status   = statusEl ? statusEl.value : '';
+    var forecast = parseCurrency(forecastEl ? forecastEl.value : '0');
+    var notes    = notesEl ? notesEl.value : '';
+
+    if (!status) { showToast('Pilih status terlebih dahulu', 'error'); return; }
+
+    var payload = {
+        funnelId:  selectedProjectId,
+        pic:       salesPicName,
+        week:      currentWeekLabel,
+        status:    status,
+        forecast:  forecast,
+        notes:     notes,
+        timestamp: new Date().toISOString()
+    };
+
+    try {
+        await apiPost('updateTracker', payload);
+        // Update local state
+        weeklyUpdates = weeklyUpdates.filter(function(u) {
+            return !(u.funnelId === selectedProjectId && u.week === currentWeekLabel);
+        });
+        weeklyUpdates.push(payload);
+        showToast('✅ Update berhasil disimpan!', 'success');
+        // Update card visual
+        var card = document.getElementById('pcard-' + selectedProjectId);
+        if (card) {
+            card.classList.add('updated');
+            var pendingEl = card.querySelector('.text-amber-400');
+            if (pendingEl) { pendingEl.className = 'text-xs text-green-400 font-semibold'; pendingEl.textContent = '✓ Updated'; }
+        }
+        updateHeader();
+    } catch(e) {
+        showToast('Gagal menyimpan: ' + e.message, 'error');
+    }
+}
+
+// =============================================
+// INPUT FUNNEL
+// =============================================
+function populateInputDropdowns() {
+    function fillSel(id, items) {
+        var sel = document.getElementById(id);
+        if (!sel) return;
+        sel.innerHTML = '<option value="">-- Pilih --</option>';
+        items.forEach(function(v) { sel.add(new Option(v, v)); });
+    }
+    // Provinsi
+    var provSel = document.getElementById('fi-provinsi');
+    if (provSel && provSel.options.length <= 1) {
+        provinsiList.forEach(function(p) { provSel.add(new Option(p, p)); });
+    }
+    fillSel('fi-principal',   principals);
+    fillSel('fi-sumberdana',  sumberDanaList);
+    fillSel('fi-status',      statusList);
+    fillSel('fi-jenisproduk', jenisProdukList);
+
+    var tkSel = document.getElementById('fi-tk');
+    if (tkSel && tkSel.options.length <= 1) {
+        tkValues.forEach(function(v) { tkSel.add(new Option(v + '%', v)); });
+    }
+}
+
+function onInputProvinsiChange() {
+    var prov   = document.getElementById('fi-provinsi').value;
+    var wilSel = document.getElementById('fi-wilayah');
+    wilSel.innerHTML = '<option value="">-- Pilih Kab/Kota --</option>';
+    if (prov && REGION_DATA[prov]) {
+        REGION_DATA[prov].forEach(function(w) { wilSel.add(new Option(w, w)); });
+    }
+}
+
+function inputFormatCurrency(el) {
+    var v = el.value.replace(/[^\d]/g, '');
+    el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function calcInputForecast() {
+    if (inputNettoManual) return;
+    var brutto = parseCurrency(document.getElementById('fi-brutto')?.value || '0');
+    var ppn    = document.getElementById('fi-ppn')?.value;
+    var cb     = parseFloat(document.getElementById('fi-cb')?.value || '0');
+    var dpp    = ppn === 'PPN' ? Math.round(brutto / 1.11) : brutto;
+    var netto  = Math.round(dpp * (1 - cb / 100));
+    var nettoEl = document.getElementById('fi-netto');
+    if (nettoEl) nettoEl.value = netto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    var hint = document.getElementById('fi-netto-hint');
+    if (hint) hint.textContent = 'DPP: ' + fmtRp(dpp) + ' → Netto: ' + fmtRp(netto) + ' (CB: ' + cb + '%)';
+}
+
+function resetInputForm() {
+    ['fi-principal','fi-sumberdana','fi-quarter','fi-namapaket','fi-instansi',
+     'fi-provinsi','fi-wilayah','fi-status','fi-tk','fi-brutto','fi-ppn',
+     'fi-cb','fi-netto','fi-jenisproduk','fi-produk','fi-qty','fi-satuan','fi-keterangan'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        if (el.tagName === 'SELECT') el.selectedIndex = 0;
+        else el.value = '';
+        el.style.borderColor = '';
+    });
+    inputNettoManual = false;
+    var hint = document.getElementById('fi-netto-hint');
+    if (hint) hint.textContent = '';
+    var wilSel = document.getElementById('fi-wilayah');
+    if (wilSel) wilSel.innerHTML = '<option value="">-- Pilih Kab/Kota --</option>';
+}
+
+function generateFunnelId() {
+    var initials = salesPicName.split(' ').map(function(n) { return n[0]; }).join('').toUpperCase();
+    var seq = (funnelData.length + 1).toString().padStart(4, '0');
+    return initials + '-' + seq;
+}
+
+async function handleInputSubmit() {
+    var required = ['fi-principal','fi-namapaket','fi-instansi','fi-provinsi','fi-status','fi-tk','fi-brutto','fi-jenisproduk'];
+    var valid = true;
+    required.forEach(function(id) {
+        var el = document.getElementById(id);
+        if (!el || !el.value.trim()) {
+            if (el) el.style.borderColor = '#dc2626';
+            valid = false;
+        } else {
+            if (el) el.style.borderColor = '';
+        }
+    });
+    if (!valid) { showToast('Lengkapi semua field yang wajib diisi', 'error'); return; }
+
+    var brutto = parseCurrency(document.getElementById('fi-brutto').value);
+    var netto  = parseCurrency(document.getElementById('fi-netto').value);
+    var tk     = parseInt(document.getElementById('fi-tk').value) || 0;
+
+    var newLead = {
+        funnelId:   generateFunnelId(),
+        pic:        salesPicName,
+        principal:  document.getElementById('fi-principal').value,
+        sumberDana: document.getElementById('fi-sumberdana').value,
+        quarter:    document.getElementById('fi-quarter').value,
+        namaPaket:  document.getElementById('fi-namapaket').value.trim(),
+        instansi:   document.getElementById('fi-instansi').value.trim(),
+        provinsi:   document.getElementById('fi-provinsi').value,
+        kabKota:    document.getElementById('fi-wilayah').value,
+        status:     document.getElementById('fi-status').value,
+        tk:         tk,
+        brutto:     brutto,
+        netto:      netto,
+        ppn:        document.getElementById('fi-ppn').value,
+        cb:         parseFloat(document.getElementById('fi-cb').value || '0'),
+        jenisProduk: document.getElementById('fi-jenisproduk').value,
+        produk:     document.getElementById('fi-produk').value.trim(),
+        qty:        parseInt(document.getElementById('fi-qty').value || '0') || 0,
+        satuan:     document.getElementById('fi-satuan').value.trim(),
+        keterangan: document.getElementById('fi-keterangan').value.trim(),
+        timestamp:  new Date().toISOString()
+    };
+
+    try {
+        await apiPost('addLead', newLead);
+        funnelData.unshift(newLead);
+        showToast('✅ Project berhasil ditambahkan!', 'success');
+        resetInputForm();
+        renderPipelineTable();
+        updateHeader();
+    } catch(e) {
+        showToast('Gagal menyimpan: ' + e.message, 'error');
+    }
+}
+
+function renderPipelineTable() {
+    var tbody   = document.getElementById('pipeline-table-body');
+    var countEl = document.getElementById('pipeline-count');
+    if (!tbody) return;
+    if (countEl) countEl.textContent = funnelData.length + ' project';
+
+    if (funnelData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-500">Belum ada project. Tambahkan via form di atas.</td></tr>';
+        return;
+    }
+
+    // newest first
+    var sorted = funnelData.slice().sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); });
+    tbody.innerHTML = sorted.map(function(p, i) {
+        return '<tr>' +
+            '<td class="px-3 py-2 text-slate-500">' + (i + 1) + '</td>' +
+            '<td class="px-3 py-2 font-medium text-white" style="max-width:200px;">' +
+            '<span class="block truncate">' + (p.namaPaket || '-') + '</span></td>' +
+            '<td class="px-3 py-2 text-slate-400">' + (p.instansi || '-') + '</td>' +
+            '<td class="px-3 py-2 text-slate-400">' + (p.sumberDana || '-') + '</td>' +
+            '<td class="px-3 py-2 text-right text-slate-300">' + fmtRp(p.brutto || 0) + '</td>' +
+            '<td class="px-3 py-2 text-right text-teal-400 font-semibold">' + fmtRp(p.netto || 0) + '</td>' +
+            '<td class="px-3 py-2"><span class="badge ' + getTKBadgeClass(parseInt(p.tk)) + '">' + (p.tk || 0) + '%</span></td>' +
+            '<td class="px-3 py-2"><span class="badge ' + getStatusBadgeClass(p.status) + '">' + (p.status || '-') + '</span></td>' +
+            '<td class="px-3 py-2 text-slate-400">' + (p.quarter || '-') + '</td>' +
+            '</tr>';
+    }).join('');
+}
+
+// =============================================
+// STATISTIK
+// =============================================
+function renderStatistik() {
+    var totalBrutto = funnelData.reduce(function(s, p) { return s + (p.brutto || 0); }, 0);
+    var totalNetto  = funnelData.reduce(function(s, p) { return s + (p.netto  || 0); }, 0);
+    document.getElementById('stat-brutto').textContent   = fmtRp(totalBrutto);
+    document.getElementById('stat-netto').textContent    = fmtRp(totalNetto);
+    document.getElementById('stat-pipeline').textContent = funnelData.length;
+
+    renderFunnelChart();
+    renderTopClosing();
+    populateHistoryFilters();
+    renderHistoryTable();
+}
+
+function renderTopClosing() {
+    var container = document.getElementById('status-rekap');
+    if (!container) return;
+
+    var stages = [
+        { label: 'Deal',        key: 'Deal',        color: '#4ade80', bg: 'rgba(34,197,94,.15)'  },
+        { label: 'Closing',     key: 'Closing',     color: '#22d3ee', bg: 'rgba(8,145,178,.15)'  },
+        { label: 'Pitching',    key: 'Pitching',    color: '#c084fc', bg: 'rgba(147,51,234,.15)' },
+        { label: 'Shortlisted', key: 'Shortlisted', color: '#fbbf24', bg: 'rgba(217,119,6,.15)'  },
+        { label: 'Pendekatan',  key: 'Pendekatan',  color: '#94a3b8', bg: 'rgba(71,85,105,.15)'  },
+        { label: 'Dead',        key: 'Dead',        color: '#f87171', bg: 'rgba(220,38,38,.15)'  },
+    ];
+
+    var total = funnelData.length || 1;
+    container.innerHTML = stages.map(function(s) {
+        var items  = funnelData.filter(function(p) { return p.status === s.key; });
+        var count  = items.length;
+        var netto  = items.reduce(function(sum, p) { return sum + (p.netto || 0); }, 0);
+        var pct    = Math.round(count / total * 100);
+        return '<div class="rounded-lg p-3" style="background:' + s.bg + ';border:1px solid ' + s.color + '33;">' +
+            '<div class="flex items-center justify-between mb-1.5">' +
+            '<span class="text-sm font-bold" style="color:' + s.color + '">' + s.label + '</span>' +
+            '<span class="text-xs text-slate-400">' + count + ' paket &nbsp;·&nbsp; ' + fmtRp(netto) + '</span>' +
+            '</div>' +
+            '<div class="w-full bg-slate-700/50 rounded-full h-1.5">' +
+            '<div class="h-1.5 rounded-full transition-all" style="width:' + pct + '%;background:' + s.color + ';"></div>' +
+            '</div>' +
+            '</div>';
+    }).join('');
+}
+
+function renderFunnelChart() {
+    var tkLevels = [100, 75, 50, 25, 10, 5];
+    var labels   = ['100% Closing','75% Hot Prospect','50% Peluang','25% Penawaran','10% Teridentifikasi','5% Info Awal'];
+    var colors   = ['#4ade80','#a3e635','#facc15','#fb923c','#f87171','#fca5a5'];
+
+    var counts = tkLevels.map(function(v) {
+        return funnelData.filter(function(p) { return parseInt(p.tk) === v; }).length;
+    });
+    var nettos = tkLevels.map(function(v) {
+        return funnelData
+            .filter(function(p) { return parseInt(p.tk) === v; })
+            .reduce(function(s, p) { return s + (p.netto || 0); }, 0);
+    });
+
+    var ctx = document.getElementById('my-funnel-chart');
+    if (!ctx) return;
+    if (myFunnelChart) { myFunnelChart.destroy(); myFunnelChart = null; }
+
+    myFunnelChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: counts,
+                backgroundColor: colors.map(function(c) { return c + '33'; }),
+                borderColor: colors,
+                borderWidth: 2,
+                borderRadius: 4,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    callbacks: {
+                        label: function(ctx) {
+                            var i = ctx.dataIndex;
+                            return ' ' + ctx.raw + ' Paket  (' + fmtRp(nettos[i]) + ')';
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: { ticks: { color: '#64748b', stepSize: 1 }, grid: { color: '#1e293b' } },
+                y: { ticks: { color: '#94a3b8', font: { size: 11 } }, grid: { display: false } }
+            }
+        }
+    });
+}
+
+
+function populateHistoryFilters() {
+    // Wilayah options dari funnelData yang ada di weeklyUpdates
+    var wilSet = new Set();
+    weeklyUpdates.forEach(function(u) {
+        var proj = funnelData.find(function(p) { return p.funnelId === u.funnelId; });
+        var w = (proj && (proj.kabKota || proj.wilayah)) || '';
+        if (w) wilSet.add(w);
+    });
+    var wilSel = document.getElementById('hist-filter-wilayah');
+    if (wilSel) {
+        wilSel.innerHTML = '<option value="ALL">Semua Wilayah</option>';
+        Array.from(wilSet).sort().forEach(function(w) { wilSel.add(new Option(w, w)); });
+    }
+    // Status
+    var statusSel = document.getElementById('hist-filter-status');
+    if (statusSel) {
+        statusSel.innerHTML = '<option value="ALL">Semua Status</option>';
+        statusList.forEach(function(s) { statusSel.add(new Option(s, s)); });
+    }
+}
+
+function renderHistoryTable() {
+    var wilayahFilter = document.getElementById('hist-filter-wilayah')?.value || 'ALL';
+    var statusFilter  = document.getElementById('hist-filter-status')?.value  || 'ALL';
+
+    // Tampilkan minggu ini + minggu lalu
+    var lastWeekDate  = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    var lastWeekNum   = getISOWeek(lastWeekDate);
+    var lastWeekYear  = lastWeekDate.getFullYear();
+    var lastWeekLabel = 'W' + lastWeekNum + '-' + lastWeekYear;
+
+    var filtered = weeklyUpdates.filter(function(u) {
+        if (u.week !== currentWeekLabel && u.week !== lastWeekLabel) return false;
+        if (statusFilter !== 'ALL' && u.status !== statusFilter) return false;
+        if (wilayahFilter !== 'ALL') {
+            var proj = funnelData.find(function(p) { return p.funnelId === u.funnelId; });
+            var w = proj ? (proj.kabKota || proj.wilayah || '') : '';
+            if (w !== wilayahFilter) return false;
+        }
+        return true;
+    }).sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); });
+
+    var tbody = document.getElementById('history-table-body');
+    if (!tbody) return;
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500">Tidak ada data update ditemukan</td></tr>';
+        return;
+    }
+    tbody.innerHTML = filtered.map(function(u) {
+        var proj = funnelData.find(function(p) { return p.funnelId === u.funnelId; });
+        return '<tr>' +
+            '<td class="px-3 py-2 text-xs font-mono text-slate-400">' + (u.week || '-') + '</td>' +
+            '<td class="px-3 py-2 font-medium text-white">' + (proj ? (proj.namaPaket || proj.namapaket) : (u.funnelId || '-')) + '</td>' +
+            '<td class="px-3 py-2"><span class="badge ' + getStatusBadgeClass(u.status) + '">' + (u.status || '-') + '</span></td>' +
+            '<td class="px-3 py-2 text-right text-teal-400 font-semibold">' + fmtRp(u.forecast || 0) + '</td>' +
+            '<td class="px-3 py-2 text-slate-400 text-xs" style="max-width:200px;">' +
+            '<span class="block truncate">' + (u.notes || '-') + '</span></td>' +
+            '</tr>';
+    }).join('');
+}
+
+// =============================================
+// NAVBAR HTMX HANDLER
+// =============================================
+document.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.target.id !== 'navbar-container') return;
+
+    // Sembunyikan semua nav menu buttons — sales punya tab navigation sendiri
+    ['nav-input','nav-update','nav-dashboard','nav-monitoring','nav-control','btn-go-prototype'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+    });
+
+    // Setup logout button
+    var btnLogin  = document.getElementById('btn-login');
+    var btnLogout = document.getElementById('btn-logout');
+    if (btnLogin)  btnLogin.classList.add('hidden');
+    if (btnLogout && SESSION) {
+        btnLogout.classList.remove('hidden');
+        btnLogout.textContent = 'Logout [' + SESSION.username + ']';
+        btnLogout.onclick = function() {
+            sessionStorage.removeItem('ip_session');
+            window.location.href = 'prototype.html';
+        };
+    }
+});
+
+// =============================================
+// INIT
+// =============================================
+async function init() {
+    if (!checkAuth()) return;
+
+    // Update UI langsung
+    var nameEl = document.getElementById('sales-display-name');
+    var weekEl = document.getElementById('week-label');
+    if (nameEl) nameEl.textContent = salesPicName;
+    if (weekEl) weekEl.textContent = currentWeekLabel;
+
+    // Load settings (principals, sumberDana, dll)
+    try {
+        var settings = await apiGet('getSettings');
+        if (settings.picNames?.length)   picNames      = settings.picNames;
+        if (settings.principals?.length) principals    = settings.principals;
+        if (settings.sumberDana?.length) sumberDanaList = settings.sumberDana;
+    } catch(e) { console.warn('Gagal load settings:', e); }
+    populateInputDropdowns();
+
+    // Load data dari Sheets
+    await loadData();
+    updateHeader();
+
+    // Tentukan tab awal: hash > default 'update'
+    var hash = window.location.hash.replace('#', '');
+    switchTab(['update','input','statistik'].includes(hash) ? hash : 'update');
+
+    console.log('Sales Portal — Intan Pariwara 2026 initialized');
+    console.log('Sales PIC:', salesPicName);
+    console.log('Pipeline:', funnelData.length, 'projects');
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+
+</body>
+</html>

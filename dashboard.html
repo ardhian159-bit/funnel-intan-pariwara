@@ -2705,7 +2705,10 @@ async function loadFromSheets() {
         const savedSession = sessionStorage.getItem('ip_session');
         // Set Dashboard button sebagai active
         const navDb = document.getElementById('nav-dashboard');
-        if (navDb) navDb.classList.add('active');
+if (navDb) {
+    navDb.classList.remove('hidden'); // ← tambah ini
+    navDb.classList.add('active');
+}
       
         // Sembunyikan "Input / Update →"
         const goProto = document.getElementById('btn-go-prototype');
