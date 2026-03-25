@@ -50,7 +50,9 @@ function doGet(e) {
         return successResponse({ status: 'ok' });
 
       case 'getLeads':
-        return successResponse(getLeads());
+        var glRole = params.role || '';
+        var glUsername = params.username || '';
+        return successResponse(getLeads(glRole, glUsername));
 
       case 'getTrackers':
         return successResponse(getTrackers());
@@ -121,7 +123,7 @@ function doPost(e) {
 // A4. getLeads() — Read all LEADS rows
 // =============================================================================
 
-function getLeads() {
+function getLeads(role, username) {
   try {
     var ss = SpreadsheetApp.openById(SHEET_ID);
     var sheet = ss.getSheetByName('LEADS');
@@ -201,6 +203,12 @@ function getLeads() {
       });
     }
 
+    // Backend role filter — sales hanya bisa lihat data milik sendiri
+    if (role === 'sales' && username) {
+      result = result.filter(function(row) {
+        return (row.pic || '').toLowerCase().trim() === username.toLowerCase().trim();
+      });
+    }
     return result;
   } catch (err) {
     throw new Error('Gagal membaca data LEADS: ' + err.message);
@@ -398,7 +406,8 @@ function verifyAuth(username, password) {
       var dbPass = (row[1] || '').toString().trim();
       var dbRole = (row[2] || '').toString().trim().toLowerCase();
 
-   if (dbUser === username.toLowerCase().trim() && dbPass === password) {
+   var incomingHash = sha256(password);
+   if (dbUser === username.toLowerCase().trim() && dbPass === incomingHash) {
         var dbPicName = (row[3] || '').toString().trim();
         return { role: dbRole, username: dbUser, picName: dbPicName };
       }
@@ -450,6 +459,18 @@ function saveSettings(data) {
 // =============================================================================
 // HELPER: Get ISO Week Label
 // =============================================================================
+
+function sha256(input) {
+  var rawHash = Utilities.computeDigest(
+    Utilities.DigestAlgorithm.SHA_256,
+    input,
+    Utilities.Charset.UTF_8
+  );
+  return rawHash.map(function(b) {
+    var hex = (b < 0 ? b + 256 : b).toString(16);
+    return hex.length === 1 ? '0' + hex : hex;
+  }).join('');
+}
 
 function getISOWeekLabel(date) {
   var d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));

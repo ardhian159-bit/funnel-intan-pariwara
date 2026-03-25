@@ -5,18 +5,26 @@
  */
 
 
-        async function verifyLogin(username, password) {
-            if (CONFIG.USE_MOCK_DATA) {
-                const cfg = AUTH_CONFIG[username];
-                return cfg && cfg.password === password ? cfg.role : null;
-            }
-            try {
-                 const result = await apiGet('verifyAuth', { username, password });
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+async function verifyLogin(username, password) {
+    if (CONFIG.USE_MOCK_DATA) {
+        const cfg = AUTH_CONFIG[username];
+        return cfg && cfg.password === password ? cfg.role : null;
+    }
+    try {
+        const hashedPassword = await hashPassword(password);
+        const result = await apiGet('verifyAuth', { username, password: hashedPassword });
         return result.role ? result : null;
-            } catch {
-                return null;
-            }
-        }
+    } catch {
+        return null;
+    }
+}
   function openLoginModal() { document.getElementById('login-modal').classList.add('open'); }
         function closeLoginModal() {
             document.getElementById('login-modal').classList.remove('open');

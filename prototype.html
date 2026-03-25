@@ -1940,13 +1940,14 @@
                             <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Status <span
                                     class="text-red-400">*</span></label>
                             <select id="f-status" class="input-field" required="">
-                                <option value="">-- Pilih --</option>
-                                <option>Pendekatan</option>
-                                <option>Shortlisted</option>
-                                <option>Pitching</option>
-                                <option>Closing</option>
-                                <option>Deal</option>
-                                <option>Dead</option>
+                                <option value="">-- Pilih Status --</option>
+                                <option value="Gagal">Gagal</option>
+                                <option value="Informasi Peluang">Informasi Peluang</option>
+                                <option value="Informasi Kebutuhan">Informasi Kebutuhan</option>
+                                <option value="Presentasi">Presentasi</option>
+                                <option value="Peluang">Peluang</option>
+                                <option value="Hot Prospek">Hot Prospek</option>
+                                <option value="Closing">Closing</option>
                             </select>
                             <div class="error-msg" id="err-status">Status wajib dipilih</div>
                         </div>
@@ -2499,7 +2500,8 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
             if (CONFIG.USE_MOCK_DATA) return funnelData;
             try {
                 showLoadingState(true);
-                const data = await apiGet('getLeads');
+                const sess = JSON.parse(sessionStorage.getItem('ip_session') || '{}');
+                const data = await apiGet('getLeads', { role: sess.role || '', username: sess.username || '' });
                 // Normalize Sheets data to match local format
                 funnelData = data.map(d => ({
                     ...d,

@@ -51,11 +51,27 @@
             return `${initials}-${seq}`;
         }
         function getStatusBadgeClass(s) {
-            const map = { Deal: 'badge-deal', Closing: 'badge-closing', Pitching: 'badge-pitching', Shortlisted: 'badge-shortlisted', Pendekatan: 'badge-pendekatan', Dead: 'badge-dead' };
+            const map = {
+                'Gagal':               'badge-dead',
+                'Informasi Peluang':   'badge-pendekatan',
+                'Informasi Kebutuhan': 'badge-shortlisted',
+                'Presentasi':          'badge-pitching',
+                'Peluang':             'badge-pitching',
+                'Hot Prospek':         'badge-closing',
+                'Closing':             'badge-deal'
+            };
             return map[s] || 'badge-pendekatan';
         }
         function getStatusRowClass(s) {
-            const map = { Deal: 'status-row-deal', Closing: 'status-row-closing', Pitching: 'status-row-pitching', Shortlisted: 'status-row-shortlisted', Pendekatan: 'status-row-pendekatan', Dead: 'status-row-dead' };
+            const map = {
+                'Gagal':               'status-row-dead',
+                'Informasi Peluang':   'status-row-pendekatan',
+                'Informasi Kebutuhan': 'status-row-shortlisted',
+                'Presentasi':          'status-row-pitching',
+                'Peluang':             'status-row-pitching',
+                'Hot Prospek':         'status-row-closing',
+                'Closing':             'status-row-deal'
+            };
             return map[s] || '';
         }
         function getTKBadgeClass(tk) {

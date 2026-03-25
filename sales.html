@@ -589,7 +589,7 @@ var currentYear      = today.getFullYear();
 var currentWeekLabel = 'W' + currentWeek + '-' + currentYear;
 
 // Dropdown lists (diisi dari getSettings)
-var statusList    = ['Pendekatan', 'Shortlisted', 'Pitching', 'Closing', 'Deal', 'Dead'];
+var statusList    = ['Gagal','Informasi Peluang','Informasi Kebutuhan','Presentasi','Peluang','Hot Prospek','Closing'];
 var tkValues      = ['5', '10', '25', '50', '75', '100'];
 var picNames      = [];
 var principals    = [];
@@ -632,15 +632,23 @@ function showLoginModal() {
     if (main) main.style.display = 'none';
 }
 
+async function hashPassword(password) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
 async function handleSalesLogin(event) {
     event.preventDefault();
     var username = document.getElementById('login-username').value.trim();
     var password = document.getElementById('login-password').value;
+    var hashedPassword = await hashPassword(password);
     var errEl    = document.getElementById('login-error');
     if (errEl) errEl.classList.add('hidden');
 
     try {
-        var result = await apiGet('verifyAuth', { username: username, password: password });
+        var result = await apiGet('verifyAuth', { username: username, password: hashedPassword });
         var role = result.role || '';
         if (role === 'sales') {
             sessionStorage.setItem('ip_session', JSON.stringify(result));
@@ -712,7 +720,7 @@ window.addEventListener('hashchange', function() {
 // =============================================
 async function loadData() {
     try {
-        var leads = await apiGet('getLeads');
+        var leads = await apiGet('getLeads', { role: SESSION ? SESSION.role : '', username: SESSION ? SESSION.picName : '' });
         var rawLeads = Array.isArray(leads) ? leads : (leads.data || []);
         // Filter by PIC name
         funnelData = rawLeads.filter(function(l) {
@@ -1307,7 +1315,7 @@ document.addEventListener('htmx:afterSwap', function(evt) {
         btnLogout.textContent = 'Logout [' + SESSION.username + ']';
         btnLogout.onclick = function() {
             sessionStorage.removeItem('ip_session');
-            window.location.href = 'prototype.html';
+            showLoginModal();
         };
     }
 });
