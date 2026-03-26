@@ -77,6 +77,18 @@ function doGet(e) {
         var payload = params.payload ? JSON.parse(params.payload) : {};
         return successResponse(saveSettings(payload));
 
+      case 'getUsers':
+        return successResponse(getUsers());
+      case 'addUser':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(addUser(payload));
+      case 'updatePassword':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(updatePassword(payload));
+      case 'deleteUser':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(deleteUser(payload));
+
       default:
         return errorResponse('Aksi tidak dikenali: ' + action);
     }
@@ -470,6 +482,100 @@ function sha256(input) {
     var hex = (b < 0 ? b + 256 : b).toString(16);
     return hex.length === 1 ? '0' + hex : hex;
   }).join('');
+}
+
+function getUsers() {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('USERS');
+    if (!sheet) return [];
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return [];
+    var data = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
+    return data
+      .filter(function(row) { return row[0]; })
+      .map(function(row) {
+        return {
+          username: row[0] || '',
+          role:     row[2] || '',
+          picName:  row[3] || ''
+        };
+      });
+  } catch(err) {
+    throw new Error('Gagal membaca USERS: ' + err.message);
+  }
+}
+
+function addUser(data) {
+  try {
+    if (!data.username || !data.password || !data.role) {
+      return { error: 'Username, password, dan role wajib diisi' };
+    }
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('USERS');
+    var lastRow = sheet.getLastRow();
+    if (lastRow >= 2) {
+      var existing = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      for (var i = 0; i < existing.length; i++) {
+        if (existing[i][0].toString().toLowerCase() === data.username.toLowerCase()) {
+          return { error: 'Username sudah ada' };
+        }
+      }
+    }
+    var hashedPassword = sha256(data.password);
+    sheet.appendRow([
+      data.username.toLowerCase(),
+      hashedPassword,
+      data.role,
+      data.picName || ''
+    ]);
+    return { success: true };
+  } catch(err) {
+    throw new Error('Gagal menambah user: ' + err.message);
+  }
+}
+
+function updatePassword(data) {
+  try {
+    if (!data.username || !data.newPassword) {
+      return { error: 'Username dan password baru wajib diisi' };
+    }
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('USERS');
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return { error: 'User tidak ditemukan' };
+    var rows = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
+    var hashedPassword = sha256(data.newPassword);
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i][0].toString().toLowerCase() === data.username.toLowerCase()) {
+        sheet.getRange(i + 2, 2).setValue(hashedPassword);
+        return { success: true };
+      }
+    }
+    return { error: 'User tidak ditemukan' };
+  } catch(err) {
+    throw new Error('Gagal update password: ' + err.message);
+  }
+}
+
+function deleteUser(data) {
+  try {
+    if (!data.username) return { error: 'Username wajib diisi' };
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('USERS');
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return { error: 'User tidak ditemukan' };
+    var rows = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (var i = 0; i < rows.length; i++) {
+      if (rows[i][0].toString().toLowerCase() === data.username.toLowerCase()) {
+        sheet.deleteRow(i + 2);
+        return { success: true };
+      }
+    }
+    return { error: 'User tidak ditemukan' };
+  } catch(err) {
+    throw new Error('Gagal menghapus user: ' + err.message);
+  }
 }
 
 function getISOWeekLabel(date) {

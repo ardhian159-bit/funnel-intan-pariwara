@@ -2275,16 +2275,49 @@
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- User Management -->
-                <div class="card p-5">
-                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">👤 User Management</h3>
-                    <div class="flex gap-2 mb-3">
-                        <input type="text" id="cp-new-user" class="input-field flex-1 text-xs py-1.5"
-                            placeholder="Nama sales baru...">
-                        <button onclick="addSalesUser()"
-                            class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">+
-                            Tambah</button>
+                <div class="card p-5 lg:col-span-2">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
+                        <h3 class="text-lg font-bold text-white">👤 User Management</h3>
+                        <button onclick="showAddUserForm()"
+                            class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">+ Tambah User</button>
                     </div>
-                    <div id="cp-user-list" class="space-y-1 max-h-60 overflow-y-auto"></div>
+                    <!-- Form tambah user (hidden by default) -->
+                    <div id="um-add-form" class="hidden mb-4 p-3 bg-slate-800 rounded-lg">
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <input type="text" id="um-username" class="input-field text-xs py-1.5" placeholder="Username">
+                            <input type="password" id="um-password" class="input-field text-xs py-1.5" placeholder="Password">
+                            <select id="um-role" class="input-field text-xs py-1.5">
+                                <option value="sales">sales</option>
+                                <option value="admin">admin</option>
+                                <option value="superadmin">superadmin</option>
+                            </select>
+                            <input type="text" id="um-picname" class="input-field text-xs py-1.5" placeholder="PIC Name (opsional)">
+                        </div>
+                        <div id="um-add-error" class="text-red-400 text-xs mb-2 hidden"></div>
+                        <div class="flex gap-2">
+                            <button onclick="submitAddUser()"
+                                class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">Simpan</button>
+                            <button onclick="hideAddUserForm()"
+                                class="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold text-white">Batal</button>
+                        </div>
+                    </div>
+                    <!-- Tabel daftar user -->
+                    <div id="um-user-table" class="space-y-1 max-h-72 overflow-y-auto"></div>
+                    <!-- Modal reset password -->
+                    <div id="um-reset-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+                        <div class="bg-slate-800 rounded-xl p-5 w-80">
+                            <h4 class="text-white font-bold mb-3">Reset Password</h4>
+                            <p id="um-reset-label" class="text-slate-400 text-xs mb-2"></p>
+                            <input type="password" id="um-new-password" class="input-field text-xs py-1.5 mb-2 w-full" placeholder="Password baru">
+                            <div id="um-reset-error" class="text-red-400 text-xs mb-2 hidden"></div>
+                            <div class="flex gap-2 justify-end">
+                                <button onclick="closeResetModal()"
+                                    class="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold text-white">Batal</button>
+                                <button onclick="submitResetPassword()"
+                                    class="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 rounded text-xs font-bold text-white">Reset</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- Reset Submission Flag -->
                 <div class="card p-5">
@@ -3294,7 +3327,117 @@ tambah catatan admin.`;
         // ============================================================
         // SECTION K: CONTROL PANEL (Super Admin)
         // ============================================================
+        // ============================================================
+        // USER MANAGEMENT
+        // ============================================================
+        var umSelectedUser = null;
+        async function loadUserList() {
+            const tbody = document.getElementById('um-user-table');
+            if (!tbody) return;
+            tbody.innerHTML = '<p class="text-slate-400 text-xs">Memuat...</p>';
+            try {
+                const users = await apiGet('getUsers');
+                if (!users.length) {
+                    tbody.innerHTML = '<p class="text-slate-400 text-xs">Tidak ada user.</p>';
+                    return;
+                }
+                tbody.innerHTML = users.map(u => `
+                    <div class="flex items-center justify-between px-3 py-2 bg-slate-800 rounded-lg text-xs">
+                        <div>
+                            <span class="font-bold text-white">${u.username}</span>
+                            <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold
+                                ${u.role === 'superadmin' ? 'bg-purple-900/50 text-purple-300' :
+                                  u.role === 'admin' ? 'bg-blue-900/50 text-blue-300' :
+                                  'bg-slate-700 text-slate-300'}">${u.role}</span>
+                            ${u.picName ? `<span class="ml-2 text-slate-400">${u.picName}</span>` : ''}
+                        </div>
+                        <div class="flex gap-1">
+                            <button onclick="openResetModal('${u.username}')"
+                                class="px-2 py-1 bg-yellow-700/50 hover:bg-yellow-600/70 rounded text-yellow-300 font-bold">🔑</button>
+                            <button onclick="confirmDeleteUser('${u.username}')"
+                                class="px-2 py-1 bg-red-900/50 hover:bg-red-800/70 rounded text-red-300 font-bold">🗑</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch(err) {
+                tbody.innerHTML = `<p class="text-red-400 text-xs">Error: ${err.message}</p>`;
+            }
+        }
+        function showAddUserForm() {
+            document.getElementById('um-add-form').classList.remove('hidden');
+            document.getElementById('um-add-error').classList.add('hidden');
+            document.getElementById('um-username').value = '';
+            document.getElementById('um-password').value = '';
+            document.getElementById('um-picname').value = '';
+        }
+        function hideAddUserForm() {
+            document.getElementById('um-add-form').classList.add('hidden');
+        }
+        async function submitAddUser() {
+            const username = document.getElementById('um-username').value.trim();
+            const password = document.getElementById('um-password').value;
+            const role     = document.getElementById('um-role').value;
+            const picName  = document.getElementById('um-picname').value.trim().toUpperCase();
+            const errEl    = document.getElementById('um-add-error');
+            if (!username || !password) {
+                errEl.textContent = 'Username dan password wajib diisi.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            try {
+                const res = await apiGet('addUser', { payload: JSON.stringify({ username, password, role, picName }) });
+                if (res.error) { errEl.textContent = res.error; errEl.classList.remove('hidden'); return; }
+                showToast('✅ User berhasil ditambahkan');
+                hideAddUserForm();
+                loadUserList();
+            } catch(err) {
+                errEl.textContent = err.message;
+                errEl.classList.remove('hidden');
+            }
+        }
+        function openResetModal(username) {
+            umSelectedUser = username;
+            document.getElementById('um-reset-label').textContent = 'Reset password untuk: ' + username;
+            document.getElementById('um-new-password').value = '';
+            document.getElementById('um-reset-error').classList.add('hidden');
+            document.getElementById('um-reset-modal').classList.remove('hidden');
+        }
+        function closeResetModal() {
+            document.getElementById('um-reset-modal').classList.add('hidden');
+            umSelectedUser = null;
+        }
+        async function submitResetPassword() {
+            const newPassword = document.getElementById('um-new-password').value;
+            const errEl = document.getElementById('um-reset-error');
+            if (!newPassword) {
+                errEl.textContent = 'Password baru wajib diisi.';
+                errEl.classList.remove('hidden');
+                return;
+            }
+            try {
+                const res = await apiGet('updatePassword', { payload: JSON.stringify({ username: umSelectedUser, newPassword }) });
+                if (res.error) { errEl.textContent = res.error; errEl.classList.remove('hidden'); return; }
+                showToast('✅ Password berhasil direset');
+                closeResetModal();
+            } catch(err) {
+                errEl.textContent = err.message;
+                errEl.classList.remove('hidden');
+            }
+        }
+        async function confirmDeleteUser(username) {
+            if (!confirm(`Hapus user "${username}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+            try {
+                const res = await apiGet('deleteUser', { payload: JSON.stringify({ username }) });
+                if (res.error) { showToast('Error: ' + res.error, 'error'); return; }
+                showToast('✅ User berhasil dihapus');
+                loadUserList();
+            } catch(err) {
+                showToast('Error: ' + err.message, 'error');
+            }
+        }
+
         function renderControlPanel() {
+            loadUserList();
             renderUserList();
             loadDropdownEditor();
             renderActivityLog();
