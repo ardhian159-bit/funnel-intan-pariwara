@@ -340,22 +340,35 @@
             <h3 class="text-base font-bold text-white mb-5 flex items-center gap-2 border-b border-slate-700 pb-3">
                 📝 Input Funnel Baru
             </h3>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
-                    <label class="form-label">Principal *</label>
-                    <select id="fi-principal" class="form-input">
-                        <option value="">-- Pilih Principal --</option>
+                    <label class="form-label">Nama Paket / Rencana Pengadaan *</label>
+                    <input type="text" id="fi-namapaket" class="form-input" placeholder="Nama paket pengadaan...">
+                </div>
+                <div>
+                    <label class="form-label">K/L/P/D (Instansi) *</label>
+                    <input type="text" id="fi-instansi" class="form-input" placeholder="Nama instansi...">
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="form-label">Provinsi *</label>
+                    <select id="fi-provinsi" class="form-input" onchange="onInputProvinsiChange()">
+                        <option value="">-- Pilih Provinsi --</option>
                     </select>
                 </div>
-
+                <div>
+                    <label class="form-label">Kabupaten / Kota</label>
+                    <select id="fi-wilayah" class="form-input">
+                        <option value="">-- Pilih Kab/Kota --</option>
+                    </select>
+                </div>
                 <div>
                     <label class="form-label">Sumber Dana *</label>
                     <select id="fi-sumberdana" class="form-input">
                         <option value="">-- Pilih --</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="form-label">Quarter *</label>
                     <select id="fi-quarter" class="form-input">
@@ -363,51 +376,46 @@
                         <option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option>
                     </select>
                 </div>
-
-                <div class="md:col-span-2">
-                    <label class="form-label">Nama Paket / Rencana Pengadaan *</label>
-                    <input type="text" id="fi-namapaket" class="form-input" placeholder="Nama paket pengadaan...">
-                </div>
-
                 <div>
-                    <label class="form-label">K/L/P/D (Instansi) *</label>
-                    <input type="text" id="fi-instansi" class="form-input" placeholder="Nama instansi...">
-                </div>
-
-                <div>
-                    <label class="form-label">Provinsi *</label>
-                    <select id="fi-provinsi" class="form-input" onchange="onInputProvinsiChange()">
-                        <option value="">-- Pilih Provinsi --</option>
+                    <label class="form-label">Status <span class="text-slate-500 normal-case text-xs">(otomatis dari TK)</span></label>
+                    <select id="fi-status" class="form-input bg-slate-800 text-slate-400 cursor-not-allowed" disabled>
+                        <option value="">-- Pilih TK dulu --</option>
                     </select>
                 </div>
-
-                <div>
-                    <label class="form-label">Kabupaten / Kota</label>
-                    <select id="fi-wilayah" class="form-input">
-                        <option value="">-- Pilih Kab/Kota --</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="form-label">Status *</label>
-                    <select id="fi-status" class="form-input">
-                        <option value="">-- Pilih --</option>
-                    </select>
-                </div>
-
                 <div>
                     <label class="form-label">TK (%) *</label>
-                    <select id="fi-tk" class="form-input">
+                    <select id="fi-tk" class="form-input" onchange="onTKChange(this)">
                         <option value="">-- Pilih --</option>
                     </select>
                 </div>
-
                 <div>
-                    <label class="form-label">Nilai Brutto / Anggaran (Rp) *</label>
-                    <input type="text" id="fi-brutto" class="form-input" placeholder="0"
-                           oninput="inputFormatCurrency(this); calcInputForecast()">
+                    <label class="form-label">Principal *</label>
+                    <select id="fi-principal" class="form-input">
+                        <option value="">-- Pilih Principal --</option>
+                    </select>
                 </div>
-
+                <div class="md:col-span-2">
+                    <label class="form-label">Keterangan / Notes</label>
+                    <textarea id="fi-keterangan" class="form-input" rows="2" placeholder="Catatan tambahan..."></textarea>
+                </div>
+                <div>
+                    <label class="form-label">Jenis Produk *</label>
+                    <select id="fi-jenisproduk" class="form-input">
+                        <option value="">-- Pilih --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label">Produk Spesifik</label>
+                    <input type="text" id="fi-produk" class="form-input" placeholder="Nama produk spesifik...">
+                </div>
+                <div>
+                    <label class="form-label">QTY</label>
+                    <input type="number" id="fi-qty" class="form-input" placeholder="Jumlah" min="0">
+                </div>
+                <div>
+                    <label class="form-label">Satuan</label>
+                    <input type="text" id="fi-satuan" class="form-input" placeholder="Unit, Set...">
+                </div>
                 <div>
                     <label class="form-label">PPN / Non PPN</label>
                     <select id="fi-ppn" class="form-input" onchange="calcInputForecast()">
@@ -415,47 +423,22 @@
                         <option value="Non PPN">Non PPN</option>
                     </select>
                 </div>
-
                 <div>
                     <label class="form-label">Perkiraan CB (%)</label>
                     <input type="number" id="fi-cb" class="form-input" placeholder="Contoh: 20.00"
                            oninput="calcInputForecast()">
                 </div>
-
+                <div>
+                    <label class="form-label">Nilai Brutto / Anggaran (Rp) *</label>
+                    <input type="text" id="fi-brutto" class="form-input" placeholder="0"
+                           oninput="inputFormatCurrency(this); calcInputForecast()">
+                </div>
                 <div class="md:col-span-2">
                     <label class="form-label">Forecast Netto (Rp) <span class="text-teal-400 normal-case">(AUTO)</span></label>
-                    <input type="text" id="fi-netto" class="form-input" placeholder="0"
-                           oninput="inputFormatCurrency(this); inputNettoManual = true;">
+                    <input type="text" id="fi-netto" class="form-input bg-slate-800 text-slate-400 cursor-not-allowed"
+                           placeholder="0" readonly>
                     <p class="text-xs text-slate-500 mt-1" id="fi-netto-hint"></p>
                 </div>
-
-                <div>
-                    <label class="form-label">Jenis Produk *</label>
-                    <select id="fi-jenisproduk" class="form-input">
-                        <option value="">-- Pilih --</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="form-label">Produk Spesifik</label>
-                    <input type="text" id="fi-produk" class="form-input" placeholder="Nama produk spesifik...">
-                </div>
-
-                <div>
-                    <label class="form-label">QTY</label>
-                    <input type="number" id="fi-qty" class="form-input" placeholder="Jumlah" min="0">
-                </div>
-
-                <div>
-                    <label class="form-label">Satuan</label>
-                    <input type="text" id="fi-satuan" class="form-input" placeholder="Unit, Set...">
-                </div>
-
-                <div>
-                    <label class="form-label">Keterangan / Notes</label>
-                    <textarea id="fi-keterangan" class="form-input" rows="2" placeholder="Catatan tambahan..."></textarea>
-                </div>
-
             </div>
 
             <div class="flex justify-end gap-3">
@@ -634,6 +617,7 @@ var currentWeekLabel = 'W' + currentWeek + '-' + currentYear;
 
 // Dropdown lists (diisi dari getSettings)
 var statusList    = ['Gagal','Informasi Peluang','Informasi Kebutuhan','Presentasi','Peluang','Hot Prospek','Closing'];
+var TK_STATUS_MAP = { '0':'Gagal', '5':'Informasi Peluang', '10':'Informasi Kebutuhan', '25':'Presentasi', '50':'Peluang', '75':'Hot Prospek', '100':'Closing' };
 var tkValues      = ['5', '10', '25', '50', '75', '100'];
 var picNames      = [];
 var principals    = [];
@@ -1076,8 +1060,16 @@ function inputFormatCurrency(el) {
     el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 }
 
+function onTKChange(sel) {
+    var statusEl = document.getElementById('fi-status');
+    if (!statusEl) return;
+    var status = TK_STATUS_MAP[sel.value] || '';
+    statusEl.innerHTML = status
+        ? '<option value="' + status + '">' + status + '</option>'
+        : '<option value="">-- Pilih TK dulu --</option>';
+}
+
 function calcInputForecast() {
-    if (inputNettoManual) return;
     var brutto = parseCurrency(document.getElementById('fi-brutto')?.value || '0');
     var ppn    = document.getElementById('fi-ppn')?.value;
     var cb     = parseFloat(document.getElementById('fi-cb')?.value || '0');
