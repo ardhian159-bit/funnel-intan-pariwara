@@ -253,7 +253,13 @@
                 <span class="font-bold text-teal-400" id="week-label"></span>
             </p>
         </div>
-        <div id="update-status-summary"></div>
+        <div class="flex items-center gap-3">
+            <div id="update-status-summary"></div>
+            <button onclick="handleLogout()"
+                class="px-3 py-1.5 bg-red-900/40 hover:bg-red-800/60 rounded text-xs font-bold text-red-400 border border-red-800/50 transition">
+                Logout
+            </button>
+        </div>
     </div>
 
     <!-- TAB NAVIGATION -->
@@ -519,36 +525,6 @@
                 <div id="status-rekap" class="flex flex-col gap-2"></div>
             </div>
 
-        <!-- History Update Mingguan -->
-        <div class="card p-5">
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 border-b border-slate-700 pb-3">
-                <h3 class="text-base font-bold text-white">📅 History Update Mingguan</h3>
-                <div class="flex gap-2 flex-wrap">
-                    <select id="hist-filter-wilayah" class="form-input text-xs py-1.5 w-40" onchange="renderHistoryTable()">
-                        <option value="ALL">Semua Wilayah</option>
-                    </select>
-                    <select id="hist-filter-status" class="form-input text-xs py-1.5 w-40" onchange="renderHistoryTable()">
-                        <option value="ALL">Semua Status</option>
-                    </select>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th class="px-3 py-2">WEEK</th>
-                            <th class="px-3 py-2">NAMA PROJECT</th>
-                            <th class="px-3 py-2">STATUS</th>
-                            <th class="px-3 py-2 text-right">NILAI FORECAST</th>
-                            <th class="px-3 py-2">NOTES</th>
-                        </tr>
-                    </thead>
-                    <tbody id="history-table-body">
-                        <tr><td colspan="5" class="text-center py-8 text-slate-500">Memuat data...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
 
     </section>
 
@@ -623,6 +599,13 @@ function checkAuth() {
         showLoginModal();
         return false;
     }
+}
+
+function handleLogout() {
+    sessionStorage.removeItem('ip_session');
+    SESSION = null;
+    salesPicName = '';
+    showLoginModal();
 }
 
 function showLoginModal() {
@@ -849,7 +832,10 @@ function selectProject(funnelId) {
     var card = document.getElementById('pcard-' + funnelId);
     if (card) card.classList.add('selected');
     var project = funnelData.find(function(p) { return p.funnelId === funnelId; });
-    if (project) renderUpdateForm(project);
+    if (project) {
+        renderUpdateForm(project);
+        renderProjectHistory(project.funnelId);
+    }
 }
 
 function renderUpdateForm(project) {
@@ -924,6 +910,12 @@ function renderUpdateForm(project) {
         '<div class="flex justify-end">' +
         '<button onclick="submitUpdate()" class="px-6 py-2.5 rounded-lg font-bold text-white text-sm transition"' +
         ' style="background:linear-gradient(135deg,#0d9488,#0ea5e9);">☁️ Submit Update</button>' +
+        '</div>' +
+        '<div class="mt-6 border-t border-slate-700 pt-4">' +
+        '<h4 class="text-sm font-bold text-slate-300 mb-3">📅 History Update Project Ini</h4>' +
+        '<div id="project-history-list" class="space-y-2 max-h-64 overflow-y-auto">' +
+        '<p class="text-slate-500 text-xs">Memuat history...</p>' +
+        '</div>' +
         '</div>' +
         '</div>';
 }
@@ -1253,6 +1245,26 @@ function populateHistoryFilters() {
         statusSel.innerHTML = '<option value="ALL">Semua Status</option>';
         statusList.forEach(function(s) { statusSel.add(new Option(s, s)); });
     }
+}
+
+function renderProjectHistory(funnelId) {
+    var container = document.getElementById('project-history-list');
+    if (!container) return;
+    var entries = weeklyUpdates
+        .filter(function(u) { return u.funnelId === funnelId; })
+        .sort(function(a, b) { return b.week > a.week ? 1 : -1; });
+    if (!entries.length) {
+        container.innerHTML = '<p class="text-slate-500 text-xs">Belum ada history update.</p>';
+        return;
+    }
+    container.innerHTML = entries.map(function(u) {
+        return '<div class="flex items-center justify-between px-3 py-2 bg-slate-800 rounded text-xs">' +
+            '<span class="text-slate-400 w-20 shrink-0">' + u.week + '</span>' +
+            '<span class="badge ' + getStatusBadgeClass(u.statusBaru) + ' mx-2">' + (u.statusBaru || '-') + '</span>' +
+            '<span class="text-teal-400 font-semibold w-32 text-right shrink-0">' + fmtRp(u.forecastNetto || 0) + '</span>' +
+            '<span class="text-slate-400 ml-3 truncate max-w-[180px]">' + (u.notes || '-') + '</span>' +
+            '</div>';
+    }).join('');
 }
 
 function renderHistoryTable() {

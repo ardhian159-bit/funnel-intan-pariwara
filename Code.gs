@@ -358,7 +358,13 @@ function updateTracker(data) {
       var existingData = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
       for (var i = 0; i < existingData.length; i++) {
         if (existingData[i][1] == funnelId && existingData[i][7] == week) {
-          return { error: 'Duplikasi: Update untuk Funnel ID ' + funnelId + ' pada ' + week + ' sudah ada' };
+          var rowToUpdate = i + 2;
+          var timestamp = Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm');
+          sheet.getRange(rowToUpdate, 5).setValue(data.statusBaru || data.status || '');
+          sheet.getRange(rowToUpdate, 6).setValue(data.forecastNetto || 0);
+          sheet.getRange(rowToUpdate, 7).setValue(data.notes || '');
+          sheet.getRange(rowToUpdate, 10).setValue(timestamp);
+          return { success: true, message: 'Update minggu ini berhasil diperbarui', week: week, timestamp: timestamp, overwritten: true };
         }
       }
     }
