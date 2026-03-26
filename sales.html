@@ -1325,22 +1325,12 @@ function renderFunnelChart() {
                     labels: quarters,
                     datasets: [
                         {
-                            label: 'Jumlah Paket',
-                            data: counts,
-                            backgroundColor: 'rgba(20,184,166,0.3)',
-                            borderColor: '#14b8a6',
-                            borderWidth: 2,
-                            borderRadius: 4,
-                            yAxisID: 'y'
-                        },
-                        {
                             label: 'Total Brutto',
                             data: bruttos,
                             backgroundColor: 'rgba(99,102,241,0.3)',
                             borderColor: '#6366f1',
                             borderWidth: 2,
-                            borderRadius: 4,
-                            yAxisID: 'y2'
+                            borderRadius: 4
                         }
                     ]
                 },
@@ -1352,8 +1342,8 @@ function renderFunnelChart() {
                         tooltip: {
                             callbacks: {
                                 label: function(ctx) {
-                                    if (ctx.datasetIndex === 1) return ' ' + fmtRp(ctx.raw);
-                                    return ' ' + ctx.raw + ' paket';
+                                    var paket = counts[ctx.dataIndex];
+                                    return [' Brutto: ' + fmtRp(ctx.raw), ' Jumlah: ' + paket + ' paket'];
                                 }
                             }
                         }
@@ -1361,16 +1351,8 @@ function renderFunnelChart() {
                     scales: {
                         x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.1)' } },
                         y: {
-                            type: 'linear', position: 'left',
-                            ticks: { color: '#14b8a6' },
-                            grid: { color: 'rgba(148,163,184,0.1)' },
-                            title: { display: true, text: 'Paket', color: '#14b8a6', font: { size: 10 } }
-                        },
-                        y2: {
-                            type: 'linear', position: 'right',
                             ticks: { color: '#6366f1', callback: function(v) { return 'Rp ' + (v/1e9).toFixed(1) + 'M'; } },
-                            grid: { drawOnChartArea: false },
-                            title: { display: true, text: 'Brutto', color: '#6366f1', font: { size: 10 } }
+                            grid: { color: 'rgba(148,163,184,0.1)' }
                         }
                     }
                 }
@@ -1386,9 +1368,15 @@ function renderFunnelChart() {
                 var k = p.jenisProduk || 'Lainnya';
                 produkMap[k] = (produkMap[k] || 0) + 1;
             });
+            var bruttoMap = {};
+            data.forEach(function(p) {
+                var k = p.jenisProduk || 'Lainnya';
+                bruttoMap[k] = (bruttoMap[k] || 0) + (p.brutto || p.nilaiAnggaran || 0);
+            });
             var sorted = Object.entries(produkMap).sort(function(a,b) { return b[1]-a[1]; }).slice(0,10);
             var labels = sorted.map(function(e) { return e[0]; });
             var counts = sorted.map(function(e) { return e[1]; });
+            var bruttos = sorted.map(function(e) { return bruttoMap[e[0]] || 0; });
             var colors = ['#14b8a6','#6366f1','#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#f97316','#ec4899','#84cc16'];
             var ctx = document.getElementById('produk-chart');
             if (!ctx) return;
@@ -1408,7 +1396,19 @@ function renderFunnelChart() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    return [
+                                        ' Jumlah: ' + ctx.raw + ' paket',
+                                        ' Brutto: ' + fmtRp(bruttos[ctx.dataIndex])
+                                    ];
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         x: { ticks: { color: '#94a3b8', font: { size: 9 }, maxRotation: 45 }, grid: { color: 'rgba(148,163,184,0.1)' } },
                         y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(148,163,184,0.1)' } }
