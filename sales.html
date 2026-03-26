@@ -544,8 +544,56 @@
                 </h3>
                 <div id="status-rekap" class="flex flex-col gap-2"></div>
             </div>
-
-
+        </div>
+        <!-- Section 1: Chart Quarter -->
+        <div class="card p-5 mb-6">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-2">
+                <h3 class="text-base font-bold text-white">📅 Pipeline per Quarter</h3>
+                <select id="filter-quarter-chart" class="form-input text-xs py-1.5 w-32" onchange="renderQuarterChart()">
+                    <option value="ALL">Semua</option>
+                    <option value="Q1">Q1</option>
+                    <option value="Q2">Q2</option>
+                    <option value="Q3">Q3</option>
+                    <option value="Q4">Q4</option>
+                </select>
+            </div>
+            <div style="position:relative; height:260px;">
+                <canvas id="quarter-chart"></canvas>
+            </div>
+        </div>
+        <!-- Section 2: Jenis Produk + Principal -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <div class="card p-5">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-2">
+                    <h3 class="text-base font-bold text-white">📦 Jenis Produk</h3>
+                    <select id="filter-produk-quarter" class="form-input text-xs py-1.5 w-32" onchange="renderProdukChart()">
+                        <option value="ALL">Semua</option>
+                        <option value="Q1">Q1</option>
+                        <option value="Q2">Q2</option>
+                        <option value="Q3">Q3</option>
+                        <option value="Q4">Q4</option>
+                    </select>
+                </div>
+                <div style="position:relative; height:260px;">
+                    <canvas id="produk-chart"></canvas>
+                </div>
+            </div>
+            <div class="card p-5">
+                <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-2">
+                    <h3 class="text-base font-bold text-white">🏷️ Principal</h3>
+                    <select id="filter-principal-quarter" class="form-input text-xs py-1.5 w-32" onchange="renderPrincipalChart()">
+                        <option value="ALL">Semua</option>
+                        <option value="Q1">Q1</option>
+                        <option value="Q2">Q2</option>
+                        <option value="Q3">Q3</option>
+                        <option value="Q4">Q4</option>
+                    </select>
+                </div>
+                <div style="position:relative; height:260px;">
+                    <canvas id="principal-chart"></canvas>
+                </div>
+            </div>
+        </div>
     </section>
 
 </div><!-- end main content -->
@@ -1159,6 +1207,9 @@ function renderStatistik() {
 
     renderFunnelChart();
     renderTopClosing();
+    renderQuarterChart();
+    renderProdukChart();
+    renderPrincipalChart();
     populateHistoryFilters();
     renderHistoryTable();
 }
@@ -1196,9 +1247,9 @@ function renderTopClosing() {
 }
 
 function renderFunnelChart() {
-    var tkLevels = [100, 75, 50, 25, 10, 5];
-    var labels   = ['100% Closing','75% Hot Prospek','50% Peluang','25% Presentasi','10% Info Kebutuhan','5% Info Peluang'];
-    var colors   = ['#4ade80','#a3e635','#facc15','#fb923c','#f87171','#fca5a5'];
+    var tkLevels = [100, 75, 50, 25, 10, 5, 0];
+    var labels   = ['100% Closing','75% Hot Prospek','50% Peluang','25% Presentasi','10% Info Kebutuhan','5% Info Peluang','0% Gagal'];
+    var colors   = ['#4ade80','#a3e635','#facc15','#fb923c','#f87171','#fca5a5','#94a3b8'];
 
     var counts = tkLevels.map(function(v) {
         return funnelData.filter(function(p) { return parseInt(p.tk) === v; }).length;
@@ -1248,6 +1299,168 @@ function renderFunnelChart() {
     });
 }
 
+
+        var quarterChartInst  = null;
+        var produkChartInst   = null;
+        var principalChartInst = null;
+        function renderQuarterChart() {
+            var filter = document.getElementById('filter-quarter-chart');
+            var q = filter ? filter.value : 'ALL';
+            var data = q === 'ALL' ? funnelData
+                : funnelData.filter(function(p) { return (p.quarter || '').toUpperCase() === q; });
+            var quarters = ['Q1','Q2','Q3','Q4'];
+            var counts = quarters.map(function(qv) {
+                return data.filter(function(p) { return (p.quarter || '').toUpperCase() === qv; }).length;
+            });
+            var bruttos = quarters.map(function(qv) {
+                return data.filter(function(p) { return (p.quarter || '').toUpperCase() === qv; })
+                    .reduce(function(s, p) { return s + (p.brutto || p.nilaiAnggaran || 0); }, 0);
+            });
+            var ctx = document.getElementById('quarter-chart');
+            if (!ctx) return;
+            if (quarterChartInst) { quarterChartInst.destroy(); quarterChartInst = null; }
+            quarterChartInst = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: quarters,
+                    datasets: [
+                        {
+                            label: 'Jumlah Paket',
+                            data: counts,
+                            backgroundColor: 'rgba(20,184,166,0.3)',
+                            borderColor: '#14b8a6',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Total Brutto',
+                            data: bruttos,
+                            backgroundColor: 'rgba(99,102,241,0.3)',
+                            borderColor: '#6366f1',
+                            borderWidth: 2,
+                            borderRadius: 4,
+                            yAxisID: 'y2'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { labels: { color: '#94a3b8', font: { size: 11 } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    if (ctx.datasetIndex === 1) return ' ' + fmtRp(ctx.raw);
+                                    return ' ' + ctx.raw + ' paket';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.1)' } },
+                        y: {
+                            type: 'linear', position: 'left',
+                            ticks: { color: '#14b8a6' },
+                            grid: { color: 'rgba(148,163,184,0.1)' },
+                            title: { display: true, text: 'Paket', color: '#14b8a6', font: { size: 10 } }
+                        },
+                        y2: {
+                            type: 'linear', position: 'right',
+                            ticks: { color: '#6366f1', callback: function(v) { return 'Rp ' + (v/1e9).toFixed(1) + 'M'; } },
+                            grid: { drawOnChartArea: false },
+                            title: { display: true, text: 'Brutto', color: '#6366f1', font: { size: 10 } }
+                        }
+                    }
+                }
+            });
+        }
+        function renderProdukChart() {
+            var filter = document.getElementById('filter-produk-quarter');
+            var q = filter ? filter.value : 'ALL';
+            var data = q === 'ALL' ? funnelData
+                : funnelData.filter(function(p) { return (p.quarter || '').toUpperCase() === q; });
+            var produkMap = {};
+            data.forEach(function(p) {
+                var k = p.jenisProduk || 'Lainnya';
+                produkMap[k] = (produkMap[k] || 0) + 1;
+            });
+            var sorted = Object.entries(produkMap).sort(function(a,b) { return b[1]-a[1]; }).slice(0,10);
+            var labels = sorted.map(function(e) { return e[0]; });
+            var counts = sorted.map(function(e) { return e[1]; });
+            var colors = ['#14b8a6','#6366f1','#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#f97316','#ec4899','#84cc16'];
+            var ctx = document.getElementById('produk-chart');
+            if (!ctx) return;
+            if (produkChartInst) { produkChartInst.destroy(); produkChartInst = null; }
+            produkChartInst = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: colors.map(function(c) { return c + '55'; }),
+                        borderColor: colors,
+                        borderWidth: 2,
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { ticks: { color: '#94a3b8', font: { size: 9 }, maxRotation: 45 }, grid: { color: 'rgba(148,163,184,0.1)' } },
+                        y: { ticks: { color: '#94a3b8', stepSize: 1 }, grid: { color: 'rgba(148,163,184,0.1)' } }
+                    }
+                }
+            });
+        }
+        function renderPrincipalChart() {
+            var filter = document.getElementById('filter-principal-quarter');
+            var q = filter ? filter.value : 'ALL';
+            var data = q === 'ALL' ? funnelData
+                : funnelData.filter(function(p) { return (p.quarter || '').toUpperCase() === q; });
+            var map = {};
+            data.forEach(function(p) {
+                var k = p.principal || 'Lainnya';
+                map[k] = (map[k] || 0) + 1;
+            });
+            var labels = Object.keys(map);
+            var counts = Object.values(map);
+            var colors = ['#14b8a6','#6366f1','#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#f97316'];
+            var ctx = document.getElementById('principal-chart');
+            if (!ctx) return;
+            if (principalChartInst) { principalChartInst.destroy(); principalChartInst = null; }
+            principalChartInst = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: counts,
+                        backgroundColor: colors.map(function(c) { return c + '99'; }),
+                        borderColor: colors,
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 }, padding: 12 } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(ctx) {
+                                    var total = ctx.dataset.data.reduce(function(a,b){return a+b;},0);
+                                    var pct = Math.round(ctx.raw/total*100);
+                                    return ' ' + ctx.raw + ' paket (' + pct + '%)';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
 
 function populateHistoryFilters() {
     var statusSel = document.getElementById('hist-filter-status');
