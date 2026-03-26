@@ -38,6 +38,12 @@ async function verifyLogin(username, password) {
 
             const result = await verifyLogin(u, p);
             const role = result?.role || null;
+            if (role === 'sales') {
+                document.getElementById('login-error').textContent =
+                    'Akses ditolak. Sales login melalui portal sales.';
+                document.getElementById('login-error').style.display = 'block';
+                return false;
+            }
             if (role) {
                 const picName = result?.picName || u.toUpperCase();
                 currentSession = { role: role, username: u, picName: picName };
@@ -74,7 +80,7 @@ async function verifyLogin(username, password) {
             const btnLogout = document.getElementById('btn-logout');
             btnLogout.classList.toggle('hidden', !isLogged);
             if (isLogged) btnLogout.textContent = `Logout [${currentSession.username}]`;
-            document.getElementById('nav-monitoring').classList.toggle('hidden', !isLogged);
+            document.getElementById('nav-monitoring').classList.remove('hidden');
             document.getElementById('nav-control').classList.toggle('hidden', !isSuper);
 
             const sp = document.getElementById('sales-name-picker');

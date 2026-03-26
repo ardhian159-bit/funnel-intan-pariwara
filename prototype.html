@@ -3444,6 +3444,11 @@ tambah catatan admin.`;
                     sessionStorage.removeItem('ip_session');
                 }
             }
+            // Sales tidak boleh akses prototype
+            if (currentRole === 'sales') {
+                window.location.href = 'sales.html';
+                return;
+            }
 
             // Show connection status indicator
             updateConnectionStatus();
