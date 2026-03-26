@@ -418,8 +418,7 @@ function verifyAuth(username, password) {
       var dbPass = (row[1] || '').toString().trim();
       var dbRole = (row[2] || '').toString().trim().toLowerCase();
 
-   var incomingHash = sha256(password);
-   if (dbUser === username.toLowerCase().trim() && dbPass === incomingHash) {
+ if (dbUser === username.toLowerCase().trim() && dbPass === password) {
         var dbPicName = (row[3] || '').toString().trim();
         return { role: dbRole, username: dbUser, picName: dbPicName };
       }
