@@ -742,7 +742,7 @@ function switchTab(tab) {
     });
     var histSection = document.getElementById('history-update-section');
     if (histSection) histSection.classList.toggle('hidden', tab !== 'update');
-    if (tab === 'update')    renderProjectList();
+    if (tab === 'update')    { renderProjectList(); populateHistoryFilters(); renderHistoryTable(); }
     if (tab === 'input')     { populateInputDropdowns(); renderPipelineTable(); }
     if (tab === 'statistik') renderStatistik();
 }
@@ -915,7 +915,7 @@ function renderUpdateForm(project) {
         .sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); })[0] || null;
 
     var currentStatus   = lastUpdate ? lastUpdate.status   : (project.status || '');
-    var currentForecast = lastUpdate ? lastUpdate.forecast  : (project.netto || project.forecastNetto || 0);
+    var currentForecast = lastUpdate ? (lastUpdate.forecast || lastUpdate.forecastNetto || 0) : (project.netto || project.forecastNetto || 0);
     var currentNotes    = lastUpdate ? lastUpdate.notes     : '';
     var adminNoteText   = adminNoteEntry ? adminNoteEntry.adminNotes : '';
 
@@ -990,13 +990,16 @@ async function submitUpdate() {
     if (!status) { showToast('Pilih status terlebih dahulu', 'error'); return; }
 
     var payload = {
-        funnelId:  selectedProjectId,
-        pic:       salesPicName,
-        week:      currentWeekLabel,
-        status:    status,
-        forecast:  forecast,
-        notes:     notes,
-        timestamp: new Date().toISOString()
+        funnelId:     selectedProjectId,
+        pic:          salesPicName,
+        namaPaket:    (funnelData.find(function(p){ return p.funnelId === selectedProjectId; }) || {}).namaPaket || '',
+        week:         currentWeekLabel,
+        status:       status,
+        statusBaru:   status,
+        forecast:     forecast,
+        forecastNetto: forecast,
+        notes:        notes,
+        timestamp:    new Date().toISOString()
     };
 
     try {
