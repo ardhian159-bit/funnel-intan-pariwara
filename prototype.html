@@ -2561,6 +2561,7 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
                 weeklyUpdates = data.map((d, i) => ({
                     id: d.id || (i + 1),
                     projectId: d.funnelId || '',
+                    funnelId: d.funnelId || '',
                     pic: d.pic || '',
                     namaPaket: d.namaPaket || '',
                     week: d.week || '',
@@ -3230,7 +3231,8 @@ tambah catatan admin.`;
             if (stf && stf !== 'ALL') data = data.filter(u => u.status === stf);
             if (qf && qf !== 'ALL') {
                 const projectIds = funnelData.filter(f => f.quarter === qf).map(f => f.id);
-                data = data.filter(u => projectIds.includes(u.projectId));
+                const funnelIds  = funnelData.filter(f => f.quarter === qf).map(f => f.funnelId);
+                data = data.filter(u => projectIds.includes(u.projectId) || funnelIds.includes(u.funnelId) || funnelIds.includes(u.projectId));
             }
             // Sort
             data.sort((a, b) => {
@@ -3263,12 +3265,12 @@ tambah catatan admin.`;
             const pagedData = data.slice(startIdx, endIdx);
 
             tbody.innerHTML = pagedData.map(u => {
-                const project = funnelData.find(f => f.id === u.projectId) || {};
+                const project = funnelData.find(f => f.funnelId === u.funnelId || f.funnelId === u.projectId || f.id === u.projectId) || {};
                 return `<tr class="${getStatusRowClass(u.status)} hover:bg-slate-700/30">
-        <td class="px-3 py-2.5 font-medium text-teal-400 font-mono text-xs">${project.funnelId || '-'}</td>
+        <td class="px-3 py-2.5 font-medium text-teal-400 font-mono text-xs">${u.funnelId || u.projectId || '-'}</td>
         <td class="px-3 py-2.5 font-medium">${u.week}</td>
         <td class="px-3 py-2.5">${u.pic}</td>
-        <td class="px-4 py-2.5">${project.namaPaket || '-'}</td>
+        <td class="px-4 py-2.5">${project.namaPaket || u.namaPaket || '-'}</td>
         <td class="px-3 py-2.5"><span class="badge ${getStatusBadgeClass(u.status)}">${u.status}</span></td>
         <td class="px-3 py-2.5 text-right text-teal-400 font-semibold">${fmtRp(u.forecast)}</td>
         <td class="px-4 py-2.5 text-xs max-w-[200px] truncate" title="${u.notes}">${u.notes || '-'}</td>
@@ -3533,9 +3535,9 @@ tambah catatan admin.`;
             const headers = ['ID Update', 'Week', 'PIC', 'ID Project', 'Nama Paket', 'Instansi', 'Principal', 'Status', 'Forecast Netto', 'Notes Sales', 'Admin Notes', 'Timestamp'];
             const rows = [headers.join(',')];
             weeklyUpdates.forEach(u => {
-                const p = funnelData.find(f => f.id === u.projectId) || {};
+                const p = funnelData.find(f => f.funnelId === u.funnelId || f.funnelId === u.projectId || f.id === u.projectId) || {};
                 const row = [
-                    u.id, u.week, `"${u.pic}"`, u.projectId, `"${p.namaPaket || ''}"`, `"${p.instansi || ''}"`, `"${p.principal || ''}"`,
+                    u.id, u.week, `"${u.pic}"`, u.funnelId || u.projectId, `"${p.namaPaket || u.namaPaket || ''}"`, `"${p.instansi || ''}"`, `"${p.principal || ''}"`,
                     u.status, u.forecast, `"${(u.notes || '').replace(/"/g, '""')}"`, `"${(u.adminNotes || '').replace(/"/g, '""')}"`, `"${u.timestamp}"`
                 ];
                 rows.push(row.join(','));
