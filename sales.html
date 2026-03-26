@@ -914,9 +914,9 @@ function renderUpdateForm(project) {
         .filter(function(u) { return u.funnelId === project.funnelId && u.adminNotes; })
         .sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); })[0] || null;
 
-    var currentStatus   = lastUpdate ? lastUpdate.status   : (project.status || '');
-    var currentForecast = lastUpdate ? (lastUpdate.forecast || lastUpdate.forecastNetto || 0) : (project.netto || project.forecastNetto || 0);
-    var currentNotes    = lastUpdate ? lastUpdate.notes     : '';
+    var currentStatus   = lastUpdate ? (lastUpdate.statusBaru || lastUpdate.status || '') : (project.status || '');
+    var currentForecast = lastUpdate ? (lastUpdate.forecastNetto || lastUpdate.forecast || 0) : (project.netto || project.forecastNetto || 0);
+    var currentNotes    = lastUpdate ? (lastUpdate.notes || '') : '';
     var adminNoteText   = adminNoteEntry ? adminNoteEntry.adminNotes : '';
 
     var forecastStr = currentForecast.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
