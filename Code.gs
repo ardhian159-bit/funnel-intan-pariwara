@@ -77,18 +77,6 @@ function doGet(e) {
         var payload = params.payload ? JSON.parse(params.payload) : {};
         return successResponse(saveSettings(payload));
 
-      case 'getUsers':
-        return successResponse(getUsers());
-      case 'addUser':
-        var payload = params.payload ? JSON.parse(params.payload) : {};
-        return successResponse(addUser(payload));
-      case 'updatePassword':
-        var payload = params.payload ? JSON.parse(params.payload) : {};
-        return successResponse(updatePassword(payload));
-      case 'deleteUser':
-        var payload = params.payload ? JSON.parse(params.payload) : {};
-        return successResponse(deleteUser(payload));
-
       default:
         return errorResponse('Aksi tidak dikenali: ' + action);
     }
@@ -351,20 +339,22 @@ function updateTracker(data) {
     var now = new Date();
     var week = data.week || getISOWeekLabel(now);
 
-    // Check for duplicate: same funnelId + same week
+    // Check for duplicate: same funnelId + same week → overwrite
     var funnelId = data.funnelId || '';
     if (funnelId && sheet.getLastRow() >= 2) {
       var lastRow = sheet.getLastRow();
       var existingData = sheet.getRange(2, 1, lastRow - 1, sheet.getLastColumn()).getValues();
       for (var i = 0; i < existingData.length; i++) {
         if (existingData[i][1] == funnelId && existingData[i][7] == week) {
-          var rowToUpdate = i + 2;
-          var timestamp = Utilities.formatDate(now, Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm');
-          sheet.getRange(rowToUpdate, 5).setValue(data.statusBaru || data.status || '');
-          sheet.getRange(rowToUpdate, 6).setValue(data.forecastNetto || 0);
-          sheet.getRange(rowToUpdate, 7).setValue(data.notes || '');
-          sheet.getRange(rowToUpdate, 10).setValue(timestamp);
-          return { success: true, message: 'Update minggu ini berhasil diperbarui', week: week, timestamp: timestamp, overwritten: true };
+          // Overwrite existing row
+          var overwriteRow = i + 2; // +2 karena header di baris 1, array 0-based
+          sheet.getRange(overwriteRow, 5).setValue(data.statusBaru || data.status || '');
+          sheet.getRange(overwriteRow, 6).setValue(data.forecastNetto || 0);
+          sheet.getRange(overwriteRow, 7).setValue(data.notes || '');
+          sheet.getRange(overwriteRow, 10).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm'));
+          // Update status di LEADS
+          updateLeadStatus(funnelId, data.statusBaru || data.status || '');
+          return { success: true, message: 'Tracker berhasil diupdate (overwrite)', week: week };
         }
       }
     }
@@ -387,6 +377,7 @@ function updateTracker(data) {
     ];
 
     sheet.appendRow(newRow);
+    updateLeadStatus(funnelId, data.statusBaru || data.status || '');
 
     return { success: true, message: 'Tracker berhasil diupdate', week: week, timestamp: timestamp };
   } catch (err) {
@@ -424,7 +415,7 @@ function verifyAuth(username, password) {
       var dbPass = (row[1] || '').toString().trim();
       var dbRole = (row[2] || '').toString().trim().toLowerCase();
 
- if (dbUser === username.toLowerCase().trim() && dbPass === password) {
+   if (dbUser === username.toLowerCase().trim() && dbPass === password) {
         var dbPicName = (row[3] || '').toString().trim();
         return { role: dbRole, username: dbUser, picName: dbPicName };
       }
@@ -489,97 +480,25 @@ function sha256(input) {
   }).join('');
 }
 
-function getUsers() {
+function updateLeadStatus(funnelId, newStatus) {
   try {
+    if (!funnelId || !newStatus) return;
     var ss = SpreadsheetApp.openById(SHEET_ID);
-    var sheet = ss.getSheetByName('USERS');
-    if (!sheet) return [];
+    var sheet = ss.getSheetByName('LEADS');
+    if (!sheet) return;
     var lastRow = sheet.getLastRow();
-    if (lastRow < 2) return [];
-    var data = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
-    return data
-      .filter(function(row) { return row[0]; })
-      .map(function(row) {
-        return {
-          username: row[0] || '',
-          role:     row[2] || '',
-          picName:  row[3] || ''
-        };
-      });
-  } catch(err) {
-    throw new Error('Gagal membaca USERS: ' + err.message);
-  }
-}
-
-function addUser(data) {
-  try {
-    if (!data.username || !data.password || !data.role) {
-      return { error: 'Username, password, dan role wajib diisi' };
-    }
-    var ss = SpreadsheetApp.openById(SHEET_ID);
-    var sheet = ss.getSheetByName('USERS');
-    var lastRow = sheet.getLastRow();
-    if (lastRow >= 2) {
-      var existing = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
-      for (var i = 0; i < existing.length; i++) {
-        if (existing[i][0].toString().toLowerCase() === data.username.toLowerCase()) {
-          return { error: 'Username sudah ada' };
-        }
+    if (lastRow < 2) return;
+    var data = sheet.getRange(2, 2, lastRow - 1, 1).getValues(); // kolom B = funnelId
+    for (var i = 0; i < data.length; i++) {
+      if (data[i][0] == funnelId) {
+        sheet.getRange(i + 2, 4).setValue(newStatus); // kolom D = status
+        var tkMap = { 'Gagal': 0, 'Informasi Awal': 5, 'Informasi Kebutuhan': 10, 'Presentasi': 25, 'Peluang 50:50': 50, 'Hot Prospek': 75, 'Closing': 100 };
+        if (tkMap[newStatus] !== undefined) sheet.getRange(i + 2, 21).setValue(tkMap[newStatus]); // kolom U = tk
+        return;
       }
     }
-    var hashedPassword = sha256(data.password);
-    sheet.appendRow([
-      data.username.toLowerCase(),
-      hashedPassword,
-      data.role,
-      data.picName || ''
-    ]);
-    return { success: true };
-  } catch(err) {
-    throw new Error('Gagal menambah user: ' + err.message);
-  }
-}
-
-function updatePassword(data) {
-  try {
-    if (!data.username || !data.newPassword) {
-      return { error: 'Username dan password baru wajib diisi' };
-    }
-    var ss = SpreadsheetApp.openById(SHEET_ID);
-    var sheet = ss.getSheetByName('USERS');
-    var lastRow = sheet.getLastRow();
-    if (lastRow < 2) return { error: 'User tidak ditemukan' };
-    var rows = sheet.getRange(2, 1, lastRow - 1, 2).getValues();
-    var hashedPassword = sha256(data.newPassword);
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i][0].toString().toLowerCase() === data.username.toLowerCase()) {
-        sheet.getRange(i + 2, 2).setValue(hashedPassword);
-        return { success: true };
-      }
-    }
-    return { error: 'User tidak ditemukan' };
-  } catch(err) {
-    throw new Error('Gagal update password: ' + err.message);
-  }
-}
-
-function deleteUser(data) {
-  try {
-    if (!data.username) return { error: 'Username wajib diisi' };
-    var ss = SpreadsheetApp.openById(SHEET_ID);
-    var sheet = ss.getSheetByName('USERS');
-    var lastRow = sheet.getLastRow();
-    if (lastRow < 2) return { error: 'User tidak ditemukan' };
-    var rows = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
-    for (var i = 0; i < rows.length; i++) {
-      if (rows[i][0].toString().toLowerCase() === data.username.toLowerCase()) {
-        sheet.deleteRow(i + 2);
-        return { success: true };
-      }
-    }
-    return { error: 'User tidak ditemukan' };
-  } catch(err) {
-    throw new Error('Gagal menghapus user: ' + err.message);
+  } catch(e) {
+    // Silent fail — jangan sampai gagalkan updateTracker
   }
 }
 

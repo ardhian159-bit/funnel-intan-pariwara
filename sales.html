@@ -616,8 +616,8 @@ var currentYear      = today.getFullYear();
 var currentWeekLabel = 'W' + currentWeek + '-' + currentYear;
 
 // Dropdown lists (diisi dari getSettings)
-var statusList    = ['Gagal','Informasi Peluang','Informasi Kebutuhan','Presentasi','Peluang','Hot Prospek','Closing'];
-var TK_STATUS_MAP = { '0':'Gagal', '5':'Informasi Peluang', '10':'Informasi Kebutuhan', '25':'Presentasi', '50':'Peluang', '75':'Hot Prospek', '100':'Closing' };
+var statusList    = ['Gagal','Informasi Awal','Informasi Kebutuhan','Presentasi','Peluang 50:50','Hot Prospek','Closing'];
+var TK_STATUS_MAP = { '0':'Gagal', '5':'Informasi Awal', '10':'Informasi Kebutuhan', '25':'Presentasi', '50':'Peluang 50:50', '75':'Hot Prospek', '100':'Closing' };
 var tkValues      = ['5', '10', '25', '50', '75', '100'];
 var picNames      = [];
 var principals    = [];
@@ -984,7 +984,8 @@ async function submitUpdate() {
     var notesEl    = document.getElementById('uf-notes');
 
     var status   = statusEl ? statusEl.value : '';
-    var forecast = parseCurrency(forecastEl ? forecastEl.value : '0');
+    var rawForecast = forecastEl ? forecastEl.value.replace(/\./g, '').replace(/,/g, '') : '0';
+    var forecast = parseInt(rawForecast) || 0;
     var notes    = notesEl ? notesEl.value : '';
 
     if (!status) { showToast('Pilih status terlebih dahulu', 'error'); return; }
@@ -1010,13 +1011,10 @@ async function submitUpdate() {
         });
         weeklyUpdates.push(payload);
         showToast('✅ Update berhasil disimpan!', 'success');
-        // Update card visual
-        var card = document.getElementById('pcard-' + selectedProjectId);
-        if (card) {
-            card.classList.add('updated');
-            var pendingEl = card.querySelector('.text-amber-400');
-            if (pendingEl) { pendingEl.className = 'text-xs text-green-400 font-semibold'; pendingEl.textContent = '✓ Updated'; }
-        }
+        var proj = funnelData.find(function(p) { return p.funnelId === selectedProjectId; });
+        if (proj) proj.status = status;
+        renderProjectList();
+        renderHistoryTable();
         updateHeader();
     } catch(e) {
         showToast('Gagal menyimpan: ' + e.message, 'error');
@@ -1214,13 +1212,13 @@ function renderTopClosing() {
     if (!container) return;
 
     var stages = [
-        { label: 'Closing',             key: 'Closing',             color: '#4ade80', bg: 'rgba(34,197,94,.15)'  },
-        { label: 'Hot Prospek',         key: 'Hot Prospek',         color: '#22d3ee', bg: 'rgba(8,145,178,.15)'  },
-        { label: 'Peluang',             key: 'Peluang',             color: '#c084fc', bg: 'rgba(147,51,234,.15)' },
-        { label: 'Presentasi',          key: 'Presentasi',          color: '#fbbf24', bg: 'rgba(217,119,6,.15)'  },
-        { label: 'Informasi Kebutuhan', key: 'Informasi Kebutuhan', color: '#94a3b8', bg: 'rgba(71,85,105,.15)'  },
-        { label: 'Informasi Peluang',   key: 'Informasi Peluang',   color: '#a3e635', bg: 'rgba(132,204,22,.15)' },
-        { label: 'Gagal',               key: 'Gagal',               color: '#f87171', bg: 'rgba(220,38,38,.15)'  },
+        { label: 'Closing',             key: 'Closing',             color: '#4ade80', bg: 'rgba(74,222,128,.1)'   },
+        { label: 'Hot Prospek',         key: 'Hot Prospek',         color: '#22d3ee', bg: 'rgba(34,211,238,.1)'   },
+        { label: 'Peluang 50:50',       key: 'Peluang 50:50',       color: '#c084fc', bg: 'rgba(192,132,252,.1)'  },
+        { label: 'Presentasi',          key: 'Presentasi',          color: '#fbbf24', bg: 'rgba(251,191,36,.1)'   },
+        { label: 'Informasi Kebutuhan', key: 'Informasi Kebutuhan', color: '#94a3b8', bg: 'rgba(148,163,184,.1)'  },
+        { label: 'Informasi Awal',      key: 'Informasi Awal',      color: '#a3e635', bg: 'rgba(163,230,53,.1)'   },
+        { label: 'Gagal',               key: 'Gagal',               color: '#f87171', bg: 'rgba(248,113,113,.1)'  },
     ];
 
     var total = funnelData.length || 1;
@@ -1242,17 +1240,17 @@ function renderTopClosing() {
 }
 
 function renderFunnelChart() {
-    var tkLevels = [100, 75, 50, 25, 10, 5, 0];
-    var labels   = ['100% Closing','75% Hot Prospek','50% Peluang','25% Presentasi','10% Info Kebutuhan','5% Info Peluang','0% Gagal'];
-    var colors   = ['#4ade80','#a3e635','#facc15','#fb923c','#f87171','#fca5a5','#94a3b8'];
+    var stages = ['Closing','Hot Prospek','Peluang 50:50','Presentasi','Informasi Kebutuhan','Informasi Awal','Gagal'];
+    var labels = ['Closing','Hot Prospek','Peluang 50:50','Presentasi','Info Kebutuhan','Informasi Awal','Gagal'];
+    var colors = ['#4ade80','#22d3ee','#c084fc','#fbbf24','#94a3b8','#a3e635','#f87171'];
 
-    var counts = tkLevels.map(function(v) {
-        return funnelData.filter(function(p) { return parseInt(p.tk) === v; }).length;
+    var counts = stages.map(function(s) {
+        return funnelData.filter(function(p) { return p.status === s; }).length;
     });
-    var nettos = tkLevels.map(function(v) {
+    var nettos = stages.map(function(s) {
         return funnelData
-            .filter(function(p) { return parseInt(p.tk) === v; })
-            .reduce(function(s, p) { return s + (p.netto || 0); }, 0);
+            .filter(function(p) { return p.status === s; })
+            .reduce(function(sum, p) { return sum + (p.netto || 0); }, 0);
     });
 
     var ctx = document.getElementById('my-funnel-chart');
@@ -1496,7 +1494,7 @@ function renderHistoryTable() {
 
     var filtered = weeklyUpdates.filter(function(u) {
         if (u.week !== currentWeekLabel && u.week !== lastWeekLabel) return false;
-        if (statusFilter !== 'ALL' && u.status !== statusFilter) return false;
+        if (statusFilter !== 'ALL' && (u.statusBaru || u.status) !== statusFilter) return false;
         return true;
     }).sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); });
 
@@ -1511,8 +1509,8 @@ function renderHistoryTable() {
         return '<tr>' +
             '<td class="px-3 py-2 text-xs font-mono text-slate-400">' + (u.week || '-') + '</td>' +
             '<td class="px-3 py-2 font-medium text-white">' + (proj ? (proj.namaPaket || proj.namapaket) : (u.funnelId || '-')) + '</td>' +
-            '<td class="px-3 py-2"><span class="badge ' + getStatusBadgeClass(u.status) + '">' + (u.status || '-') + '</span></td>' +
-            '<td class="px-3 py-2 text-right text-teal-400 font-semibold">' + fmtRp(u.forecast || 0) + '</td>' +
+            '<td class="px-3 py-2"><span class="badge ' + getStatusBadgeClass(u.statusBaru || u.status) + '">' + (u.statusBaru || u.status || '-') + '</span></td>' +
+            '<td class="px-3 py-2 text-right text-teal-400 font-semibold">' + fmtRp(u.forecastNetto || u.forecast || 0) + '</td>' +
             '<td class="px-3 py-2 text-slate-400 text-xs" style="max-width:200px;">' +
             '<span class="block truncate">' + (u.notes || '-') + '</span></td>' +
             '</tr>';
@@ -1569,6 +1567,8 @@ async function init() {
     // Load data dari Sheets
     await loadData();
     updateHeader();
+    populateHistoryFilters();
+    renderHistoryTable();
 
     // Tentukan tab awal: hash > default 'update'
     var hash = window.location.hash.replace('#', '');
