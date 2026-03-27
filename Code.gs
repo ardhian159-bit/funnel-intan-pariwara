@@ -77,6 +77,21 @@ function doGet(e) {
         var payload = params.payload ? JSON.parse(params.payload) : {};
         return successResponse(saveSettings(payload));
 
+      case 'getUsers':
+        return successResponse(getUsers());
+
+      case 'addUser':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(addUser(payload));
+
+      case 'updateUser':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(updateUser(payload));
+
+      case 'deleteUser':
+        var delUsername = params.username || '';
+        return successResponse(deleteUser(delUsername));
+
       default:
         return errorResponse('Aksi tidak dikenali: ' + action);
     }
@@ -462,6 +477,101 @@ function saveSettings(data) {
     }
     sheet.getRange(2, 1, rows.length, 3).setValues(rows);
     return { success: true };
+}
+
+// =============================================================================
+// USER MANAGEMENT FUNCTIONS
+// =============================================================================
+
+function getUsers() {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('USERS');
+    if (!sheet) return { success: false, error: 'Tab USERS tidak ditemukan' };
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return { success: true, data: [] };
+    var data = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
+    var users = data
+      .filter(function(row) { return row[0]; })
+      .map(function(row) {
+        return { username: row[0], role: row[2], picName: row[3] };
+        // password sengaja tidak dikembalikan ke frontend
+      });
+    return { success: true, data: users };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+function addUser(data) {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('USERS');
+    if (!sheet) return { success: false, error: 'Tab USERS tidak ditemukan' };
+    // Cek duplikat username
+    var lastRow = sheet.getLastRow();
+    if (lastRow >= 2) {
+      var existing = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+      for (var i = 0; i < existing.length; i++) {
+        if ((existing[i][0] || '').toLowerCase() === (data.username || '').toLowerCase()) {
+          return { success: false, error: 'Username sudah ada' };
+        }
+      }
+    }
+    // password sudah di-hash dari frontend (SHA-256)
+    sheet.appendRow([
+      data.username || '',
+      data.password || '',
+      data.role || 'sales',
+      data.picName || ''
+    ]);
+    return { success: true, message: 'User berhasil ditambahkan' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+function updateUser(data) {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('USERS');
+    if (!sheet) return { success: false, error: 'Tab USERS tidak ditemukan' };
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return { success: false, error: 'User tidak ditemukan' };
+    var rows = sheet.getRange(2, 1, lastRow - 1, 4).getValues();
+    for (var i = 0; i < rows.length; i++) {
+      if ((rows[i][0] || '').toLowerCase() === (data.username || '').toLowerCase()) {
+        var targetRow = i + 2;
+        if (data.password) sheet.getRange(targetRow, 2).setValue(data.password);
+        if (data.role) sheet.getRange(targetRow, 3).setValue(data.role);
+        if (data.picName !== undefined) sheet.getRange(targetRow, 4).setValue(data.picName);
+        return { success: true, message: 'User berhasil diupdate' };
+      }
+    }
+    return { success: false, error: 'User tidak ditemukan' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+function deleteUser(username) {
+  try {
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('USERS');
+    if (!sheet) return { success: false, error: 'Tab USERS tidak ditemukan' };
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) return { success: false, error: 'User tidak ditemukan' };
+    var rows = sheet.getRange(2, 1, lastRow - 1, 1).getValues();
+    for (var i = 0; i < rows.length; i++) {
+      if ((rows[i][0] || '').toLowerCase() === username.toLowerCase()) {
+        sheet.deleteRow(i + 2);
+        return { success: true, message: 'User berhasil dihapus' };
+      }
+    }
+    return { success: false, error: 'User tidak ditemukan' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
 }
 
 // =============================================================================

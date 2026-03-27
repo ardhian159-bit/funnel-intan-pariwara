@@ -2194,10 +2194,16 @@
             </div>
             <!-- Filters -->
             <div class="card p-4 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Funnel ID</label>
+                        <select id="mon-filter-funnel" class="input-field text-xs py-1.5" onchange="renderMonitoring()">
+                            <option value="">Semua Funnel</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Sales</label>
-                        <select id="mon-filter-sales" class="input-field text-xs py-1.5" onchange="renderMonitoring()">
+                        <select id="mon-filter-sales" class="input-field text-xs py-1.5" onchange="repopulateMonFilterFunnel()">
                             <option value="ALL">Semua Sales</option>
                         </select>
                     </div>
@@ -3190,6 +3196,19 @@ tambah catatan admin.`;
         // SECTION J: MONITORING TABLE
         // ============================================================
         let lastFilterState = '';
+        function repopulateMonFilterFunnel() {
+            const salesVal = document.getElementById('mon-filter-sales')?.value || '';
+            const funnelSel = document.getElementById('mon-filter-funnel');
+            if (!funnelSel) return;
+            const filtered = (salesVal && salesVal !== 'ALL')
+                ? weeklyUpdates.filter(u => (u.pic || '').toLowerCase() === salesVal.toLowerCase())
+                : weeklyUpdates;
+            const ids = [...new Set(filtered.map(u => u.funnelId).filter(Boolean))].sort();
+            funnelSel.innerHTML = '<option value="">Semua Funnel</option>' +
+                ids.map(id => `<option value="${id}">${id}</option>`).join('');
+            funnelSel.value = '';
+            renderMonitoring();
+        }
         function populateMonitoringFilters() {
             const salesFil = document.getElementById('mon-filter-sales');
             if (!salesFil) return;
@@ -3210,6 +3229,7 @@ tambah catatan admin.`;
             uniqueWeeks.forEach(w => {
                 const o = document.createElement('option'); o.value = w; o.textContent = w; weekFil.appendChild(o);
             });
+            repopulateMonFilterFunnel();
         }
         function renderMonitoring() {
             const tbody = document.getElementById('monitoring-tbody');
@@ -3219,8 +3239,9 @@ tambah catatan admin.`;
             const wf = document.getElementById('mon-filter-week')?.value;
             const stf = document.getElementById('mon-filter-status')?.value;
             const qf = document.getElementById('mon-filter-quarter')?.value;
+            const ff = document.getElementById('mon-filter-funnel')?.value || '';
 
-            const currentFilterState = sf + wf + stf + qf;
+            const currentFilterState = sf + wf + stf + qf + ff;
             if (lastFilterState !== currentFilterState) {
                 currentPage = 1;
                 lastFilterState = currentFilterState;
@@ -3229,6 +3250,7 @@ tambah catatan admin.`;
             if (sf && sf !== 'ALL') data = data.filter(u => u.pic === sf);
             if (wf && wf !== 'ALL') data = data.filter(u => u.week === wf);
             if (stf && stf !== 'ALL') data = data.filter(u => u.status === stf);
+            if (ff) data = data.filter(u => u.funnelId === ff);
             if (qf && qf !== 'ALL') {
                 const projectIds = funnelData.filter(f => f.quarter === qf).map(f => f.id);
                 const funnelIds  = funnelData.filter(f => f.quarter === qf).map(f => f.funnelId);
@@ -3338,7 +3360,8 @@ tambah catatan admin.`;
             if (!tbody) return;
             tbody.innerHTML = '<p class="text-slate-400 text-xs">Memuat...</p>';
             try {
-                const users = await apiGet('getUsers');
+                const response = await apiGet('getUsers');
+                const users = response.data || [];
                 if (!users.length) {
                     tbody.innerHTML = '<p class="text-slate-400 text-xs">Tidak ada user.</p>';
                     return;

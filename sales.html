@@ -308,15 +308,21 @@
     <div class="mt-6 card p-5" id="history-update-section">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-4 border-b border-slate-700 pb-3">
             <h3 class="text-base font-bold text-white">📅 History Update Mingguan</h3>
-            <select id="hist-filter-status" class="form-input text-xs py-1.5 w-40" onchange="renderHistoryTable()">
-                <option value="ALL">Semua Status</option>
-            </select>
+            <div class="flex gap-2">
+                <select id="hist-filter-funnel" class="form-input text-xs py-1.5 w-44" onchange="renderHistoryTable()">
+                    <option value="">Semua Funnel</option>
+                </select>
+                <select id="hist-filter-status" class="form-input text-xs py-1.5 w-40" onchange="renderHistoryTable()">
+                    <option value="ALL">Semua Status</option>
+                </select>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="data-table">
                 <thead>
                     <tr>
                         <th class="px-3 py-2">WEEK</th>
+                        <th class="px-3 py-2">FUNNEL ID</th>
                         <th class="px-3 py-2">NAMA PROJECT</th>
                         <th class="px-3 py-2">STATUS</th>
                         <th class="px-3 py-2 text-right">NILAI FORECAST</th>
@@ -324,7 +330,7 @@
                     </tr>
                 </thead>
                 <tbody id="history-table-body">
-                    <tr><td colspan="5" class="text-center py-8 text-slate-500">Memuat data...</td></tr>
+                    <tr><td colspan="6" class="text-center py-8 text-slate-500">Memuat data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1461,6 +1467,18 @@ function populateHistoryFilters() {
         statusSel.innerHTML = '<option value="ALL">Semua Status</option>';
         statusList.forEach(function(s) { statusSel.add(new Option(s, s)); });
     }
+    var funnelSel = document.getElementById('hist-filter-funnel');
+    if (funnelSel) {
+        var currentVal = funnelSel.value;
+        funnelSel.innerHTML = '<option value="">Semua Funnel</option>';
+        var uniqueFunnels = [];
+        weeklyUpdates.forEach(function(u) {
+            if (u.funnelId && uniqueFunnels.indexOf(u.funnelId) === -1) uniqueFunnels.push(u.funnelId);
+        });
+        uniqueFunnels.sort();
+        uniqueFunnels.forEach(function(f) { funnelSel.add(new Option(f, f)); });
+        if (currentVal) funnelSel.value = currentVal;
+    }
 }
 
 function renderProjectHistory(funnelId) {
@@ -1485,6 +1503,7 @@ function renderProjectHistory(funnelId) {
 
 function renderHistoryTable() {
     var statusFilter  = document.getElementById('hist-filter-status')?.value  || 'ALL';
+    var filterFunnelId = document.getElementById('hist-filter-funnel')?.value || '';
 
     // Tampilkan minggu ini + minggu lalu
     var lastWeekDate  = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -1495,19 +1514,21 @@ function renderHistoryTable() {
     var filtered = weeklyUpdates.filter(function(u) {
         if (u.week !== currentWeekLabel && u.week !== lastWeekLabel) return false;
         if (statusFilter !== 'ALL' && (u.statusBaru || u.status) !== statusFilter) return false;
+        if (filterFunnelId && u.funnelId !== filterFunnelId) return false;
         return true;
     }).sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); });
 
     var tbody = document.getElementById('history-table-body');
     if (!tbody) return;
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-slate-500">Tidak ada data update ditemukan</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8 text-slate-500">Tidak ada data update ditemukan</td></tr>';
         return;
     }
     tbody.innerHTML = filtered.map(function(u) {
         var proj = funnelData.find(function(p) { return p.funnelId === u.funnelId; });
         return '<tr>' +
             '<td class="px-3 py-2 text-xs font-mono text-slate-400">' + (u.week || '-') + '</td>' +
+            '<td class="px-3 py-2 text-xs font-mono text-teal-400">' + (u.funnelId || '-') + '</td>' +
             '<td class="px-3 py-2 font-medium text-white">' + (proj ? (proj.namaPaket || proj.namapaket) : (u.funnelId || '-')) + '</td>' +
             '<td class="px-3 py-2"><span class="badge ' + getStatusBadgeClass(u.statusBaru || u.status) + '">' + (u.statusBaru || u.status || '-') + '</span></td>' +
             '<td class="px-3 py-2 text-right text-teal-400 font-semibold">' + fmtRp(u.forecastNetto || u.forecast || 0) + '</td>' +
