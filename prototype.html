@@ -3410,7 +3410,8 @@ tambah catatan admin.`;
                 return;
             }
             try {
-                const res = await apiGet('addUser', { payload: JSON.stringify({ username, password, role, picName }) });
+                const hashedPassword = await hashPassword(password);
+                const res = await apiGet('addUser', { payload: JSON.stringify({ username, password: hashedPassword, role, picName }) });
                 if (res.error) { errEl.textContent = res.error; errEl.classList.remove('hidden'); return; }
                 showToast('✅ User berhasil ditambahkan');
                 hideAddUserForm();
@@ -3440,7 +3441,8 @@ tambah catatan admin.`;
                 return;
             }
             try {
-                const res = await apiGet('updatePassword', { payload: JSON.stringify({ username: umSelectedUser, newPassword }) });
+                const hashedNew = await hashPassword(newPassword);
+                const res = await apiGet('updateUser', { payload: JSON.stringify({ username: umSelectedUser, password: hashedNew }) });
                 if (res.error) { errEl.textContent = res.error; errEl.classList.remove('hidden'); return; }
                 showToast('✅ Password berhasil direset');
                 closeResetModal();
