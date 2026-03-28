@@ -836,6 +836,13 @@ function updateHeader() {
 // =============================================
 // UPDATE FUNNEL — PROJECT LIST
 // =============================================
+function getLatestWeek(funnelId) {
+    var weeks = weeklyUpdates
+        .filter(function(u) { return u.funnelId === funnelId && u.week; })
+        .map(function(u) { return u.week; })
+        .sort();
+    return weeks.length > 0 ? weeks[weeks.length - 1] : '';
+}
 function isUpdatedThisWeek(funnelId) {
     return weeklyUpdates.some(function(u) {
         return u.funnelId === funnelId && u.week === currentWeekLabel;
@@ -873,6 +880,7 @@ function renderProjectList() {
                '</div>' +
                '<div class="flex items-center gap-2 text-xs text-slate-400 mb-2">' +
                '<span class="bg-slate-700/70 px-1.5 py-0.5 rounded font-mono text-teal-400 text-xs">' + (p.funnelId || '') + '</span>' +
+               (getLatestWeek(p.funnelId) ? '<span class="text-slate-500 text-xs ml-1">' + getLatestWeek(p.funnelId) + '</span>' : '') +
                '<span class="truncate">' + (p.instansi || '-') + '</span>' +
                '</div>' +
                '<div class="flex items-center justify-between">' +
@@ -1568,6 +1576,8 @@ document.addEventListener('htmx:afterSwap', function(evt) {
 // INIT
 // =============================================
 async function init() {
+    // Warmup Apps Script — eliminasi cold start
+    apiGet('ping').catch(function() {});
     if (!checkAuth()) return;
 
     // Update UI langsung

@@ -3645,6 +3645,8 @@ async function handleLogin(e) {
     return false;
 }
         async function init() {
+            // Warmup Apps Script — eliminasi cold start
+            apiGet('ping').catch(function() {});
             // Restore session dari sessionStorage (misal: back dari dashboard.html)
             const savedSession = sessionStorage.getItem('ip_session');
             if (savedSession) {
