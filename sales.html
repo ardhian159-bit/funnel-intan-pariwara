@@ -235,6 +235,33 @@
     </div>
 </div>
 
+<!-- ===== GANTI PASSWORD MODAL ===== -->
+<div id="password-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 class="text-xl font-bold text-white mb-1">Ganti Password</h2>
+        <p class="text-slate-400 text-sm mb-6">Pastikan password baru Anda aman.</p>
+        <form onsubmit="return handleChangePassword(event)">
+            <div class="mb-4">
+                <label class="form-label">Password Lama</label>
+                <input type="password" id="cp-old" class="input-field" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Password Baru</label>
+                <input type="password" id="cp-new" class="input-field" required>
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Konfirmasi Password Baru</label>
+                <input type="password" id="cp-confirm" class="input-field" required>
+            </div>
+            <div id="cp-error" class="text-red-400 text-sm mb-4 hidden"></div>
+            <div class="flex gap-2">
+                <button type="button" onclick="closeChangePasswordModal()" class="w-full py-2.5 rounded-lg font-bold text-white text-sm bg-slate-700 hover:bg-slate-600 transition">Batal</button>
+                <button type="submit" class="w-full py-2.5 rounded-lg font-bold text-white text-sm transition" style="background: linear-gradient(135deg, #0d9488, #0ea5e9);">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- ===== NAVBAR via htmx ===== -->
 <div id="navbar-container" hx-get="navbar.html" hx-trigger="load" hx-swap="innerHTML"></div>
 
@@ -252,6 +279,7 @@
                 Minggu saat ini:
                 <span class="font-bold text-teal-400" id="week-label"></span>
             </p>
+            <button onclick="openChangePasswordModal()" class="mt-2 px-3 py-1 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs font-semibold text-slate-300 transition">🔑 Ganti Password</button>
         </div>
         <div id="update-status-summary"></div>
     </div>
@@ -721,6 +749,59 @@ async function handleSalesLogin(event) {
             errEl.textContent = e.message || 'Login gagal. Periksa username dan password.';
             errEl.classList.remove('hidden');
         }
+    }
+    return false;
+}
+
+function openChangePasswordModal() {
+    document.getElementById('cp-old').value = '';
+    document.getElementById('cp-new').value = '';
+    document.getElementById('cp-confirm').value = '';
+    document.getElementById('cp-error').classList.add('hidden');
+    document.getElementById('password-modal').classList.add('open');
+}
+
+function closeChangePasswordModal() {
+    document.getElementById('password-modal').classList.remove('open');
+}
+
+async function handleChangePassword(e) {
+    e.preventDefault();
+    var oldPass = document.getElementById('cp-old').value;
+    var newPass = document.getElementById('cp-new').value;
+    var confirmPass = document.getElementById('cp-confirm').value;
+    var errEl = document.getElementById('cp-error');
+
+    if (newPass !== confirmPass) {
+        errEl.textContent = 'Konfirmasi password baru tidak cocok!';
+        errEl.classList.remove('hidden');
+        return false;
+    }
+
+    try {
+        // 1. Hash password lama & Verifikasi
+        var hashedOld = await hashPassword(oldPass);
+        var username = SESSION.username; // Menggunakan SESSION.username karena valuenya diset dari auth result
+        var verifyRes = await apiGet('verifyAuth', { username: username, password: hashedOld });
+
+        if (verifyRes.error || !verifyRes.role) {
+            errEl.textContent = 'Password lama salah!';
+            errEl.classList.remove('hidden');
+            return false;
+        }
+
+        // 2. Hash password baru & Update via API
+        var hashedNew = await hashPassword(newPass);
+        var updateRes = await apiGet('updateUser', { payload: JSON.stringify({ username: username, password: hashedNew }) });
+
+        if (updateRes.error) throw new Error(updateRes.error);
+
+        showToast('✅ Password berhasil diubah!', 'success');
+        closeChangePasswordModal();
+
+    } catch(err) {
+        errEl.textContent = 'Gagal update: ' + err.message;
+        errEl.classList.remove('hidden');
     }
     return false;
 }
