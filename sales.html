@@ -998,6 +998,9 @@ function renderUpdateForm(project) {
     var container = document.getElementById('update-form-container');
     if (!container) return;
 
+    var p = project;
+    var isLocked = (p.status === 'Gagal' || p.status === 'Closing' || parseInt(p.tk) === 0 || parseInt(p.tk) === 100);
+
     // Ambil update terakhir minggu ini
     var thisWeekUpdates = weeklyUpdates
         .filter(function(u) { return u.funnelId === project.funnelId && u.week === currentWeekLabel; })
@@ -1018,6 +1021,13 @@ function renderUpdateForm(project) {
     var statusOptions = statusList.map(function(s) {
         return '<option value="' + s + '"' + (s === currentStatus ? ' selected' : '') + '>' + s + '</option>';
     }).join('');
+
+    var lockBanner = '';
+    if (isLocked) {
+        lockBanner = '<div class="mb-4 px-3 py-2 rounded-lg bg-slate-700/50 border border-slate-600 text-slate-400 text-xs flex items-center gap-2">' +
+                     '🔒 Project ini sudah <strong>' + p.status + '</strong> dan tidak dapat diupdate lagi.' +
+                     '</div>';
+    }
 
     container.innerHTML =
         '<div>' +
@@ -1043,6 +1053,8 @@ function renderUpdateForm(project) {
         '<span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nilai Brutto / Anggaran</span>' +
         '<span class="font-bold text-white">' + fmtRp(project.brutto || 0) + '</span>' +
         '</div>' +
+        
+        lockBanner +
 
         // Form
         '<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">' +
@@ -1068,6 +1080,15 @@ function renderUpdateForm(project) {
         ' style="background:linear-gradient(135deg,#0d9488,#0ea5e9);">☁️ Submit Update</button>' +
         '</div>' +
         '</div>';
+
+    if (isLocked) {
+        ['uf-status','uf-forecast','uf-notes'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.disabled = true;
+        });
+        var submitBtn = document.querySelector('#update-form-container button[onclick="submitUpdate()"]');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.style.opacity = '0.4'; submitBtn.style.cursor = 'not-allowed'; }
+    }
 }
 
 async function submitUpdate() {
