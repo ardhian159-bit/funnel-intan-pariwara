@@ -1,6 +1,6 @@
 <!-- ============================================================
      navbar.html — Shared Navbar | Intan Pariwara Sales Management
-     Dipakai oleh: prototype.html, dashboard.html, sales.html (Step 7)
+     Dipakai oleh: admin.html, dashboard.html, sales.html (Step 7)
      Di-inject via htmx: hx-get="navbar.html" hx-trigger="load"
 
      Visibility rules:
@@ -32,13 +32,13 @@
 
                 <!-- Selalu visible -->
                 <button class="nav-btn"
-                        onclick="if(typeof switchMenu==='function') switchMenu('input'); else window.location.href='prototype.html?menu=input'"
+                        onclick="if(typeof switchMenu==='function') switchMenu('input'); else window.location.href='admin.html?menu=input'"
                         id="nav-input">
                     📝 Input Funnel
                 </button>
 
                 <button class="nav-btn"
-                        onclick="if(typeof switchMenu==='function') switchMenu('update'); else window.location.href='prototype.html?menu=update'"
+                        onclick="if(typeof switchMenu==='function') switchMenu('update'); else window.location.href='admin.html?menu=update'"
                         id="nav-update">
                     🔄 Update Funnel
                 </button>
@@ -52,14 +52,14 @@
 
                 <!-- Hidden sampai login (admin/superadmin) -->
                 <button class="nav-btn hidden"
-                        onclick="if(typeof switchMenu==='function') switchMenu('monitoring'); else window.location.href='prototype.html?menu=monitoring'"
+                        onclick="if(typeof switchMenu==='function') switchMenu('monitoring'); else window.location.href='admin.html?menu=monitoring'"
                         id="nav-monitoring">
                     📋 Monitoring
                 </button>
 
                 <!-- Hidden sampai login superadmin -->
                 <button class="nav-btn hidden"
-                        onclick="if(typeof switchMenu==='function') switchMenu('control'); else window.location.href='prototype.html?menu=control'"
+                        onclick="if(typeof switchMenu==='function') switchMenu('control'); else window.location.href='admin.html?menu=control'"
                         id="nav-control">
                     ⚙️ Control Panel
                 </button>
@@ -68,7 +68,7 @@
 
             <!-- Tombol kembali ke prototype (dipakai di dashboard.html) -->
             <!-- Hidden by default, ditampilkan via htmx:afterSwap di dashboard.html -->
-            <a href="prototype.html" id="btn-go-prototype" class="nav-btn hidden"
+            <a href="admin.html" id="btn-go-prototype" class="nav-btn hidden"
                style="background:linear-gradient(135deg,#7c3aed,#0ea5e9);color:white;border-color:transparent;">
                 ✏️ Input / Update →
             </a>

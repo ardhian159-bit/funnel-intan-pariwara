@@ -1,7 +1,7 @@
 /**
  * auth.js
  * Session management, login/logout, role checks.
- * Dipakai oleh: prototype.html, dashboard.html
+ * Dipakai oleh: admin.html, dashboard.html
  */
 
 

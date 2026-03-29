@@ -740,7 +740,7 @@ async function handleSalesLogin(event) {
             switchTab(['update','input','statistik'].includes(hash) ? hash : 'update');
         } else if (role === 'admin' || role === 'superadmin') {
             sessionStorage.setItem('ip_session', JSON.stringify(result));
-            window.location.href = 'prototype.html';
+            window.location.href = 'admin.html';
         } else {
             throw new Error('Akses ditolak. Hanya akun sales yang dapat masuk di sini.');
         }
