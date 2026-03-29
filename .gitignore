@@ -4,3 +4,5 @@ prototype_files/
 *.xlsx
 *.txt
 Handoff_*.md
+
+.agent/
