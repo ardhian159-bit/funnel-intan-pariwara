@@ -2065,200 +2065,6 @@
             </div>
         </section><!-- ===== SECTION 3: DASHBOARD & STATISTIK MP ===== -->
         <!-- ===== SECTION 4: MONITORING WEEKLY MP ===== -->
-        <section id="section-monitoring" class="hidden">
-            <div class="mb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                <div>
-                    <h2 class="text-2xl font-bold text-white flex items-center gap-2">📋 Monitoring Weekly MP</h2>
-                    <p class="text-slate-400 text-sm mt-1">Riwayat update mingguan seluruh sales</p>
-                </div>
-                <button onclick="exportData()"
-                    class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold border border-slate-600 text-white transition">📥
-                    Export CSV</button>
-            </div>
-            <!-- Filters -->
-            <div class="card p-4 mb-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Funnel ID</label>
-                        <select id="mon-filter-funnel" class="input-field text-xs py-1.5" onchange="renderMonitoring()">
-                            <option value="">Semua Funnel</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Sales</label>
-                        <select id="mon-filter-sales" class="input-field text-xs py-1.5" onchange="repopulateMonFilterFunnel()">
-                            <option value="ALL">Semua Sales</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Week</label>
-                        <select id="mon-filter-week" class="input-field text-xs py-1.5" onchange="renderMonitoring()">
-                            <option value="ALL">Semua Week</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Status</label>
-                        <select id="mon-filter-status" class="input-field text-xs py-1.5" onchange="renderMonitoring()">
-                            <option value="ALL">Semua Status</option>
-                            <option>Informasi Awal</option>
-                            <option>Informasi Kebutuhan</option>
-                            <option>Presentasi</option>
-                            <option>Peluang 50:50</option>
-                            <option>Hot Prospek</option>
-                            <option>Closing</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Quarter</label>
-                        <select id="mon-filter-quarter" class="input-field text-xs py-1.5"
-                            onchange="renderMonitoring()">
-                            <option value="ALL">Semua Q</option>
-                            <option>Q1</option>
-                            <option>Q2</option>
-                            <option>Q3</option>
-                            <option>Q4</option>
-                        </select>
-                    </div>
-                </div>
-            </div>
-            <div class="card overflow-x-auto">
-                <table class="w-full text-sm text-left text-slate-300">
-                    <thead
-                        class="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700 sticky top-0 z-10">
-                        <tr>
-                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring(&#39;id&#39;)">ID Funnel ↕</th>
-                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring(&#39;week&#39;)">Week ↕</th>
-                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring(&#39;sales&#39;)">Nama Sales ↕
-                            </th>
-                            <th class="px-4 py-3 cursor-pointer" onclick="sortMonitoring(&#39;project&#39;)">Nama
-                                Project ↕</th>
-                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring(&#39;status&#39;)">Status ↕
-                            </th>
-                            <th class="px-3 py-3 text-right cursor-pointer"
-                                onclick="sortMonitoring(&#39;forecast&#39;)">Nilai
-                                Forecast ↕</th>
-                            <th class="px-4 py-3">Notes</th>
-                            <th class="px-4 py-3">Admin Notes</th>
-                            <th class="px-3 py-3 cursor-pointer" onclick="sortMonitoring(&#39;timestamp&#39;)">Timestamp
-                                ↕</th>
-                            <th class="px-3 py-3 text-center" id="mon-action-col">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody id="monitoring-tbody" class="divide-y divide-slate-700/80"></tbody>
-                </table>
-                <div class="p-3 border-t border-slate-700 flex justify-between items-center bg-slate-800">
-                    <span class="text-sm text-slate-400" id="monitoring-info">Menampilkan 0 entri</span>
-                    <div id="monitoring-pagination"
-                        class="flex items-center gap-1 text-sm bg-slate-900 rounded border border-slate-700 overflow-hidden">
-                        <!-- Pagination buttons generated by JS -->
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ===== SECTION 5: CONTROL PANEL (Super Admin) ===== -->
-        <section id="section-control" class="hidden">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-white flex items-center gap-2">⚙️ Control Panel</h2>
-                <p class="text-slate-400 text-sm mt-1">Super Admin — Kelola sistem</p>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- User Management -->
-                <div class="card p-5 lg:col-span-2">
-                    <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
-                        <h3 class="text-lg font-bold text-white">👤 User Management</h3>
-                        <button onclick="showAddUserForm()"
-                            class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">+ Tambah User</button>
-                    </div>
-                    <!-- Form tambah user (hidden by default) -->
-                    <div id="um-add-form" class="hidden mb-4 p-3 bg-slate-800 rounded-lg">
-                        <div class="grid grid-cols-2 gap-2 mb-2">
-                            <input type="text" id="um-username" class="input-field text-xs py-1.5" placeholder="Username">
-                            <input type="password" id="um-password" class="input-field text-xs py-1.5" placeholder="Password">
-                            <select id="um-role" class="input-field text-xs py-1.5">
-                                <option value="sales">sales</option>
-                                <option value="admin">admin</option>
-                                <option value="superadmin">superadmin</option>
-                            </select>
-                            <input type="text" id="um-picname" class="input-field text-xs py-1.5" placeholder="PIC Name (opsional)">
-                        </div>
-                        <div id="um-add-error" class="text-red-400 text-xs mb-2 hidden"></div>
-                        <div class="flex gap-2">
-                            <button onclick="submitAddUser()"
-                                class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">Simpan</button>
-                            <button onclick="hideAddUserForm()"
-                                class="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold text-white">Batal</button>
-                        </div>
-                    </div>
-                    <!-- Tabel daftar user -->
-                    <div id="um-user-table" class="space-y-1 max-h-72 overflow-y-auto"></div>
-                    <!-- Modal reset password -->
-                    <div id="um-reset-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
-                        <div class="bg-slate-800 rounded-xl p-5 w-80">
-                            <h4 class="text-white font-bold mb-3">Reset Password</h4>
-                            <p id="um-reset-label" class="text-slate-400 text-xs mb-2"></p>
-                            <input type="password" id="um-new-password" class="input-field text-xs py-1.5 mb-2 w-full" placeholder="Password baru">
-                            <div id="um-reset-error" class="text-red-400 text-xs mb-2 hidden"></div>
-                            <div class="flex gap-2 justify-end">
-                                <button onclick="closeResetModal()"
-                                    class="px-3 py-1.5 bg-slate-600 hover:bg-slate-500 rounded text-xs font-bold text-white">Batal</button>
-                                <button onclick="submitResetPassword()"
-                                    class="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 rounded text-xs font-bold text-white">Reset</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Reset Submission Flag -->
-                <div class="card p-5">
-                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">🔄 Reset Submission
-                        Flag</h3>
-                    <p class="text-xs text-slate-400 mb-3">Reset flag agar sales bisa submit ulang minggu ini</p>
-                    <div class="flex gap-2">
-                        <select id="cp-reset-user" class="input-field flex-1 text-xs py-1.5">
-                            <option value="">-- Pilih Sales --</option>
-                        </select>
-                        <select id="cp-reset-project" class="input-field flex-1 text-xs py-1.5">
-                            <option value="">-- Pilih Project --</option>
-                        </select>
-                        <button onclick="resetSubmissionFlag()"
-                            class="px-3 py-1.5 bg-yellow-600 hover:bg-yellow-700 rounded text-xs font-bold text-white">Reset</button>
-                    </div>
-                </div>
-                <!-- Dropdown Master Edit (Admin+) -->
-                <div class="card p-5">
-                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">📝 Edit Dropdown Master
-                    </h3>
-                    <div class="mb-3">
-                        <label class="text-xs text-slate-400 font-semibold">Pilih Dropdown:</label>
-                        <select id="cp-dropdown-select" class="input-field text-xs py-1.5 mt-1"
-                            onchange="loadDropdownEditor()">
-                            <option value="picNames">PIC Names</option>
-                            <option value="principals">Principal</option>
-                            <option value="sumberDanaList">Sumber Dana</option>
-                        </select>
-                    </div>
-                    <div id="cp-dropdown-items" class="space-y-1 max-h-48 overflow-y-auto mb-3"></div>
-                    <div class="flex gap-2">
-                        <input type="text" id="cp-dropdown-new" class="input-field flex-1 text-xs py-1.5"
-                            placeholder="Nilai baru...">
-                        <button onclick="addDropdownItem()"
-                            class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">+
-                            Tambah</button>
-                    </div>
-                </div>
-                <!-- Export & Activity Log -->
-                <div class="card p-5">
-                    <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">📊 Export &amp;
-                        Activity
-                        Log</h3>
-                    <button onclick="exportAllCSV()"
-                        class="w-full mb-3 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 rounded-lg text-sm font-bold text-white transition">📥
-                        Export All Data as CSV</button>
-                    <h4 class="text-sm font-semibold text-slate-300 mb-2">Aktivitas Terakhir:</h4>
-                    <div id="activity-log" class="space-y-1 max-h-52 overflow-y-auto text-xs text-slate-400"></div>
-                </div>
-            </div>
-        </section>
 
     </main>
 
@@ -2338,10 +2144,7 @@
         var currentMenu = 'update'; // Default landing page
         var currentSalesUser = '';
         var selectedProjectId = null;
-        var monitoringSortKey = 'timestamp';
-        var monitoringSortAsc = false;
-        var currentPage = 1;
-        var ITEMS_PER_PAGE = 10;
+
         var activityLog = [];
         var nextFunnelId = 100;
         var nextUpdateId = 200;
@@ -2405,7 +2208,7 @@
         // SECTION E: UTILITY FUNCTIONS
         // ============================================================
 // utility functions → lihat assets/utils.js
-var today = new Date(2026, 2, 7); // March 7 2026
+var today = new Date();
 var currentWeek = getISOWeek(today);
 var currentYear = 2026;
 var currentWeekLabel = `W${currentWeek}-${currentYear}`;
@@ -2487,7 +2290,7 @@ function switchMenu(menu) {
             if (window.location.hash !== '#' + menu) {
                 history.replaceState(null, '', '#' + menu);
             }
-            ['input', 'update', 'dashboard', 'monitoring', 'control'].forEach(m => {
+            ['input', 'update', 'dashboard'].forEach(m => {
                 const sec = document.getElementById('section-' + m);
                 const btn = document.getElementById('nav-' + m);
                 if (sec) {
@@ -2504,8 +2307,6 @@ function switchMenu(menu) {
             if (menu === 'input') { populateDropdowns(); renderPipelineTable(); }
             if (menu === 'update') { renderProjectList(); }
             if (menu === 'dashboard') { renderDashboard(); }
-            if (menu === 'monitoring') { populateMonitoringFilters(); renderMonitoring(); }
-            if (menu === 'control') { renderControlPanel(); }
         }
         function setCurrentSales(name) {
             currentSalesUser = name;
@@ -3076,369 +2877,7 @@ tambah catatan admin.`;
             });
         }
 
-        // ============================================================
-        // SECTION J: MONITORING TABLE
-        // ============================================================
-        let lastFilterState = '';
-        function repopulateMonFilterFunnel() {
-            const salesVal = document.getElementById('mon-filter-sales')?.value || '';
-            const funnelSel = document.getElementById('mon-filter-funnel');
-            if (!funnelSel) return;
-            const filtered = (salesVal && salesVal !== 'ALL')
-                ? weeklyUpdates.filter(u => (u.pic || '').toLowerCase() === salesVal.toLowerCase())
-                : weeklyUpdates;
-            const ids = [...new Set(filtered.map(u => u.funnelId).filter(Boolean))].sort();
-            funnelSel.innerHTML = '<option value="">Semua Funnel</option>' +
-                ids.map(id => `<option value="${id}">${id}</option>`).join('');
-            funnelSel.value = '';
-            renderMonitoring();
-        }
-        function populateMonitoringFilters() {
-            const salesFil = document.getElementById('mon-filter-sales');
-            if (!salesFil) return;
-            const uniqueSales = [...new Set(getVisibleUpdates().map(u => u.pic))];
-            salesFil.innerHTML = '<option value="ALL">Semua Sales</option>';
-            uniqueSales.forEach(s => {
-                const o = document.createElement('option'); o.value = s; o.textContent = s;
-                salesFil.appendChild(o);
-            });
-            if (canSeeAllData()) {
-                salesFil.value = 'ALL';
-            } else if (uniqueSales.includes(currentSalesUser)) {
-                salesFil.value = currentSalesUser;
-            }
-            const weekFil = document.getElementById('mon-filter-week');
-            const uniqueWeeks = [...new Set(weeklyUpdates.map(u => u.week))].sort();
-            weekFil.innerHTML = '<option value="ALL">Semua Week</option>';
-            uniqueWeeks.forEach(w => {
-                const o = document.createElement('option'); o.value = w; o.textContent = w; weekFil.appendChild(o);
-            });
-            repopulateMonFilterFunnel();
-        }
-        function renderMonitoring() {
-            const tbody = document.getElementById('monitoring-tbody');
-            if (!tbody) return;
-            let data = getVisibleUpdates();
-            const sf = document.getElementById('mon-filter-sales')?.value;
-            const wf = document.getElementById('mon-filter-week')?.value;
-            const stf = document.getElementById('mon-filter-status')?.value;
-            const qf = document.getElementById('mon-filter-quarter')?.value;
-            const ff = document.getElementById('mon-filter-funnel')?.value || '';
 
-            const currentFilterState = sf + wf + stf + qf + ff;
-            if (lastFilterState !== currentFilterState) {
-                currentPage = 1;
-                lastFilterState = currentFilterState;
-            }
-
-            if (sf && sf !== 'ALL') data = data.filter(u => u.pic === sf);
-            if (wf && wf !== 'ALL') data = data.filter(u => u.week === wf);
-            if (stf && stf !== 'ALL') data = data.filter(u => u.status === stf);
-            if (ff) data = data.filter(u => u.funnelId === ff);
-            if (qf && qf !== 'ALL') {
-                const projectIds = funnelData.filter(f => f.quarter === qf).map(f => f.id);
-                const funnelIds  = funnelData.filter(f => f.quarter === qf).map(f => f.funnelId);
-                data = data.filter(u => projectIds.includes(u.projectId) || funnelIds.includes(u.funnelId) || funnelIds.includes(u.projectId));
-            }
-            // Sort
-            data.sort((a, b) => {
-                let va = a[monitoringSortKey], vb = b[monitoringSortKey];
-                if (monitoringSortKey === 'forecast') { va = a.forecast; vb = b.forecast; }
-                if (monitoringSortKey === 'sales') { va = a.pic; vb = b.pic; }
-                if (monitoringSortKey === 'project') {
-                    const pa = funnelData.find(f => f.id === a.projectId);
-                    const pb = funnelData.find(f => f.id === b.projectId);
-                    va = pa ? pa.namaPaket : ''; vb = pb ? pb.namaPaket : '';
-                }
-                if (monitoringSortKey === 'id') {
-                    const pa = funnelData.find(f => f.id === a.projectId);
-                    const pb = funnelData.find(f => f.id === b.projectId);
-                    va = pa ? (pa.funnelId || '') : ''; vb = pb ? (pb.funnelId || '') : '';
-                }
-                if (typeof va === 'string') va = va.toLowerCase();
-                if (typeof vb === 'string') vb = vb.toLowerCase();
-                if (va < vb) return monitoringSortAsc ? -1 : 1; if (va > vb) return monitoringSortAsc ? 1 : -1;
-                return 0;
-            });
-            const showActions = canDelete();
-            document.getElementById('mon-action-col').style.display = showActions ? '' : 'none';
-
-            const totalEntries = data.length;
-            const totalPages = Math.ceil(totalEntries / ITEMS_PER_PAGE) || 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-            const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, totalEntries);
-            const pagedData = data.slice(startIdx, endIdx);
-
-            tbody.innerHTML = pagedData.map(u => {
-                const project = funnelData.find(f => f.funnelId === u.funnelId || f.funnelId === u.projectId || f.id === u.projectId) || {};
-                return `<tr class="${getStatusRowClass(u.status)} hover:bg-slate-700/30">
-        <td class="px-3 py-2.5 font-medium text-teal-400 font-mono text-xs">${u.funnelId || u.projectId || '-'}</td>
-        <td class="px-3 py-2.5 font-medium">${u.week}</td>
-        <td class="px-3 py-2.5">${u.pic}</td>
-        <td class="px-4 py-2.5">${project.namaPaket || u.namaPaket || '-'}</td>
-        <td class="px-3 py-2.5"><span class="badge ${getStatusBadgeClass(u.status)}">${u.status}</span></td>
-        <td class="px-3 py-2.5 text-right text-teal-400 font-semibold">${fmtRp(u.forecast)}</td>
-        <td class="px-4 py-2.5 text-xs max-w-[200px] truncate" title="${u.notes}">${u.notes || '-'}</td>
-        <td class="px-4 py-2.5 text-xs text-teal-300 max-w-[200px] truncate" title="${u.adminNotes}">
-            ${u.adminNotes || '-'}</td>
-        <td class="px-3 py-2.5 text-xs text-slate-500">${u.timestamp}</td>
-        <td class="px-3 py-2.5 text-center" style="${showActions ? '' : 'display:none'}">${showActions ? `<button
-                onclick="deleteUpdate(${u.id})"
-                class="text-red-400 hover:text-red-300 text-xs font-bold">🗑️</button>`: ''}</td>
-    </tr>`;
-            }).join('');
-
-            document.getElementById('monitoring-info').textContent = totalEntries > 0 ? `Menampilkan ${startIdx + 1}–${endIdx} dari ${totalEntries} entri` : 'Menampilkan 0 entri';
-            renderPagination(totalPages);
-        }
-
-        function renderPagination(totalPages) {
-            const pag = document.getElementById('monitoring-pagination');
-            if (!pag) return;
-            let html = `<button class="px-3 py-1.5 hover:bg-slate-700 border-r border-slate-700 disabled:opacity-50" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>← Previous</button>`;
-            for (let i = 1; i <= totalPages; i++) {
-                if (i === 1 || i === totalPages || (i >= currentPage - 1 && i <= currentPage + 1)) {
-                    html += `<button class="px-3 py-1.5 border-r border-slate-700 ${i === currentPage ? 'bg-teal-600 font-bold' : 'hover:bg-slate-700'}" onclick="goToPage(${i})">${i}</button>`;
-                } else if (i === currentPage - 2 || i === currentPage + 2) {
-                    html += `<span class="px-2 py-1.5 opacity-50 border-r border-slate-700">...</span>`;
-                }
-            }
-            html += `<button class="px-3 py-1.5 hover:bg-slate-700 disabled:opacity-50" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>Next →</button>`;
-            pag.innerHTML = html;
-        }
-
-        function goToPage(p) {
-            currentPage = p;
-            renderMonitoring();
-        }
-        function sortMonitoring(key) {
-            if (monitoringSortKey === key) monitoringSortAsc = !monitoringSortAsc;
-            else { monitoringSortKey = key; monitoringSortAsc = true; }
-            renderMonitoring();
-        }
-        function deleteUpdate(id) {
-            if (!canDelete()) { showToast('Tidak punya akses untuk menghapus!', 'error'); return; }
-            weeklyUpdates = weeklyUpdates.filter(u => u.id !== id);
-            logActivity('Deleted weekly update ID ' + id);
-            showToast('Data berhasil dihapus');
-            renderMonitoring();
-        }
-        function exportData() {
-            if (!canExportCSV()) {
-                showToast('Hanya Superadmin yang bisa export CSV!', 'error');
-                return;
-            }
-            exportCSV();
-        }
-
-        // ============================================================
-        // SECTION K: CONTROL PANEL (Super Admin)
-        // ============================================================
-        // ============================================================
-        // USER MANAGEMENT
-        // ============================================================
-        var umSelectedUser = null;
-        async function loadUserList() {
-            const tbody = document.getElementById('um-user-table');
-            if (!tbody) return;
-            tbody.innerHTML = '<p class="text-slate-400 text-xs">Memuat...</p>';
-            try {
-                const response = await apiGet('getUsers');
-                const users = response.data || [];
-                if (!users.length) {
-                    tbody.innerHTML = '<p class="text-slate-400 text-xs">Tidak ada user.</p>';
-                    return;
-                }
-                tbody.innerHTML = users.map(u => `
-                    <div class="flex items-center justify-between px-3 py-2 bg-slate-800 rounded-lg text-xs">
-                        <div>
-                            <span class="font-bold text-white">${u.username}</span>
-                            <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold
-                                ${u.role === 'superadmin' ? 'bg-purple-900/50 text-purple-300' :
-                                  u.role === 'admin' ? 'bg-blue-900/50 text-blue-300' :
-                                  'bg-slate-700 text-slate-300'}">${u.role}</span>
-                            ${u.picName ? `<span class="ml-2 text-slate-400">${u.picName}</span>` : ''}
-                        </div>
-                        <div class="flex gap-1">
-                            <button onclick="openResetModal('${u.username}')"
-                                class="px-2 py-1 bg-yellow-700/50 hover:bg-yellow-600/70 rounded text-yellow-300 font-bold">🔑</button>
-                            <button onclick="confirmDeleteUser('${u.username}')"
-                                class="px-2 py-1 bg-red-900/50 hover:bg-red-800/70 rounded text-red-300 font-bold">🗑</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch(err) {
-                tbody.innerHTML = `<p class="text-red-400 text-xs">Error: ${err.message}</p>`;
-            }
-        }
-        function showAddUserForm() {
-            document.getElementById('um-add-form').classList.remove('hidden');
-            document.getElementById('um-add-error').classList.add('hidden');
-            document.getElementById('um-username').value = '';
-            document.getElementById('um-password').value = '';
-            document.getElementById('um-picname').value = '';
-        }
-        function hideAddUserForm() {
-            document.getElementById('um-add-form').classList.add('hidden');
-        }
-        async function submitAddUser() {
-            const username = document.getElementById('um-username').value.trim();
-            const password = document.getElementById('um-password').value;
-            const role     = document.getElementById('um-role').value;
-            const picName  = document.getElementById('um-picname').value.trim().toUpperCase();
-            const errEl    = document.getElementById('um-add-error');
-            if (!username || !password) {
-                errEl.textContent = 'Username dan password wajib diisi.';
-                errEl.classList.remove('hidden');
-                return;
-            }
-            try {
-                const hashedPassword = await hashPassword(password);
-                const res = await apiGet('addUser', { payload: JSON.stringify({ username, password: hashedPassword, role, picName }) });
-                if (res.error) { errEl.textContent = res.error; errEl.classList.remove('hidden'); return; }
-                showToast('✅ User berhasil ditambahkan');
-                hideAddUserForm();
-                loadUserList();
-            } catch(err) {
-                errEl.textContent = err.message;
-                errEl.classList.remove('hidden');
-            }
-        }
-        function openResetModal(username) {
-            umSelectedUser = username;
-            document.getElementById('um-reset-label').textContent = 'Reset password untuk: ' + username;
-            document.getElementById('um-new-password').value = '';
-            document.getElementById('um-reset-error').classList.add('hidden');
-            document.getElementById('um-reset-modal').classList.remove('hidden');
-        }
-        function closeResetModal() {
-            document.getElementById('um-reset-modal').classList.add('hidden');
-            umSelectedUser = null;
-        }
-        async function submitResetPassword() {
-            const newPassword = document.getElementById('um-new-password').value;
-            const errEl = document.getElementById('um-reset-error');
-            if (!newPassword) {
-                errEl.textContent = 'Password baru wajib diisi.';
-                errEl.classList.remove('hidden');
-                return;
-            }
-            try {
-                const hashedNew = await hashPassword(newPassword);
-                const res = await apiGet('updateUser', { payload: JSON.stringify({ username: umSelectedUser, password: hashedNew }) });
-                if (res.error) { errEl.textContent = res.error; errEl.classList.remove('hidden'); return; }
-                showToast('✅ Password berhasil direset');
-                closeResetModal();
-            } catch(err) {
-                errEl.textContent = err.message;
-                errEl.classList.remove('hidden');
-            }
-        }
-        async function confirmDeleteUser(username) {
-            if (!confirm(`Hapus user "${username}"? Tindakan ini tidak bisa dibatalkan.`)) return;
-            try {
-                const res = await apiGet('deleteUser', { payload: JSON.stringify({ username }) });
-                if (res.error) { showToast('Error: ' + res.error, 'error'); return; }
-                showToast('✅ User berhasil dihapus');
-                loadUserList();
-            } catch(err) {
-                showToast('Error: ' + err.message, 'error');
-            }
-        }
-
-        function renderControlPanel() {
-            loadUserList();
-            renderUserList();
-            loadDropdownEditor();
-            renderActivityLog();
-            populateResetSelects();
-        }
-        function renderUserList() {
-            const cont = document.getElementById('cp-user-list');
-            if (!cont) return;
-            cont.innerHTML = picNames.map(n =>
-                `<div class="flex justify-between items-center py-1.5 px-2 rounded hover:bg-slate-700/50 text-sm text-slate-300">
-        <span>${n}</span>
-        <button onclick="removeSalesUser('${n}')" class="text-red-400 hover:text-red-300 text-xs">✕</button>
-    </div>`
-            ).join('');
-        }
-        function addSalesUser() {
-            const inp = document.getElementById('cp-new-user');
-            const name = inp.value.trim().toUpperCase();
-            if (!name) return;
-            if (picNames.includes(name)) { showToast('Nama sudah ada!', 'error'); return; }
-            picNames.push(name);
-            saveSettingsToSheets();
-            inp.value = '';
-            renderUserList();
-            logActivity('Added sales user: ' + name);
-            showToast('User ' + name + ' ditambahkan');
-        }
-        function removeSalesUser(name) {
-            picNames = picNames.filter(n => n !== name);
-            saveSettingsToSheets();
-            renderUserList();
-            logActivity('Removed sales user: ' + name);
-            showToast('User ' + name + ' dihapus');
-        }
-        function loadDropdownEditor() {
-            const sel = document.getElementById('cp-dropdown-select')?.value;
-            const cont = document.getElementById('cp-dropdown-items');
-            if (!cont || !sel) return;
-            let items = [];
-            if (sel === 'picNames') items = picNames;
-            else if (sel === 'principals') items = principals;
-            else if (sel === 'sumberDanaList') items = sumberDanaList;
-            cont.innerHTML = items.map((it, i) =>
-                `<div class="flex justify-between items-center py-1 px-2 rounded hover:bg-slate-700/50 text-xs text-slate-300">
-        <span>${it}</span>
-        <button onclick="removeDropdownItem('${sel}',${i})" class="text-red-400 hover:text-red-300">✕</button>
-    </div>`
-            ).join('');
-        }
-        function addDropdownItem() {
-            const sel = document.getElementById('cp-dropdown-select')?.value;
-            const inp = document.getElementById('cp-dropdown-new');
-            const val = inp.value.trim();
-            if (!val || !sel) return;
-            if (sel === 'picNames') picNames.push(val.toUpperCase());
-            else if (sel === 'principals') principals.push(val);
-            else if (sel === 'sumberDanaList') sumberDanaList.push(val);
-            inp.value = '';
-            loadDropdownEditor();
-            logActivity('Added dropdown item to ' + sel + ': ' + val);
-            showToast('Item ditambahkan');
-        }
-        function removeDropdownItem(listName, idx) {
-            if (listName === 'picNames') picNames.splice(idx, 1);
-            else if (listName === 'principals') principals.splice(idx, 1);
-            else if (listName === 'sumberDanaList') sumberDanaList.splice(idx, 1);
-            loadDropdownEditor();
-            logActivity('Removed dropdown item from ' + listName);
-            showToast('Item dihapus');
-        }
-        function populateResetSelects() {
-            fillSelect('cp-reset-user', picNames, '-- Pilih Sales --');
-            const projNames = funnelData.map(f => f.id + '|' + f.namaPaket);
-            const sel = document.getElementById('cp-reset-project');
-            if (sel) {
-                sel.innerHTML = '<option value="">-- Pilih Project --</option>';
-                funnelData.forEach(f => {
-                    const
-                        o = document.createElement('option'); o.value = f.id; o.textContent = f.namaPaket; sel.appendChild(o);
-                });
-            }
-        }
-        function resetSubmissionFlag() {
-            const user = document.getElementById('cp-reset-user')?.value;
-            const projId = parseInt(document.getElementById('cp-reset-project')?.value);
-            if (!user || !projId) { showToast('Pilih Sales dan Project terlebih dahulu', 'error'); return; }
-            weeklyUpdates = weeklyUpdates.filter(u => !(u.pic === user && u.projectId === projId && u.week === currentWeekLabel));
-            logActivity('Reset submission flag: ' + user + ' project ID ' + projId + ' week ' + currentWeekLabel);
-            showToast('✅ Submission flag direset untuk ' + user);
-        }
         function exportCSV() {
             if (!weeklyUpdates.length) { showToast('Tidak ada data update untuk diexport', 'error'); return; }
             const headers = ['ID Update', 'Week', 'PIC', 'ID Project', 'Nama Paket', 'Instansi', 'Principal', 'Status', 'Forecast Netto', 'Notes Sales', 'Admin Notes', 'Timestamp'];
@@ -3462,25 +2901,6 @@ tambah catatan admin.`;
             document.body.removeChild(a);
             logActivity('Exported weekly updates to CSV');
             showToast('✅ Download CSV dimulai');
-        }
-        async function saveSettingsToSheets() {
-    try {
-        await apiGet('saveSettings', {
-            payload: JSON.stringify({
-                picNames, principals, sumberDanaList
-            })
-        });
-    } catch(e) {
-        console.warn('Gagal save settings:', e);
-    }
-}
-        function renderActivityLog() {
-            const cont = document.getElementById('activity-log');
-            if (!cont) return;
-            cont.innerHTML = activityLog.length ? activityLog.map(a =>
-                `<div class="py-1 border-b border-slate-700/50"><span class="text-slate-500">${a.time}</span> <span
-            class="text-teal-400 font-semibold">[${a.role}]</span> ${a.action}</div>`
-            ).join('') : '<p class="text-slate-500 italic">Belum ada aktivitas</p>';
         }
 
         // ============================================================
@@ -3586,7 +3006,7 @@ async function handleLogin(e) {
             logActivity('System initialized');
             updateNavVisibility();
            // Baca menu: prioritas hash > ?menu= > default 'update'
-            const validMenus = ['input', 'update', 'monitoring', 'control'];
+            const validMenus = ['input', 'update'];
             const hash = window.location.hash.replace('#', '');
             const urlParams = new URLSearchParams(window.location.search);
             const menuParam = urlParams.get('menu');
@@ -3603,7 +3023,7 @@ async function handleLogin(e) {
         document.addEventListener('DOMContentLoaded', init);
         window.addEventListener('hashchange', function() {
             const hash = window.location.hash.replace('#', '');
-            const validMenus = ['input', 'update', 'monitoring', 'control'];
+            const validMenus = ['input', 'update'];
             if (validMenus.includes(hash)) switchMenu(hash);
         });
         // ===== NAVBAR HTMX HANDLER =====
@@ -3619,6 +3039,6 @@ async function handleLogin(e) {
     </script>
 
 
-</body>
+<footer class="text-center text-xs text-slate-600 py-4 mt-4">\n  made with 🔥 by Adrian\n</footer>\n</body>
 
 </html>

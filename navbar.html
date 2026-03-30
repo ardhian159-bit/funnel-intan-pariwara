@@ -51,18 +51,20 @@
                 </button>
 
                 <!-- Hidden sampai login (admin/superadmin) -->
-                <button class="nav-btn hidden"
-                        onclick="if(typeof switchMenu==='function') switchMenu('monitoring'); else window.location.href='admin.html?menu=monitoring'"
-                        id="nav-monitoring">
+                <a href="monitoring.html"
+                   class="nav-btn hidden"
+                   data-menu="monitoring"
+                   id="nav-monitoring">
                     📋 Monitoring
-                </button>
+                </a>
 
                 <!-- Hidden sampai login superadmin -->
-                <button class="nav-btn hidden"
-                        onclick="if(typeof switchMenu==='function') switchMenu('control'); else window.location.href='admin.html?menu=control'"
-                        id="nav-control">
+                <a href="controlpanel.html"
+                   class="nav-btn hidden"
+                   data-menu="control"
+                   id="nav-control">
                     ⚙️ Control Panel
-                </button>
+                </a>
 
             </div>
 

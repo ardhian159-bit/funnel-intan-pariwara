@@ -251,6 +251,11 @@
         </div>
         <div class="mt-4">
           <span class="text-3xl font-bold text-white tracking-tight" id="kpiBrutto">Rp 0</span>
+          <div class="flex items-center gap-2 mt-2">
+            <span class="text-red-400 text-sm font-semibold" id="kpiGagalDiff">▼ Rp 0</span>
+            <span class="text-slate-500 text-xs" id="kpiGagalPct">(0%)</span>
+            <span class="text-slate-600 text-xs">hilang (Gagal)</span>
+          </div>
         </div>
       </div>
 
@@ -2301,6 +2306,10 @@
         }
 
         document.getElementById('kpiBrutto').textContent = formatRupiahShort(tBruto);
+        let gagalBruto = state.filtered.filter(x => x.tkNum === 0).reduce((s, d) => s + d.bruto, 0);
+        let gagalPct = tBruto > 0 ? ((gagalBruto / tBruto) * 100).toFixed(1) : 0;
+        document.getElementById('kpiGagalDiff').textContent = gagalBruto > 0 ? '▼ ' + formatRupiahShort(gagalBruto) : '▼ Rp 0';
+        document.getElementById('kpiGagalPct').textContent = '(' + gagalPct + '%)';
         document.getElementById('kpiNetto').textContent = formatRupiahShort(tNetto);
         document.getElementById('kpiPipeline').textContent = count;
         document.getElementById('kpiClosingValue').textContent = formatRupiahShort(cNetto);
@@ -2743,6 +2752,6 @@
       });
     </script>
   </div><!-- end main content -->
-</body>
+<footer class="text-center text-xs text-slate-600 py-4 mt-4">\n  made with 🔥 by Adrian\n</footer>\n</body>
 
 </html>
