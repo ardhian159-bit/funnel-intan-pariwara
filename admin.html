@@ -1602,371 +1602,168 @@
 
         <!-- ===== SECTION 1: INPUT FUNNEL ===== -->
         <section id="section-input" class="">
-            <div class="mb-6">
-                <h2 class="text-2xl font-bold text-white flex items-center gap-2">📝 Input Funnel Baru</h2>
-                <p class="text-slate-400 text-sm mt-1">Tambah project baru ke pipeline sales</p>
-            </div>
-            <div class="card p-6">
-                <form id="input-form" onsubmit="return handleInputSubmit(event)">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        <!-- PIC -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">PIC / Nama Sales
-                                <span class="text-red-400">*</span></label>
-                            <select id="f-pic" class="input-field" required="">
-                                <option value="">-- Pilih PIC --</option>
-                                <option value="GIRI SURYANTO">GIRI SURYANTO</option>
-                                <option value="DIKKY MAHISA PUTERA">DIKKY MAHISA PUTERA</option>
-                                <option value="DANANG SETYO BUDI">DANANG SETYO BUDI</option>
-                                <option value="BAMBANG SURYANTO">BAMBANG SURYANTO</option>
-                                <option value="HERI IRWANSYAH">HERI IRWANSYAH</option>
-                                <option value="BLASIUS DIMAS">BLASIUS DIMAS</option>
-                                <option value="JOKO WALUYO">JOKO WALUYO</option>
-                                <option value="LILIK LASONO">LILIK LASONO</option>
-                                <option value="MANAEK HENDRAWAN SITINJAK">MANAEK HENDRAWAN SITINJAK</option>
-                                <option value="MUHAMMAD RASYID RIDHA">MUHAMMAD RASYID RIDHA</option>
-                                <option value="EKO JULIANTO">EKO JULIANTO</option>
-                                <option value="YUDISTIRA WOLDI PAOKI">YUDISTIRA WOLDI PAOKI</option>
-                                <option value="AJI FARIZ RACHMAN">AJI FARIZ RACHMAN</option>
-                                <option value="REZKI ANUGRAHA">REZKI ANUGRAHA</option>
-                                <option value="ATEP KUNAEPI">ATEP KUNAEPI</option>
-                                <option value="YUDHA PRATISTA APRIANATA">YUDHA PRATISTA APRIANATA</option>
-                                <option value="AGUS MUHCLIS">AGUS MUHCLIS</option>
-                                <option value="BAMBANG MUDJIRAN">BAMBANG MUDJIRAN</option>
-                                <option value="RISKY ALDIANSYAH">RISKY ALDIANSYAH</option>
-                                <option value="FIKRI ARI HANAFI">FIKRI ARI HANAFI</option>
-                            </select>
-                            <div class="error-msg" id="err-pic">PIC wajib dipilih</div>
-                        </div>
-                        <!-- Principal -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Principal <span
-                                    class="text-red-400">*</span></label>
-                            <select id="f-principal" class="input-field" required="">
-                                <option value="">-- Pilih Principal --</option>
-                                <option value="ATS">ATS</option>
-                                <option value="SKE">SKE</option>
-                                <option value="SMK">SMK</option>
-                                <option value="IPE">IPE</option>
-                                <option value="IPV">IPV</option>
-                                <option value="Un categories">Un categories</option>
-                            </select>
-                            <div class="error-msg" id="err-principal">Principal wajib dipilih</div>
-                        </div>
-                        <!-- Sumber Dana -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Sumber Dana <span
-                                    class="text-red-400">*</span></label>
-                            <select id="f-sumberdana" class="input-field" required="">
-                                <option value="">-- Pilih --</option>
-                                <option value="APBN">APBN</option>
-                                <option value="APBD">APBD</option>
-                                <option value="DAK">DAK</option>
-                                <option value="BOS">BOS</option>
-                                <option value="BLUD">BLUD</option>
-                                <option value="BUMD">BUMD</option>
-                                <option value="POKIR">POKIR</option>
-                                <option value="APBDP">APBDP</option>
-                                <option value="Swasta">Swasta</option>
-                            </select>
-                            <div class="error-msg" id="err-sumberdana">Sumber Dana wajib dipilih</div>
-                        </div>
-                        <!-- Nama Paket -->
-                        <div class="lg:col-span-2">
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nama Paket /
-                                Rencana Pengadaan <span class="text-red-400">*</span></label>
-                            <input type="text" id="f-namapaket" class="input-field"
-                                placeholder="Nama paket pengadaan..." required="">
-                            <div class="error-msg" id="err-namapaket">Nama Paket wajib diisi</div>
-                        </div>
-                        <!-- K/L/P/D -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">K/L/P/D (Instansi)
-                                <span class="text-red-400">*</span></label>
-                            <input type="text" id="f-instansi" class="input-field" placeholder="Nama instansi..."
-                                required="">
-                            <div class="error-msg" id="err-instansi">Instansi wajib diisi</div>
-                        </div>
-                        <!-- Provinsi -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Provinsi <span
-                                    class="text-red-400">*</span></label>
-                            <div class="custom-select-wrapper" id="custom-provinsi">
-                                <div class="custom-select" onclick="toggleCustomDropdown(&#39;provinsi-options&#39;)">
-                                    <div class="custom-select__trigger">
-                                        <span id="f-provinsi-text">Aceh</span>
-                                        <div class="arrow">▼</div>
-                                    </div>
-                                    <div class="custom-options" id="provinsi-options" onclick="event.stopPropagation()">
-                                        <div class="custom-search">
-                                            <input type="text" id="provinsi-search" placeholder="Cari provinsi..."
-                                                oninput="filterCustomDropdown(&#39;provinsi&#39;)">
-                                        </div>
-                                        <div class="options-list" id="provinsi-list">
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <input type="hidden" id="f-provinsi" value="Aceh" required="" onchange="onProvinsiChange()">
-                            <div class="error-msg" id="err-provinsi">Provinsi wajib dipilih</div>
-                        </div>
-                        <!-- Kab/Kota -->
-                        <div>
-                            <label
-                                class="block text-xs font-semibold text-slate-400 uppercase mb-1">Kabupaten/Kota</label>
-                            <div class="custom-select-wrapper" id="custom-wilayah">
-                                <div class="custom-select" id="custom-wilayah-trigger"
-                                    onclick="toggleCustomDropdown(&#39;wilayah-options&#39;)">
-                                    <div class="custom-select__trigger">
-                                        <span id="f-wilayah-text">-- Pilih Kab/Kota --</span>
-                                        <div class="arrow">▼</div>
-                                    </div>
-                                    <div class="custom-options" id="wilayah-options" onclick="event.stopPropagation()">
-                                        <div class="custom-search">
-                                            <input type="text" id="wilayah-search" placeholder="Cari kab/kota..."
-                                                oninput="filterCustomDropdown(&#39;wilayah&#39;)">
-                                        </div>
-                                        <div class="options-list" id="wilayah-list">
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kota Banda Aceh&#39;, &#39;Kota Banda Aceh&#39;)">
-                                                Kota Banda Aceh</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Jaya&#39;, &#39;Kab. Aceh Jaya&#39;)">
-                                                Kab. Aceh Jaya</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kota Sabang&#39;, &#39;Kota Sabang&#39;)">
-                                                Kota Sabang</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Besar&#39;, &#39;Kab. Aceh Besar&#39;)">
-                                                Kab. Aceh Besar</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Selatan&#39;, &#39;Kab. Aceh Selatan&#39;)">
-                                                Kab. Aceh Selatan</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Tenggara&#39;, &#39;Kab. Aceh Tenggara&#39;)">
-                                                Kab. Aceh Tenggara</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Barat Daya&#39;, &#39;Kab. Aceh Barat Daya&#39;)">
-                                                Kab. Aceh Barat Daya</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kota Subulussalam&#39;, &#39;Kota Subulussalam&#39;)">
-                                                Kota Subulussalam</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Singkil&#39;, &#39;Kab. Aceh Singkil&#39;)">
-                                                Kab. Aceh Singkil</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Barat&#39;, &#39;Kab. Aceh Barat&#39;)">
-                                                Kab. Aceh Barat</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Simeulue&#39;, &#39;Kab. Simeulue&#39;)">
-                                                Kab. Simeulue</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Pidie&#39;, &#39;Kab. Pidie&#39;)">
-                                                Kab. Pidie</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Pidie Jaya&#39;, &#39;Kab. Pidie Jaya&#39;)">
-                                                Kab. Pidie Jaya</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Nagan Raya&#39;, &#39;Kab. Nagan Raya&#39;)">
-                                                Kab. Nagan Raya</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Bireuen&#39;, &#39;Kab. Bireuen&#39;)">
-                                                Kab. Bireuen</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kota Langsa&#39;, &#39;Kota Langsa&#39;)">
-                                                Kota Langsa</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Timur&#39;, &#39;Kab. Aceh Timur&#39;)">
-                                                Kab. Aceh Timur</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Tamiang&#39;, &#39;Kab. Aceh Tamiang&#39;)">
-                                                Kab. Aceh Tamiang</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Tengah&#39;, &#39;Kab. Aceh Tengah&#39;)">
-                                                Kab. Aceh Tengah</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Aceh Utara&#39;, &#39;Kab. Aceh Utara&#39;)">
-                                                Kab. Aceh Utara</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Bener Meriah&#39;, &#39;Kab. Bener Meriah&#39;)">
-                                                Kab. Bener Meriah</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kota Lhokseumawe&#39;, &#39;Kota Lhokseumawe&#39;)">
-                                                Kota Lhokseumawe</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Kab. Gayo Lues&#39;, &#39;Kab. Gayo Lues&#39;)">
-                                                Kab. Gayo Lues</div>
-                                            <div class="custom-option"
-                                                onclick="selectCustomOption(&#39;wilayah&#39;, &#39;Provinsi Aceh&#39;, &#39;Provinsi Aceh&#39;)">
-                                                Provinsi Aceh</div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <input type="hidden" id="f-wilayah" value="">
-                        </div>
-                        <!-- Quarter -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Quarter <span
-                                    class="text-red-400">*</span></label>
-                            <select id="f-quarter" class="input-field" required="">
-                                <option value="">-- Pilih --</option>
-                                <option>Q1</option>
-                                <option>Q2</option>
-                                <option>Q3</option>
-                                <option>Q4</option>
-                            </select>
-                            <div class="error-msg" id="err-quarter">Quarter wajib dipilih</div>
-                        </div>
-                        <!-- Status -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Status <span
-                                    class="text-red-400">*</span></label>
-                            <select id="f-status" class="input-field" required="">
-                                <option value="">-- Pilih Status --</option>
-                                <option value="Gagal">Gagal</option>
-                                <option value="Informasi Peluang">Informasi Peluang</option>
-                                <option value="Informasi Kebutuhan">Informasi Kebutuhan</option>
-                                <option value="Presentasi">Presentasi</option>
-                                <option value="Peluang">Peluang</option>
-                                <option value="Hot Prospek">Hot Prospek</option>
-                                <option value="Closing">Closing</option>
-                            </select>
-                            <div class="error-msg" id="err-status">Status wajib dipilih</div>
-                        </div>
-                        <!-- TK / Win Rate (%) -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">TK (%) <span
-                                    class="text-red-400">*</span></label>
-                            <input type="number" id="f-tk" class="input-field" placeholder="0" required="">
-                            <div class="error-msg" id="err-tk">TK wajib diisi</div>
-                            <div class="error-msg" id="err-tk-val">TK harus 0 - 100</div>
-                        </div>
-                        <!-- Nilai Brutto -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Nilai Brutto /
-                                Anggaran (Rp) <span class="text-red-400">*</span></label>
-                            <input type="text" id="f-brutto" class="input-field" placeholder="0" required=""
-                                oninput="formatCurrency(this); calcForecast()">
-                            <div class="error-msg" id="err-brutto">Nilai Brutto wajib diisi</div>
-                            <div class="error-msg" id="err-brutto-val">Brutto harus &gt;= 0</div>
-                        </div>
-                        <!-- Forecast Netto -->
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Forecast Netto (Rp)
-                                <span class="text-teal-400 text-xs">(auto)</span></label>
-                            <input type="text" id="f-netto" class="input-field bg-slate-800" placeholder="0"
-                                oninput="nettoManuallyEdited = true; formatCurrency(this)">
-                            <p class="text-xs text-slate-500 mt-1" id="f-netto-hint">DPP: Rp 0 → Netto: Rp 0 (CB: 20%)
-                            </p>
-                            <div class="error-msg" id="err-netto-val">Netto tidak boleh melebihi Brutto</div>
-                        </div>
-                        <!-- Keterangan -->
-                        <div class="lg:col-span-3">
-                            <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Keterangan /
-                                Notes</label>
-                            <textarea id="f-keterangan" class="input-field" rows="2"
-                                placeholder="Catatan tambahan..."></textarea>
-                        </div>
-                    </div>
 
-                    <!-- 📦 Permintaan Produk Section -->
-                    <details class="mt-6 border border-slate-700 bg-slate-800/50 rounded-lg" open="">
-                        <summary class="font-bold text-white p-4 cursor-pointer hover:bg-slate-700/50 transition">📦
-                            Permintaan Produk</summary>
-                        <div class="p-4 border-t border-slate-700 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">PPN / NON
-                                    PPN</label>
-                                <select id="f-ppn" class="input-field" onchange="calcForecast()">
-                                    <option value="PPN">PPN</option>
-                                    <option value="NON PPN">NON PPN</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Perkiraan CB
-                                    (%)</label>
-                                <input type="number" step="0.01" id="f-cb" class="input-field"
-                                    placeholder="Contoh: 20.00" oninput="calcForecast()">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Jenis Produk
-                                    <span class="text-red-400">*</span></label>
-                                <select id="f-jenisproduk" class="input-field">
-                                    <option value="">-- Pilih --</option>
-                                    <option value="Mebel / Furnitur">Mebel / Furnitur</option>
-                                    <option value="Alat Tulis Kantor">Alat Tulis Kantor</option>
-                                    <option value="TIK &amp; Periperal">TIK &amp; Periperal</option>
-                                    <option value="Buku Non Teks HET">Buku Non Teks HET</option>
-                                    <option value="Buku Teks Pendamping HET">Buku Teks Pendamping HET</option>
-                                    <option value="Buku Teks Pendamping">Buku Teks Pendamping</option>
-                                    <option value="Buku Non Teks">Buku Non Teks</option>
-                                    <option value="Buku PAUD">Buku PAUD</option>
-                                    <option value="Cetak, Kertas, dan Buku Tulis">Cetak, Kertas, dan Buku Tulis</option>
-                                    <option value="Alat Olahraga">Alat Olahraga</option>
-                                    <option value="Alat Kesehatan / Kebersihan">Alat Kesehatan / Kebersihan</option>
-                                    <option value="Alat Praktik">Alat Praktik</option>
-                                    <option value="Alat Praktik SMK">Alat Praktik SMK</option>
-                                    <option value="Alat Peraga APE Luar">Alat Peraga APE Luar</option>
-                                    <option value="Alat Peraga APE Dalam">Alat Peraga APE Dalam</option>
-                                    <option value="Alat Peraga LAB IPA">Alat Peraga LAB IPA</option>
-                                    <option value="Pakaian dan Seragam">Pakaian dan Seragam</option>
-                                    <option value="Elektronik">Elektronik</option>
-                                    <option value="Paket Project">Paket Project</option>
-                                </select>
-                                <div class="error-msg" id="err-jenisproduk">Jenis Produk wajib dipilih</div>
-                            </div>
-                            <div class="lg:col-span-2">
-                                <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">Produk</label>
-                                <input type="text" id="f-produk" class="input-field"
-                                    placeholder="Nama produk spesifik...">
-                            </div>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-xs font-semibold text-slate-400 uppercase mb-1">QTY</label>
-                                    <input type="number" id="f-qty" class="input-field" placeholder="Jumlah">
-                                </div>
-                                <div>
-                                    <label
-                                        class="block text-xs font-semibold text-slate-400 uppercase mb-1">Satuan</label>
-                                    <input type="text" id="f-satuan" class="input-field" placeholder="Unit, Set...">
-                                </div>
-                            </div>
-                        </div>
-                    </details>
-                    <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-slate-700">
-                        <button type="button" onclick="resetInputForm()"
-                            class="px-5 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold text-white border border-slate-600 transition">Reset</button>
-                        <button type="submit"
-                            class="px-6 py-2.5 bg-gradient-to-r from-teal-500 to-blue-500 hover:from-teal-600 hover:to-blue-600 rounded-lg text-sm font-bold text-white transition shadow-lg shadow-teal-500/20">💾
-                            Simpan ke Pipeline</button>
-                    </div>
-                </form>
-            </div>
-            <!-- Recent entries -->
-            <div class="mt-6">
-                <h3 class="text-lg font-bold text-white mb-3">📋 Pipeline Terbaru</h3>
-                <div class="card overflow-x-auto">
-                    <table class="w-full text-sm text-left text-slate-300">
-                        <thead class="text-xs text-slate-400 uppercase bg-slate-800 border-b border-slate-700">
-                            <tr>
-                                <th class="px-3 py-3">No</th>
-                                <th class="px-3 py-3">PIC</th>
-                                <th class="px-3 py-3">Nama Paket</th>
-                                <th class="px-3 py-3">Instansi</th>
-                                <th class="px-3 py-3">Sumber Dana</th>
-                                <th class="px-3 py-3 text-right">Nilai Brutto</th>
-                                <th class="px-3 py-3 text-right">Forecast Netto</th>
-                                <th class="px-3 py-3 text-center">TK</th>
-                                <th class="px-3 py-3 text-center">Status</th>
-                                <th class="px-3 py-3 text-center">Quarter</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pipeline-tbody" class="divide-y divide-slate-700/80"></tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
+  <!-- Dropdown PIC Admin -->
+  <div class="flex items-center gap-3 mb-5 p-4 card">
+    <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+      Input atas nama:
+    </label>
+    <select id="admin-pic-input" class="input-field w-64" onchange="onAdminPicInputChange()">
+      <option value="">-- Pilih Sales --</option>
+    </select>
+  </div>
+
+  <!-- Form Input -->
+  <div class="card p-5 mb-6">
+    <h3 class="text-base font-bold text-white mb-5 flex items-center gap-2 border-b border-slate-700 pb-3">
+      📝 Input Funnel Baru
+    </h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="form-label">Nama Paket / Rencana Pengadaan *</label>
+        <input type="text" id="fi-namapaket" class="input-field" placeholder="Nama paket pengadaan...">
+      </div>
+      <div>
+        <label class="form-label">K/L/P/D (Instansi) *</label>
+        <input type="text" id="fi-instansi" class="input-field" placeholder="Nama instansi...">
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+      <div>
+        <label class="form-label">Provinsi *</label>
+        <select id="fi-provinsi" class="input-field" onchange="onInputProvinsiChange()">
+          <option value="">-- Pilih Provinsi --</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Kabupaten / Kota</label>
+        <select id="fi-wilayah" class="input-field">
+          <option value="">-- Pilih Kab/Kota --</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Sumber Dana *</label>
+        <select id="fi-sumberdana" class="input-field">
+          <option value="">-- Pilih --</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Quarter *</label>
+        <select id="fi-quarter" class="input-field">
+          <option value="">-- Pilih --</option>
+          <option>Q1</option><option>Q2</option><option>Q3</option><option>Q4</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Status <span class="text-slate-500 normal-case text-xs">(otomatis dari TK)</span></label>
+        <select id="fi-status" class="input-field bg-slate-800 text-slate-400 cursor-not-allowed" disabled>
+          <option value="">-- Pilih TK dulu --</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">TK (%) *</label>
+        <select id="fi-tk" class="input-field" onchange="onTKChange(this)">
+          <option value="">-- Pilih --</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Principal *</label>
+        <select id="fi-principal" class="input-field">
+          <option value="">-- Pilih Principal --</option>
+        </select>
+      </div>
+      <div class="md:col-span-2">
+        <label class="form-label">Keterangan / Notes</label>
+        <textarea id="fi-keterangan" class="input-field" rows="2" placeholder="Catatan tambahan..."></textarea>
+      </div>
+      <div>
+        <label class="form-label">Jenis Produk *</label>
+        <select id="fi-jenisproduk" class="input-field">
+          <option value="">-- Pilih --</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Produk Spesifik</label>
+        <input type="text" id="fi-produk" class="input-field" placeholder="Nama produk spesifik...">
+      </div>
+      <div>
+        <label class="form-label">QTY</label>
+        <input type="number" id="fi-qty" class="input-field" placeholder="Jumlah" min="0">
+      </div>
+      <div>
+        <label class="form-label">Satuan</label>
+        <input type="text" id="fi-satuan" class="input-field" placeholder="Unit, Set...">
+      </div>
+      <div>
+        <label class="form-label">PPN / Non PPN</label>
+        <select id="fi-ppn" class="input-field" onchange="calcInputForecast()">
+          <option value="PPN">PPN</option>
+          <option value="Non PPN">Non PPN</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Perkiraan CB (%)</label>
+        <input type="number" id="fi-cb" class="input-field" placeholder="Contoh: 20.00"
+               oninput="calcInputForecast()">
+      </div>
+      <div>
+        <label class="form-label">Nilai Brutto / Anggaran (Rp) *</label>
+        <input type="text" id="fi-brutto" class="input-field" placeholder="0"
+               oninput="inputFormatCurrency(this); calcInputForecast()">
+      </div>
+      <div class="md:col-span-2">
+        <label class="form-label">Forecast Netto (Rp) <span class="text-teal-400 normal-case">(AUTO)</span></label>
+        <input type="text" id="fi-netto" class="input-field bg-slate-800 text-slate-400 cursor-not-allowed"
+               placeholder="0" readonly>
+        <p class="text-xs text-slate-500 mt-1" id="fi-netto-hint"></p>
+      </div>
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <button onclick="resetInputForm()"
+              class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold text-slate-300 border border-slate-600 transition">
+        Reset
+      </button>
+      <button onclick="handleInputSubmit()"
+              class="px-5 py-2 rounded-lg text-sm font-bold text-white transition"
+              style="background: linear-gradient(135deg, #0d9488, #0ea5e9);">
+        ➕ Tambah ke Pipeline
+      </button>
+    </div>
+  </div>
+
+  <!-- Pipeline Table -->
+  <div class="card p-5">
+    <div class="flex items-center justify-between mb-4 border-b border-slate-700 pb-3">
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        📋 Pipeline — <span id="admin-pic-label" class="text-teal-400">Pilih Sales di atas</span>
+      </h3>
+      <span id="pipeline-count" class="text-sm text-slate-400"></span>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th class="px-3 py-2">NO</th>
+            <th class="px-3 py-2">NAMA PAKET</th>
+            <th class="px-3 py-2">INSTANSI</th>
+            <th class="px-3 py-2">SUMBER DANA</th>
+            <th class="px-3 py-2 text-right">NILAI BRUTTO</th>
+            <th class="px-3 py-2 text-right">FORECAST NETTO</th>
+            <th class="px-3 py-2">TK</th>
+            <th class="px-3 py-2">STATUS</th>
+            <th class="px-3 py-2">QUARTER</th>
+          </tr>
+        </thead>
+        <tbody id="pipeline-table-body">
+          <tr><td colspan="9" class="text-center py-8 text-slate-500">Pilih Sales untuk melihat pipeline.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</section>
+
 
         <!-- ===== SECTION 2: UPDATE FUNNEL ===== -->
         <section id="section-update" class="hidden">
@@ -1974,10 +1771,13 @@
                 <h2 class="text-2xl font-bold text-white flex items-center gap-2">🔄 Update Funnel Mingguan</h2>
                 <p class="text-slate-400 text-sm mt-1 mb-4">Update status dan forecast project per minggu. Minggu saat
                     ini: <span class="text-teal-400 font-semibold" id="current-week-label"></span></p>
-                <div class="w-full md:w-[300px]">
-                    <select id="sales-name-picker" class="input-field w-full" onchange="setCurrentSales(this.value)">
-                        <option value="">[ Pilih Nama Sales ▼ ]</option>
-                    </select>
+                <div class="flex items-center gap-3 mb-5 p-4 card">
+                  <label class="text-sm font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+                    Update atas nama:
+                  </label>
+                  <select id="sales-name-picker" class="input-field w-64" style="color: #e2e8f0; background-color: #1e293b;" onchange="setCurrentSales(this.value)">
+                    <option value="">-- Pilih Sales --</option>
+                  </select>
                 </div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -2304,8 +2104,8 @@ function switchMenu(menu) {
                 }
                 if (btn) btn.classList.toggle('active', m === menu);
             });
-            if (menu === 'input') { populateDropdowns(); renderPipelineTable(); }
-            if (menu === 'update') { renderProjectList(); }
+            if (menu === 'input') { populateInputDropdowns(); renderAdminPipelineTable(); }
+            if (menu === 'update') { populateAdminPicDropdowns(); renderProjectList(); }
             if (menu === 'dashboard') { renderDashboard(); }
         }
         function setCurrentSales(name) {
@@ -2375,7 +2175,11 @@ function switchMenu(menu) {
         // SECTION G: INPUT FUNNEL LOGIC
         // ============================================================
         function populateDropdowns() {
-            fillSelect('f-pic', picNames, '-- Pilih PIC --');
+            const picEl = document.getElementById('f-pic');
+            if (picEl) {
+                picEl.innerHTML = '<option value="">-- Pilih PIC --</option>' +
+                    picNames.map(n => '<option value="' + n + '">' + n + '</option>').join('');
+            }
             fillSelect('f-principal', principals, '-- Pilih Principal --');
             fillSelect('f-sumberdana', sumberDanaList, '-- Pilih --');
             fillSelect('f-jenisproduk', jenisProdukList, '-- Pilih --');
@@ -2396,6 +2200,230 @@ function switchMenu(menu) {
                 picSel.disabled = false;
             }
         }
+
+// ===== ADMIN INPUT FUNNEL FUNCTIONS =====
+var adminSelectedPic = '';
+
+function onAdminPicInputChange() {
+    adminSelectedPic = document.getElementById('admin-pic-input').value;
+    var label = document.getElementById('admin-pic-label');
+    if (label) label.textContent = adminSelectedPic || 'Pilih Sales di atas';
+    renderAdminPipelineTable();
+}
+
+function onInputProvinsiChange() {
+    var prov = document.getElementById('fi-provinsi').value;
+    var wilEl = document.getElementById('fi-wilayah');
+    if (!wilEl) return;
+    wilEl.innerHTML = '<option value="">-- Pilih Kab/Kota --</option>';
+    if (prov && REGION_DATA[prov]) {
+        REGION_DATA[prov].forEach(function(city) {
+            wilEl.innerHTML += '<option value="' + city + '">' + city + '</option>';
+        });
+    }
+}
+
+function onTKChange(sel) {
+    var tkMap = {
+        '0': 'Gagal', '5': 'Informasi Awal', '10': 'Informasi Kebutuhan',
+        '25': 'Presentasi', '50': 'Peluang 50:50', '75': 'Hot Prospek', '100': 'Closing'
+    };
+    document.getElementById('fi-tk').value = sel.value;
+    var statusEl = document.getElementById('fi-status');
+    if (statusEl) {
+        var st = tkMap[sel.value] || '';
+        statusEl.innerHTML = '<option value="' + st + '">' + (st || '--') + '</option>';
+        statusEl.value = st;
+    }
+    calcInputForecast();
+}
+
+function calcInputForecast() {
+    var brutto = parseCurrency(document.getElementById('fi-brutto')?.value || '0');
+    var ppn = document.getElementById('fi-ppn')?.value;
+    var cb = parseFloat(document.getElementById('fi-cb')?.value || '0') / 100;
+    var dpp = ppn === 'PPN' ? Math.round(brutto / 1.11) : brutto;
+    var netto = Math.round(dpp * (1 - cb));
+    var nettoEl = document.getElementById('fi-netto');
+    var hintEl = document.getElementById('fi-netto-hint');
+    if (nettoEl) nettoEl.value = netto.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    if (hintEl) hintEl.textContent = 'DPP: ' + fmtRp(dpp) + ' → Netto: ' + fmtRp(netto) + ' (CB: ' + (cb * 100) + '%)';
+}
+
+function inputFormatCurrency(el) {
+    var v = el.value.replace(/[^\d]/g, '');
+    el.value = v.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+function populateInputDropdowns() {
+    var provEl = document.getElementById('fi-provinsi');
+    if (provEl && provEl.options.length <= 1) {
+        provinsiList.forEach(function(p) {
+            provEl.innerHTML += '<option value="' + p + '">' + p + '</option>';
+        });
+    }
+    var sdEl = document.getElementById('fi-sumberdana');
+    if (sdEl && sdEl.options.length <= 1) {
+        ['APBN','APBD','DAK','BOS','BLUD','BUMD','POKIR','APBDP','BUMN','Swasta'].forEach(function(s) {
+            sdEl.innerHTML += '<option value="' + s + '">' + s + '</option>';
+        });
+    }
+    var tkEl = document.getElementById('fi-tk');
+    if (tkEl && tkEl.options.length <= 1) {
+        [[0,'Gagal (0%)'],[5,'Informasi Awal (5%)'],[10,'Informasi Kebutuhan (10%)'],
+         [25,'Presentasi (25%)'],[50,'Peluang 50:50 (50%)'],[75,'Hot Prospek (75%)'],[100,'Closing (100%)']
+        ].forEach(function(t) {
+            tkEl.innerHTML += '<option value="' + t[0] + '">' + t[1] + '</option>';
+        });
+    }
+    var picPickerEl = document.getElementById('admin-pic-input');
+    if (picPickerEl) {
+        picPickerEl.innerHTML = '<option value="">-- Pilih Sales --</option>' +
+            picNames.map(function(n) { return '<option value="' + n + '">' + n + '</option>'; }).join('');
+    }
+    var jpEl = document.getElementById('fi-jenisproduk');
+    if (jpEl && jpEl.options.length <= 1) {
+        ['Mebel / Furnitur','Alat Tulis Kantor','TIK & Periperal','Buku Non Teks HET',
+         'Buku Teks Pendamping HET','Buku Non Teks','Buku PAUD','Cetak, Kertas, dan Buku Tulis',
+         'Alat Olahraga','Alat Kesehatan / Kebersihan','Alat Praktik','Pakaian dan Seragam',
+         'Elektronik','Paket Project'
+        ].forEach(function(j) {
+            jpEl.innerHTML += '<option value="' + j + '">' + j + '</option>';
+        });
+    }
+    var prEl = document.getElementById('fi-principal');
+    if (prEl && prEl.options.length <= 1) {
+        principals.forEach(function(p) {
+            prEl.innerHTML += '<option value="' + p + '">' + p + '</option>';
+        });
+    }
+}
+
+function resetInputForm() {
+    ['fi-namapaket','fi-instansi','fi-keterangan','fi-produk','fi-qty',
+     'fi-satuan','fi-brutto','fi-netto','fi-cb'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.value = '';
+    });
+    ['fi-provinsi','fi-wilayah','fi-sumberdana','fi-quarter',
+     'fi-tk','fi-principal','fi-jenisproduk'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.selectedIndex = 0;
+    });
+    var hintEl = document.getElementById('fi-netto-hint');
+    if (hintEl) hintEl.textContent = '';
+}
+
+async function handleInputSubmit() {
+    if (!adminSelectedPic) {
+        showToast('Pilih Sales terlebih dahulu!', 'error');
+        return;
+    }
+    var namapaket = document.getElementById('fi-namapaket')?.value.trim();
+    var instansi = document.getElementById('fi-instansi')?.value.trim();
+    var provinsi = document.getElementById('fi-provinsi')?.value;
+    var sumberdana = document.getElementById('fi-sumberdana')?.value;
+    var quarter = document.getElementById('fi-quarter')?.value;
+    var tk = document.getElementById('fi-tk')?.value;
+    var status = document.getElementById('fi-status')?.value;
+    var principal = document.getElementById('fi-principal')?.value;
+    var brutto = parseCurrency(document.getElementById('fi-brutto')?.value || '0');
+    var netto = parseCurrency(document.getElementById('fi-netto')?.value || '0');
+
+    if (!namapaket || !instansi || !provinsi || !sumberdana || !quarter || !tk || !principal || !brutto) {
+        showToast('Lengkapi semua field yang wajib diisi!', 'error');
+        return;
+    }
+
+    var ppn = document.getElementById('fi-ppn')?.value || 'PPN';
+    var cb = parseFloat(document.getElementById('fi-cb')?.value || '0');
+    var dpp = ppn === 'PPN' ? Math.round(brutto / 1.11) : brutto;
+
+    var leadData = {
+        pic: adminSelectedPic,
+        namaPaket: namapaket,
+        instansi: instansi,
+        provinsi: provinsi,
+        wilayah: document.getElementById('fi-wilayah')?.value || '',
+        kabupatenKota: document.getElementById('fi-wilayah')?.value || '',
+        sumberDana: sumberdana,
+        quarter: quarter,
+        tk: parseInt(tk),
+        status: status,
+        principal: principal,
+        jenisProduk: document.getElementById('fi-jenisproduk')?.value || '',
+        produk: document.getElementById('fi-produk')?.value || '',
+        qty: parseInt(document.getElementById('fi-qty')?.value || '0'),
+        satuan: document.getElementById('fi-satuan')?.value || '',
+        ppnNon: ppn,
+        perkiraanCb: cb,
+        dpp: dpp,
+        nilaiAnggaran: brutto,
+        forecastNetto: netto,
+        keterangan: document.getElementById('fi-keterangan')?.value || '',
+        funnelId: ''
+    };
+
+    try {
+        showToast('Menyimpan...', 'success');
+        await apiPost('addLead', leadData);
+        showToast('✅ Project berhasil ditambahkan!', 'success');
+        resetInputForm();
+        await loadPipelineData();
+        renderAdminPipelineTable();
+    } catch (err) {
+        showToast('Gagal menyimpan: ' + err.message, 'error');
+    }
+}
+
+function renderAdminPipelineTable() {
+    var tbody = document.getElementById('pipeline-table-body');
+    var countEl = document.getElementById('pipeline-count');
+    if (!tbody) return;
+    var data = adminSelectedPic
+        ? funnelData.filter(function(f) { return f.pic === adminSelectedPic; })
+        : [];
+    if (countEl) countEl.textContent = data.length + ' project';
+    if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-500">' +
+            (adminSelectedPic ? 'Belum ada project untuk ' + adminSelectedPic : 'Pilih Sales untuk melihat pipeline.') +
+            '</td></tr>';
+        return;
+    }
+    var sorted = data.slice().sort(function(a, b) { return new Date(b.timestamp||0) - new Date(a.timestamp||0); });
+    tbody.innerHTML = sorted.map(function(p, i) {
+        return '<tr>' +
+            '<td class="px-3 py-2 text-slate-500">' + (i + 1) + '</td>' +
+            '<td class="px-3 py-2 font-medium text-white" style="max-width:200px;">' +
+            '<span class="block truncate">' + (p.namaPaket || '-') + '</span></td>' +
+            '<td class="px-3 py-2 text-slate-400">' + (p.instansi || '-') + '</td>' +
+            '<td class="px-3 py-2 text-slate-400">' + (p.sumberDana || '-') + '</td>' +
+            '<td class="px-3 py-2 text-right text-slate-300">' + fmtRp(p.nilaiAnggaran || 0) + '</td>' +
+            '<td class="px-3 py-2 text-right text-teal-400 font-semibold">' + fmtRp(p.forecastNetto || 0) + '</td>' +
+            '<td class="px-3 py-2"><span class="badge ' + getTKBadgeClass(parseInt(p.tk)) + '">' + (p.tk || 0) + '%</span></td>' +
+            '<td class="px-3 py-2"><span class="badge ' + getStatusBadgeClass(p.status) + '">' + (p.status || '-') + '</span></td>' +
+            '<td class="px-3 py-2 text-slate-400">' + (p.quarter || '-') + '</td>' +
+            '</tr>';
+    }).join('');
+}
+
+        function populateAdminPicDropdowns() {
+            const opts = '<option value="">-- Pilih Sales --</option>' +
+                picNames.map(n => '<option value="' + n + '">' + n + '</option>').join('');
+            const upEl = document.getElementById('admin-pic-update');
+            const inEl = document.getElementById('admin-pic-input');
+            if (upEl) upEl.innerHTML = opts;
+            if (inEl) inEl.innerHTML = opts;
+        }
+
+        function onAdminPicChange() {
+            adminSelectedPic = document.getElementById('admin-pic-update').value;
+            if (!adminSelectedPic) return;
+            // Filter funnelData by PIC lalu render
+            const filtered = funnelData.filter(f => f.pic === adminSelectedPic);
+            renderProjectList(filtered);
+        }
+
         function fillSelect(id, items, placeholder, placeholderValue = "") {
             const sel = document.getElementById(id);
             if (!sel) return;
@@ -2406,133 +2434,6 @@ function switchMenu(menu) {
             });
             if (current && items.includes(current)) sel.value = current;
         }
-        function resetInputForm() {
-            document.getElementById('input-form').reset();
-            document.querySelectorAll('.field-error').forEach(el => el.classList.remove('field-error'));
-            document.querySelectorAll('.error-msg').forEach(el => el.style.display = 'none');
-            if (!canSeeAllData()) document.getElementById('f-pic').value = currentSalesUser;
-            nettoManuallyEdited = false;
-        }
-        async function handleInputSubmit(e) {
-            e.preventDefault();
-            let valid = true;
-            const fields =
-                ['pic', 'principal', 'sumberdana', 'namapaket', 'instansi', 'provinsi', 'quarter', 'jenisproduk', 'status', 'tk', 'brutto'];
-            fields.forEach(f => {
-                const el = document.getElementById('f-' + f);
-                const err = document.getElementById('err-' + f);
-                if (el && !el.value.trim()) {
-                    el.classList.add('field-error');
-                    if (err) err.style.display = 'block';
-                    valid = false;
-                } else {
-                    if (el) el.classList.remove('field-error');
-                    if (err) err.style.display = 'none';
-                }
-            });
-            if (!valid) { showToast('Lengkapi semua field yang wajib diisi!', 'error'); return false; }
-
-            const bruttoVal = parseCurrency(document.getElementById('f-brutto').value);
-            const nettoVal = parseCurrency(document.getElementById('f-netto').value);
-            const tkVal = parseInt(document.getElementById('f-tk').value) || 0;
-            const ppnVal = document.getElementById('f-ppn').value;
-            const dppVal = ppnVal === 'PPN' ? Math.round(bruttoVal / 1.11) : bruttoVal;
-            let numValid = true;
-            if (bruttoVal < 0) {
-                document.getElementById('f-brutto').classList.add('field-error');
-                document.getElementById('err-brutto-val').style.display = 'block';
-                numValid = false;
-            }
-            if (tkVal < 0 || tkVal > 100) {
-                document.getElementById('f-tk').classList.add('field-error');
-                document.getElementById('err-tk-val').style.display = 'block';
-                numValid = false;
-            }
-            if (nettoVal > bruttoVal) {
-                document.getElementById('f-netto').classList.add('field-error');
-                document.getElementById('err-netto-val').style.display = 'block';
-                numValid = false;
-            }
-            if (!numValid) { showToast('Periksa kembali nilai angka yang dimasukkan', 'error'); return false; }
-
-            const instansiVal = document.getElementById('f-instansi').value.trim();
-            const namaPaketVal = document.getElementById('f-namapaket').value.trim();
-            const principalVal = document.getElementById('f-principal').value.trim();
-            const picVal = document.getElementById('f-pic').value;
-
-            const isDuplicate = funnelData.some(d =>
-                d.instansi.toLowerCase() === instansiVal.toLowerCase() &&
-                d.namaPaket.toLowerCase() === namaPaketVal.toLowerCase() &&
-                d.principal.toLowerCase() === principalVal.toLowerCase()
-            );
-
-            if (isDuplicate) {
-                showToast('Gagal: Duplikasi Project (Instansi + Nama Paket + Principal sudah ada)', 'error');
-                return false;
-            }
-
-            const generatedId = generateFunnelId(picVal);
-            const entry = {
-                id: nextFunnelId++,
-                funnelId: generatedId,
-                pic: picVal,
-                principal: principalVal,
-                instansi: instansiVal,
-                wilayah: document.getElementById('f-wilayah').value,
-                provinsi: document.getElementById('f-provinsi').value,
-                namaPaket: namaPaketVal,
-                sumberDana: document.getElementById('f-sumberdana').value,
-                nilaiAnggaran: parseCurrency(document.getElementById('f-brutto').value),
-          dpp: dppVal,
-                forecastNetto: parseCurrency(document.getElementById('f-netto').value),
-                ppnNon: document.getElementById('f-ppn').value,
-                perkiraanCb: parseFloat(document.getElementById('f-cb').value || 0),
-                produk: document.getElementById('f-produk').value,
-                qty: parseInt(document.getElementById('f-qty').value || 0),
-                satuan: document.getElementById('f-satuan').value,
-                jenisProduk: document.getElementById('f-jenisproduk').value,
-                tk: tkVal,
-                quarter: document.getElementById('f-quarter').value,
-                status: document.getElementById('f-status').value,
-                keterangan: document.getElementById('f-keterangan').value
-            };
-            funnelData.push(entry);
-            logActivity('Added funnel: ' + entry.namaPaket + ' by ' + entry.pic);
-            showToast(`✅ Project berhasil disimpan! ID: ${entry.funnelId}`);
-
-            // Also save to Google Sheets if not using mock data
-            if (!CONFIG.USE_MOCK_DATA) {
-                try {
-                    await savePipelineData(entry);
-                } catch (err) {
-                    // Error toast already shown by savePipelineData
-                }
-            }
-
-            resetInputForm();
-            renderPipelineTable();
-            return false;
-        }
-        function renderPipelineTable() {
-            const tbody = document.getElementById('pipeline-tbody');
-            if (!tbody) return;
-            const data = getVisibleFunnel();
-            tbody.innerHTML = data.map((d, i) =>
-                `<tr class="${getStatusRowClass(d.status)} hover:bg-slate-700/30">
-    <td class="px-3 py-2.5">${i + 1}</td>
-    <td class="px-3 py-2.5 font-medium">${d.pic}</td>
-    <td class="px-3 py-2.5">${d.namaPaket}</td>
-    <td class="px-3 py-2.5">${d.instansi}</td>
-    <td class="px-3 py-2.5">${d.sumberDana}</td>
-    <td class="px-3 py-2.5 text-right">${fmtRp(d.nilaiAnggaran)}</td>
-    <td class="px-3 py-2.5 text-right font-semibold text-teal-400">${fmtRp(d.forecastNetto)}</td>
-    <td class="px-3 py-2.5 text-center"><span class="badge ${getTKBadgeClass(d.cb || d.tk || 0)}">${d.cb || d.tk || 0}%</span></td>
-    <td class="px-3 py-2.5 text-center"><span class="badge ${getStatusBadgeClass(d.status)}">${d.status}</span></td>
-    <td class="px-3 py-2.5 text-center">${d.quarter}</td>
-</tr>`
-            ).join('');
-        }
-
         // ============================================================
         // SECTION H: UPDATE FUNNEL LOGIC
         // ============================================================
@@ -3039,6 +2940,9 @@ async function handleLogin(e) {
     </script>
 
 
-<footer class="text-center text-xs text-slate-600 py-4 mt-4">\n  made with 🔥 by Adrian\n</footer>\n</body>
+<footer class="text-center text-xs text-slate-600 py-4 mt-4">
+  made with 🔥 by Adrian
+</footer>
+</body>
 
 </html>
