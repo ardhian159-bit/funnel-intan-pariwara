@@ -1691,7 +1691,7 @@
                     </div>
                 </div>
                 <!-- Export & Activity Log -->
-                <div class="card p-5">
+                <div class="card p-5" style="display:none;">
                     <h3 class="text-lg font-bold text-white mb-3 border-b border-slate-700 pb-2">📊 Export &amp;
                         Activity
                         Log</h3>
@@ -2029,6 +2029,15 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
             logActivity('Removed dropdown item from ' + listName);
             showToast('Item dihapus');
         }
+        function fillSelect(id, items, placeholder, placeholderValue) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            placeholderValue = placeholderValue !== undefined ? placeholderValue : '';
+            el.innerHTML = '<option value="' + placeholderValue + '">' + placeholder + '</option>';
+            items.forEach(function(item) {
+                el.innerHTML += '<option value="' + item + '">' + item + '</option>';
+            });
+        }
         function populateResetSelects() {
             fillSelect('cp-reset-user', picNames, '-- Pilih Sales --');
             const projNames = funnelData.map(f => f.id + '|' + f.namaPaket);
@@ -2164,6 +2173,9 @@ function logout() {
     </script>
 
 
-<footer class="text-center text-xs text-slate-600 py-4 mt-4">\n  made with 🔥 by Adrian\n</footer>\n</body>
+<footer class="text-center text-xs text-slate-600 py-4 mt-4">
+  made with 🔥 by Adrian
+</footer>
+</body>
 
 </html>

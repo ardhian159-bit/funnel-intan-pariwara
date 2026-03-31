@@ -1708,6 +1708,32 @@
         <!-- ===== SECTION 5: CONTROL PANEL (Super Admin) ===== -->
 
 
+    <!-- Detail Modal -->
+    <div id="detail-modal" class="modal-overlay">
+      <div class="modal-content" style="max-width:600px;width:95%;">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-700">
+          <h3 class="text-lg font-bold text-white">Detail Update</h3>
+          <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
+        </div>
+        <div id="detail-modal-body" class="space-y-3 text-sm mb-4"></div>
+        <div class="border-t border-slate-700 pt-4">
+          <label class="block text-xs font-semibold text-slate-400 uppercase mb-2">Admin Notes</label>
+          <textarea id="detail-admin-notes" class="input-field w-full" rows="3"
+                    placeholder="Tambahkan catatan admin..."></textarea>
+        </div>
+        <div class="flex justify-end gap-3 mt-4">
+          <button onclick="closeDetailModal()"
+                  class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm font-semibold text-slate-300">
+            Tutup
+          </button>
+          <button onclick="saveAdminNotes()"
+                  class="px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded text-sm font-bold text-white">
+            💾 Simpan Notes
+          </button>
+        </div>
+      </div>
+    </div>
+
     </main>
 
     <!-- ===== JAVASCRIPT: DATA + STATE + CORE LOGIC ===== -->
@@ -1968,7 +1994,8 @@
 
             tbody.innerHTML = pagedData.map(u => {
                 const project = funnelData.find(f => f.funnelId === u.funnelId || f.funnelId === u.projectId || f.id === u.projectId) || {};
-                return `<tr class="${getStatusRowClass(u.status)} hover:bg-slate-700/30">
+                return `<tr class="${getStatusRowClass(u.status)} hover:bg-slate-700/30 cursor-pointer"
+                        onclick="openDetailModal(${u.id})">
         <td class="px-3 py-2.5 font-medium text-teal-400 font-mono text-xs">${u.funnelId || u.projectId || '-'}</td>
         <td class="px-3 py-2.5 font-medium">${u.week}</td>
         <td class="px-3 py-2.5">${u.pic}</td>
@@ -1980,7 +2007,7 @@
             ${u.adminNotes || '-'}</td>
         <td class="px-3 py-2.5 text-xs text-slate-500">${u.timestamp}</td>
         <td class="px-3 py-2.5 text-center" style="${showActions ? '' : 'display:none'}">${showActions ? `<button
-                onclick="deleteUpdate(${u.id})"
+                onclick="event.stopPropagation(); deleteUpdate(${u.id})"
                 class="text-red-400 hover:text-red-300 text-xs font-bold">🗑️</button>`: ''}</td>
     </tr>`;
             }).join('');
@@ -2020,6 +2047,68 @@
             showToast('Data berhasil dihapus');
             renderMonitoring();
         }
+
+        var detailCurrentId = null;
+
+        function openDetailModal(id) {
+            const u = weeklyUpdates.find(w => w.id === id);
+            if (!u) return;
+            const project = funnelData.find(f => f.funnelId === u.funnelId || f.funnelId === u.projectId || f.id === u.projectId) || {};
+            detailCurrentId = id;
+
+            document.getElementById('detail-modal-body').innerHTML = `
+                <div class="grid grid-cols-2 gap-3">
+                    <div><span class="text-slate-500 text-xs uppercase">Funnel ID</span>
+                        <p class="text-teal-400 font-mono font-bold">${u.funnelId || u.projectId || '-'}</p></div>
+                    <div><span class="text-slate-500 text-xs uppercase">Week</span>
+                        <p class="text-white font-semibold">${u.week}</p></div>
+                    <div><span class="text-slate-500 text-xs uppercase">Sales</span>
+                        <p class="text-white">${u.pic}</p></div>
+                    <div><span class="text-slate-500 text-xs uppercase">Status</span>
+                        <p><span class="badge ${getStatusBadgeClass(u.status)}">${u.status}</span></p></div>
+                    <div class="col-span-2"><span class="text-slate-500 text-xs uppercase">Nama Project</span>
+                        <p class="text-white">${project.namaPaket || u.namaPaket || '-'}</p></div>
+                    <div><span class="text-slate-500 text-xs uppercase">Nilai Forecast</span>
+                        <p class="text-teal-400 font-semibold">${fmtRp(u.forecast)}</p></div>
+                    <div><span class="text-slate-500 text-xs uppercase">Principal</span>
+                        <p class="text-white">${project.principal || '-'}</p></div>
+                    <div class="col-span-2"><span class="text-slate-500 text-xs uppercase">Notes dari Sales</span>
+                        <p class="text-slate-300 bg-slate-800 rounded p-2 mt-1">${u.notes || '-'}</p></div>
+                </div>`;
+
+            document.getElementById('detail-admin-notes').value = u.adminNotes || '';
+            document.getElementById('detail-modal').classList.add('open');
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detail-modal').classList.remove('open');
+            detailCurrentId = null;
+        }
+
+        async function saveAdminNotes() {
+            if (!detailCurrentId) return;
+            const u = weeklyUpdates.find(w => w.id === detailCurrentId);
+            if (!u) return;
+            const notes = document.getElementById('detail-admin-notes').value;
+            try {
+                await apiPost('updateTracker', {
+                    funnelId: u.funnelId || u.projectId,
+                    week: u.week,
+                    pic: u.pic,
+                    statusBaru: u.status,
+                    forecastNetto: u.forecast,
+                    notes: u.notes,
+                    adminNotes: notes
+                });
+                u.adminNotes = notes;
+                showToast('✅ Admin notes berhasil disimpan', 'success');
+                closeDetailModal();
+                renderMonitoring();
+            } catch(err) {
+                showToast('Gagal simpan: ' + err.message, 'error');
+            }
+        }
+
         function exportData() {
             if (!canExportCSV()) {
                 showToast('Hanya Superadmin yang bisa export CSV!', 'error');
@@ -2155,6 +2244,6 @@
     </script>
 
 
-<footer class="text-center text-xs text-slate-600 py-4 mt-4">\n  made with 🔥 by Adrian\n</footer>\n</body>
+<footer class="text-center text-xs text-slate-600 py-4 mt-4">made with 🔥 by Adrian</footer>\n</body>
 
 </html>
