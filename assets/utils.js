@@ -43,12 +43,36 @@
             document.getElementById('f-netto-hint').textContent = "(diisi manual)";
         }
         // ID & badges
-        function generateFunnelId(picName) {
+        function generateFunnelId(picName, existingIds) {
             if (!picName) return '';
-            const initials = picName.split(' ').map(n => n[0]).join('').toUpperCase();
-            const picEntries = funnelData.filter(f => f.pic === picName);
-            const seq = (picEntries.length + 1).toString().padStart(4, '0');
-            return `${initials}-${seq}`;
+            existingIds = existingIds || (typeof funnelData !== 'undefined' ? funnelData.map(f => f.funnelId || '') : []);
+
+            // Ambil prefix unik dari nama depan (3 huruf, extend ke 4 jika collision)
+            var firstName = picName.split(' ')[0].toUpperCase();
+            var prefix = firstName.substring(0, 3);
+
+            // Cek apakah prefix sudah dipakai PIC lain
+            var prefixUsedByOther = existingIds.some(function(id) {
+                if (!id) return false;
+                var idPrefix = id.split('-')[0];
+                // Cek apakah prefix ini milik PIC yang berbeda
+                var owner = typeof funnelData !== 'undefined'
+                    ? funnelData.find(function(f) { return f.funnelId === id; })
+                    : null;
+                return idPrefix === prefix && owner && owner.pic !== picName;
+            });
+
+            if (prefixUsedByOther) {
+                prefix = firstName.substring(0, 4);
+            }
+
+            // Hitung sequence berdasarkan prefix yang sama milik PIC ini
+            var picEntries = existingIds.filter(function(id) {
+                return id && id.startsWith(prefix + '-');
+            });
+            var seq = (picEntries.length + 1).toString().padStart(4, '0');
+
+            return prefix + '-' + seq;
         }
         function getStatusBadgeClass(s) {
             const map = {

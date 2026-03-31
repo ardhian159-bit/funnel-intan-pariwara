@@ -288,6 +288,40 @@ function getTrackers() {
 }
 
 // =============================================================================
+// A5b. generateFunnelId(picName, sheet) — Generate unique funnel ID
+// =============================================================================
+
+function generateFunnelId(picName, sheet) {
+    if (!picName) return '';
+
+    var firstName = picName.split(' ')[0].toUpperCase();
+    var prefix = firstName.substring(0, 3);
+
+    // Ambil semua funnelId yang ada di sheet
+    var lastRow = sheet.getLastRow();
+    var existingIds = lastRow >= 2
+        ? sheet.getRange(2, 2, lastRow - 1, 2).getValues() // kolom B=funnelId, E=pic
+        : [];
+
+    // Cek collision: prefix yang sama tapi PIC berbeda
+    var collision = existingIds.some(function(row) {
+        var id = row[0] || '';
+        var pic = row[1] || '';
+        return id.startsWith(prefix + '-') && pic !== picName;
+    });
+
+    if (collision) prefix = firstName.substring(0, 4);
+
+    // Hitung sequence untuk PIC ini
+    var count = existingIds.filter(function(row) {
+        return (row[0] || '').startsWith(prefix + '-');
+    }).length;
+
+    var seq = (count + 1).toString().padStart(4, '0');
+    return prefix + '-' + seq;
+}
+
+// =============================================================================
 // A6. addLead(data) — Append one row to LEADS
 // =============================================================================
 
@@ -307,7 +341,7 @@ function addLead(data) {
     // Map data to correct column order matching LEADS header
     var newRow = [
       rowNumber,                         // A: NO
-      data.funnelId || '',               // B: funnelId
+      data.funnelId || generateFunnelId(data.pic, sheet),  // B: funnelId
       data.principal || '',              // C: principal
       data.status || '',                 // D: status
       data.pic || '',                    // E: pic
