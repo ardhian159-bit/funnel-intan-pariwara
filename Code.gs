@@ -400,6 +400,7 @@ function updateTracker(data) {
           sheet.getRange(overwriteRow, 5).setValue(data.statusBaru || data.status || '');
           sheet.getRange(overwriteRow, 6).setValue(data.forecastNetto || 0);
           sheet.getRange(overwriteRow, 7).setValue(data.notes || '');
+          sheet.getRange(overwriteRow, 9).setValue(data.adminNotes || '');
           sheet.getRange(overwriteRow, 10).setValue(Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'dd/MM/yyyy HH:mm'));
           // Update status di LEADS
           updateLeadStatus(funnelId, data.statusBaru || data.status || '');
