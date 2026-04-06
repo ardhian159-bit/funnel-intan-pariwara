@@ -11,6 +11,7 @@
     <script src="assets/api.js"></script>
     <script src="assets/auth.js"></script>
     <script src="assets/utils.js"></script>
+    <link rel="stylesheet" href="assets/badge.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -59,89 +60,6 @@
 
         ::-webkit-scrollbar-thumb:hover {
             background: #64748b;
-        }
-
-        .badge {
-            padding: .25rem .5rem;
-            border-radius: 9999px;
-            font-size: .75rem;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: .25rem;
-        }
-
-        .badge-deal {
-            background: rgba(34, 197, 94, .2);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, .5);
-        }
-
-        .badge-closing {
-            background: rgba(132, 204, 22, .2);
-            color: #a3e635;
-            border: 1px solid rgba(132, 204, 22, .5);
-        }
-
-        .badge-pitching {
-            background: rgba(234, 179, 8, .2);
-            color: #facc15;
-            border: 1px solid rgba(234, 179, 8, .5);
-        }
-
-        .badge-shortlisted {
-            background: rgba(249, 115, 22, .2);
-            color: #fb923c;
-            border: 1px solid rgba(249, 115, 22, .5);
-        }
-
-        .badge-pendekatan {
-            background: rgba(239, 68, 68, .2);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, .5);
-        }
-
-        .badge-dead {
-            background: rgba(100, 116, 139, .2);
-            color: #94a3b8;
-            text-decoration: line-through;
-            border: 1px solid rgba(100, 116, 139, .5);
-        }
-
-        .badge-100 {
-            background: rgba(34, 197, 94, .2);
-            color: #4ade80;
-            border: 1px solid rgba(34, 197, 94, .5);
-        }
-
-        .badge-75 {
-            background: rgba(132, 204, 22, .2);
-            color: #a3e635;
-            border: 1px solid rgba(132, 204, 22, .5);
-        }
-
-        .badge-50 {
-            background: rgba(234, 179, 8, .2);
-            color: #facc15;
-            border: 1px solid rgba(234, 179, 8, .5);
-        }
-
-        .badge-25 {
-            background: rgba(249, 115, 22, .2);
-            color: #fb923c;
-            border: 1px solid rgba(249, 115, 22, .5);
-        }
-
-        .badge-10 {
-            background: rgba(239, 68, 68, .2);
-            color: #f87171;
-            border: 1px solid rgba(239, 68, 68, .5);
-        }
-
-        .badge-5 {
-            background: rgba(239, 68, 68, .2);
-            color: #fca5a5;
-            border: 1px solid rgba(239, 68, 68, .5);
         }
 
         .card {
@@ -1953,56 +1871,8 @@
        // REGION_DATA & provinsiList → lihat assets/region-data.js
     // utility functions → lihat assets/utils.js
 
-        // ============================================================
-        // SECTION C: MOCK FUNNEL DATA (from Excel - 15 real entries)
-        // ============================================================
-        var funnelData = [
-            { id: 1, pic: 'DANANG SETYO BUDI', principal: 'ATS', instansi: 'Dinas Pendidikan Kutai Timur', wilayah: 'Kabupaten Kutai Timur', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan meubel', sumberDana: 'APBD', nilaiAnggaran: 6489999430, forecastNetto: 5846846333, jenisProduk: 'Mebel / Furnitur', quarter: 'Q2', tk: 100, status: 'Deal', keterangan: 'PO sudah masuk' },
-            { id: 2, pic: 'DANANG SETYO BUDI', principal: 'SMK', instansi: 'Dinas Pendidikan Kutai Timur', wilayah: 'Kabupaten Kutai Timur', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan ATK', sumberDana: 'APBD', nilaiAnggaran: 2499999810, forecastNetto: 2252252081, jenisProduk: 'Alat Tulis Kantor', quarter: 'Q2', tk: 100, status: 'Deal', keterangan: '' },
-            { id: 3, pic: 'DANANG SETYO BUDI', principal: 'SKE', instansi: 'Dinas Pendidikan Kutai Timur', wilayah: 'Kabupaten Kutai Timur', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan seragam dan meubel', sumberDana: 'APBD', nilaiAnggaran: 30000000000, forecastNetto: 27027027027, jenisProduk: 'Paket Project', quarter: 'Q2', tk: 75, status: 'Closing', keterangan: 'Shortlisted, kemungkinan besar menang' },
-            { id: 4, pic: 'DANANG SETYO BUDI', principal: 'SMK', instansi: 'Kemenag', wilayah: 'Kota Yogyakarta', provinsi: 'Daerah Istimewa Yogyakarta', namaPaket: 'Paket pengadaan ATK', sumberDana: 'APBN', nilaiAnggaran: 10000000000, forecastNetto: 9009009009, jenisProduk: 'Alat Tulis Kantor', quarter: 'Q2', tk: 75, status: 'Shortlisted', keterangan: '' },
-            { id: 5, pic: 'GIRI SURYANTO', principal: 'ATS', instansi: 'Bawaslu', wilayah: 'Kota Administrasi Jakarta Pusat', provinsi: 'DKI Jakarta', namaPaket: 'Belanja Modal alat dan mesin', sumberDana: 'APBN', nilaiAnggaran: 1000000000, forecastNetto: 810810811, jenisProduk: 'Cetak, Kertas, dan Buku Tulis', quarter: 'Q3', tk: 50, status: 'Pitching', keterangan: '' },
-            { id: 6, pic: 'MUHAMMAD RASYID RIDHA', principal: 'IPE', instansi: 'Dinas Pendidikan dan Kebudayaan', wilayah: 'Kota Singkawang', provinsi: 'Kalimantan Barat', namaPaket: 'Paket pengadaan Buku Smartbook SD', sumberDana: 'APBD', nilaiAnggaran: 400000000, forecastNetto: 360360360, jenisProduk: 'Buku Non Teks', quarter: 'Q1', tk: 100, status: 'Deal', keterangan: 'Sudah closing Q1' },
-            { id: 7, pic: 'MUHAMMAD RASYID RIDHA', principal: 'ATS', instansi: 'Dinas Pendidikan dan Kebudayaan', wilayah: 'Kota Singkawang', provinsi: 'Kalimantan Barat', namaPaket: 'Paket pengadaan Meubelair', sumberDana: 'APBD', nilaiAnggaran: 200000000, forecastNetto: 180180180, jenisProduk: 'Mebel / Furnitur', quarter: 'Q1', tk: 100, status: 'Deal', keterangan: '' },
-            { id: 8, pic: 'LILIK LASONO', principal: 'SMK', instansi: 'Dinas Pendidikan', wilayah: 'Kabupaten Kutai Barat', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan Baju Seragam TK Negeri', sumberDana: 'APBD', nilaiAnggaran: 565896000, forecastNetto: 509816216, jenisProduk: 'Pakaian dan Seragam', quarter: 'Q2', tk: 75, status: 'Shortlisted', keterangan: '' },
-            { id: 9, pic: 'LILIK LASONO', principal: 'ATS', instansi: 'Dinas Pendidikan', wilayah: 'Kabupaten Kutai Barat', provinsi: 'Kalimantan Timur', namaPaket: 'Paket pengadaan Meja Kursi Siswa', sumberDana: 'APBD', nilaiAnggaran: 1980000000, forecastNetto: 1783783784, jenisProduk: 'Mebel / Furnitur', quarter: 'Q2', tk: 75, status: 'Closing', keterangan: '' },
-            { id: 10, pic: 'HERI IRWANSYAH', principal: 'SKE', instansi: 'INSPEKTORAT', wilayah: 'Kabupaten Boyolali', provinsi: 'Jawa Tengah', namaPaket: 'Paket Pengadaan Hibah', sumberDana: 'APBD', nilaiAnggaran: 24000839, forecastNetto: 21622378, jenisProduk: 'Alat Praktik', quarter: 'Q2', tk: 100, status: 'Deal', keterangan: 'Closing/Masuk PO' },
-            { id: 11, pic: 'JOKO WALUYO', principal: 'IPV', instansi: 'Perpusda Kalteng', wilayah: 'Kota Palangka Raya', provinsi: 'Kalimantan Tengah', namaPaket: 'Paket pengadaan Buku Perpustakaan', sumberDana: 'POKIR', nilaiAnggaran: 1500000000, forecastNetto: 1351351351, jenisProduk: 'Buku Non Teks HET', quarter: 'Q3', tk: 50, status: 'Pitching', keterangan: '' },
-            { id: 12, pic: 'BAMBANG SURYANTO', principal: 'IPE', instansi: 'Pendidikan', wilayah: 'Kabupaten Kolaka Utara', provinsi: 'Sulawesi Tenggara', namaPaket: 'Paket Buku Teks pendamping koding Ai', sumberDana: 'APBD', nilaiAnggaran: 242400000, forecastNetto: 242400000, jenisProduk: 'Buku Teks Pendamping HET', quarter: 'Q2', tk: 50, status: 'Pendekatan', keterangan: '' },
-            { id: 13, pic: 'YUDISTIRA WOLDI PAOKI', principal: 'ATS', instansi: 'Dinas Perpustakaan dan Kearsipan', wilayah: 'Kabupaten Minahasa Tenggara', provinsi: 'Sulawesi Utara', namaPaket: 'Paket pengadaan meubel', sumberDana: 'APBN', nilaiAnggaran: 500000000, forecastNetto: 500000000, jenisProduk: 'Mebel / Furnitur', quarter: 'Q2', tk: 75, status: 'Shortlisted', keterangan: '' },
-            { id: 14, pic: 'FIKRI ARI HANAFI', principal: 'ATS', instansi: 'DINAS KESEHATAN KAB.PEMALANG', wilayah: 'Kabupaten Pemalang', provinsi: 'Jawa Tengah', namaPaket: 'Paket pengadaan Meubel', sumberDana: 'APBD', nilaiAnggaran: 1198820000, forecastNetto: 1080018018, jenisProduk: 'Mebel / Furnitur', quarter: 'Q3', tk: 50, status: 'Pendekatan', keterangan: '' },
-            { id: 15, pic: 'AGUS MUHCLIS', principal: 'ATS', instansi: 'Sekwan DPRD Kab.Bandung Barat', wilayah: 'Kabupaten Bandung Barat', provinsi: 'Jawa Barat', namaPaket: 'Paket pengadaan meja dan kursi', sumberDana: 'APBD', nilaiAnggaran: 741300000, forecastNetto: 667837838, jenisProduk: 'Mebel / Furnitur', quarter: 'Q2', tk: 75, status: 'Closing', keterangan: '' },
-        ];
-
-        // ============================================================
-        // SECTION D: MOCK WEEKLY UPDATES (20+ entries across W8-W10)
-        // ============================================================
-        var weeklyUpdates = [
-            { id: 101, projectId: 1, pic: 'DANANG SETYO BUDI', week: 'W9-2026', status: 'Deal', forecast: 5846846333, notes: 'PO sudah diterima, proses pengiriman', adminNotes: 'Good job, monitor delivery', timestamp: '03/03/2026 09:15' },
-            { id: 102, projectId: 2, pic: 'DANANG SETYO BUDI', week: 'W9-2026', status: 'Deal', forecast: 2252252081, notes: 'ATK sudah kirim sebagian', adminNotes: '', timestamp: '03/03/2026 09:20' },
-            { id: 103, projectId: 3, pic: 'DANANG SETYO BUDI', week: 'W9-2026', status: 'Closing', forecast: 27027027027, notes: 'Negosiasi harga final', adminNotes: 'Push for closing W10', timestamp: '03/03/2026 09:30' },
-            { id: 104, projectId: 4, pic: 'DANANG SETYO BUDI', week: 'W9-2026', status: 'Shortlisted', forecast: 9009009009, notes: 'Masuk daftar pendek, tunggu evaluasi', adminNotes: '', timestamp: '03/03/2026 09:35' },
-            { id: 105, projectId: 5, pic: 'GIRI SURYANTO', week: 'W9-2026', status: 'Pitching', forecast: 810810811, notes: 'Presentasi ke tim Bawaslu minggu depan', adminNotes: '', timestamp: '03/02/2026 14:00' },
-            { id: 106, projectId: 6, pic: 'MUHAMMAD RASYID RIDHA', week: 'W9-2026', status: 'Deal', forecast: 360360360, notes: 'Sudah closing, invoice terkirim', adminNotes: '', timestamp: '03/02/2026 10:30' },
-            { id: 107, projectId: 8, pic: 'LILIK LASONO', week: 'W9-2026', status: 'Shortlisted', forecast: 509816216, notes: 'Menunggu keputusan tender', adminNotes: '', timestamp: '03/03/2026 11:00' },
-            { id: 108, projectId: 9, pic: 'LILIK LASONO', week: 'W9-2026', status: 'Closing', forecast: 1783783784, notes: 'Proses negosiasi akhir', adminNotes: '', timestamp: '03/03/2026 11:15' },
-            { id: 109, projectId: 11, pic: 'JOKO WALUYO', week: 'W9-2026', status: 'Pitching', forecast: 1351351351, notes: 'Presentasi minggu depan', adminNotes: '', timestamp: '03/04/2026 08:45' },
-            { id: 110, projectId: 12, pic: 'BAMBANG SURYANTO', week: 'W9-2026', status: 'Pendekatan', forecast: 242400000, notes: 'Masih pendekatan awal', adminNotes: 'Follow up segera', timestamp: '03/04/2026 09:00' },
-            // W8 entries
-            { id: 111, projectId: 1, pic: 'DANANG SETYO BUDI', week: 'W8-2026', status: 'Closing', forecast: 5846846333, notes: 'Negosiasi kontrak', adminNotes: '', timestamp: '02/24/2026 10:00' },
-            { id: 112, projectId: 3, pic: 'DANANG SETYO BUDI', week: 'W8-2026', status: 'Shortlisted', forecast: 27027027027, notes: 'Masuk shortlist vendor', adminNotes: '', timestamp: '02/24/2026 10:15' },
-            { id: 113, projectId: 5, pic: 'GIRI SURYANTO', week: 'W8-2026', status: 'Pendekatan', forecast: 810810811, notes: 'Identifikasi kebutuhan klien', adminNotes: '', timestamp: '02/23/2026 14:30' },
-            { id: 114, projectId: 8, pic: 'LILIK LASONO', week: 'W8-2026', status: 'Pendekatan', forecast: 509816216, notes: 'Awal pendekatan ke Dinas', adminNotes: '', timestamp: '02/24/2026 09:00' },
-            { id: 115, projectId: 13, pic: 'YUDISTIRA WOLDI PAOKI', week: 'W8-2026', status: 'Pitching', forecast: 500000000, notes: 'Kirim proposal', adminNotes: '', timestamp: '02/25/2026 11:00' },
-            // W10 entries
-            { id: 116, projectId: 1, pic: 'DANANG SETYO BUDI', week: 'W10-2026', status: 'Deal', forecast: 5846846333, notes: 'Delivery batch 1 selesai', adminNotes: 'Excellent progress', timestamp: '03/07/2026 08:00' },
-            { id: 117, projectId: 3, pic: 'DANANG SETYO BUDI', week: 'W10-2026', status: 'Closing', forecast: 27027027027, notes: 'Final negotiation done, menunggu PO', adminNotes: '', timestamp: '03/07/2026 08:10' },
-            { id: 118, projectId: 13, pic: 'YUDISTIRA WOLDI PAOKI', week: 'W10-2026', status: 'Shortlisted', forecast: 500000000, notes: 'Sudah masuk shortlist', adminNotes: '', timestamp: '03/07/2026 09:00' },
-            { id: 119, projectId: 14, pic: 'FIKRI ARI HANAFI', week: 'W10-2026', status: 'Pendekatan', forecast: 1080018018, notes: 'Masih pendekatan ke dinas kesehatan', adminNotes: '', timestamp: '03/07/2026 08:30' },
-            { id: 120, projectId: 15, pic: 'AGUS MUHCLIS', week: 'W10-2026', status: 'Closing', forecast: 667837838, notes: 'Menuju closing, RAB disetujui', adminNotes: '', timestamp: '03/07/2026 08:45' },
-            { id: 121, projectId: 10, pic: 'HERI IRWANSYAH', week: 'W9-2026', status: 'Deal', forecast: 21622378, notes: 'Deal selesai, barang sudah dikirim', adminNotes: '', timestamp: '03/03/2026 15:00' },
-            { id: 122, projectId: 7, pic: 'MUHAMMAD RASYID RIDHA', week: 'W10-2026', status: 'Deal', forecast: 180180180, notes: 'Semua terkirim', adminNotes: '', timestamp: '03/07/2026 09:15' },
-        ];
+        var funnelData = [];
+        var weeklyUpdates = [];
 
         // ============================================================
         // SECTION E: UTILITY FUNCTIONS
@@ -2662,7 +2532,7 @@ tambah catatan admin.`;
             const totalBrutto = data.reduce((s, d) => s + (d.nilaiAnggaran || 0), 0);
             const totalNetto = data.reduce((s, d) => s + (d.forecastNetto || 0), 0);
             const totalPipeline = data.length;
-            const deals = data.filter(d => d.status === 'Deal' || d.status === 'Closing');
+            const deals = data.filter(d => d.status === 'Closing');
             document.getElementById('kpi-brutto').textContent = fmtRp(totalBrutto);
             document.getElementById('kpi-netto').textContent = fmtRp(totalNetto);
             document.getElementById('kpi-pipeline').textContent = totalPipeline;
@@ -2685,7 +2555,7 @@ tambah catatan admin.`;
             const top5Container = document.getElementById('top-5-closing');
             if (top5Container) {
                 const closings = funnelData
-                    .filter(d => d.status === 'Closing' || d.status === 'Deal')
+                    .filter(d => d.status === 'Closing')
                     .sort((a, b) => (b.forecastNetto || 0) - (a.forecastNetto || 0))
                     .slice(0, 5);
 
