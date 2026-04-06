@@ -1286,7 +1286,7 @@ function renderPipelineTable() {
 // =============================================
 function renderStatistik() {
     var totalBrutto = funnelData.reduce(function(s, p) { return s + (p.brutto || 0); }, 0);
-    var totalNetto  = funnelData.reduce(function(s, p) { return s + (p.netto  || 0); }, 0);
+    var totalNetto  = funnelData.reduce(function(s, p) { return s + (p.netto || p.forecastNetto || 0); }, 0);
     document.getElementById('stat-brutto').textContent   = fmtRp(totalBrutto);
     document.getElementById('stat-netto').textContent    = fmtRp(totalNetto);
     document.getElementById('stat-pipeline').textContent = funnelData.length;
