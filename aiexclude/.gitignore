@@ -1,8 +1,0 @@
-.claude/
-_archive/
-prototype_files/
-*.xlsx
-*.txt
-Handoff_*.md
-Claude
-.agent/
