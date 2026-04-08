@@ -1628,7 +1628,7 @@
 
     <!-- Detail Modal -->
     <div id="detail-modal" class="modal-overlay">
-      <div class="modal-content" style="max-width:600px;width:95%;">
+      <div class="modal-content" style="max-width:600px;width:95%;max-height:90vh;overflow-y:auto;">
         <div class="flex justify-between items-center mb-4 pb-3 border-b border-slate-700">
           <h3 class="text-lg font-bold text-white">Detail Update</h3>
           <button onclick="closeDetailModal()" class="text-slate-400 hover:text-white text-xl font-bold">✕</button>
@@ -1648,6 +1648,10 @@
                   class="px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded text-sm font-bold text-white">
             💾 Simpan Notes
           </button>
+        </div>
+        <div style="border-top:1px solid #334155; margin-top:20px; padding-top:20px;">
+          <h4 style="color:#94a3b8; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px;">Riwayat Update Weekly</h4>
+          <div id="detail-riwayat-list" style="display:flex; flex-direction:column; gap:8px; max-height:280px; overflow-y:auto;"></div>
         </div>
       </div>
     </div>
@@ -1996,6 +2000,29 @@
 
             document.getElementById('detail-admin-notes').value = u.adminNotes || '';
             document.getElementById('detail-modal').classList.add('open');
+
+            const riwayatEl = document.getElementById('detail-riwayat-list');
+            if (riwayatEl) {
+                const funnelIdTarget = u.funnelId;
+                const history = weeklyUpdates
+                    .filter(w => w.funnelId === funnelIdTarget || w.projectId === funnelIdTarget)
+                    .sort((a, b) => (b.week || '').localeCompare(a.week || ''));
+
+                if (history.length === 0) {
+                    riwayatEl.innerHTML = '<div style="color:#64748b; font-size:0.85rem;">Belum ada riwayat update.</div>';
+                } else {
+                    riwayatEl.innerHTML = history.map(w => `
+                        <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="color:#38bdf8; font-weight:700; font-size:0.85rem;">${w.week || '-'}</span>
+                                <span class="badge badge-${w.tk || '0'}" style="font-size:0.7rem;">${w.statusBaru || w.status || '-'}</span>
+                            </div>
+                            <div style="color:#2dd4bf; font-weight:600; font-size:0.85rem; margin-bottom:4px;">${w.forecastNetto ? 'Rp ' + Number(w.forecastNetto).toLocaleString('id-ID') : (w.forecast ? 'Rp ' + Number(w.forecast).toLocaleString('id-ID') : '-')}</div>
+                            ${w.notes ? `<div style="color:#94a3b8; font-size:0.8rem;">${w.notes}</div>` : ''}
+                        </div>
+                    `).join('');
+                }
+            }
         }
 
         function closeDetailModal() {

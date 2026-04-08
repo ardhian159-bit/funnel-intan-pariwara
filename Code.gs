@@ -66,6 +66,10 @@ function doGet(e) {
         var payload = params.payload ? JSON.parse(params.payload) : {};
         return successResponse(addLead(payload));
 
+      case 'updateLead':
+        var payload = params.payload ? JSON.parse(params.payload) : {};
+        return successResponse(updateLead(payload));
+
       case 'updateTracker':
         var payload = params.payload ? JSON.parse(params.payload) : {};
         return successResponse(updateTracker(payload));
@@ -371,6 +375,54 @@ function addLead(data) {
     return { success: true, message: 'Data berhasil ditambahkan', rowNumber: rowNumber, timestamp: timestamp };
   } catch (err) {
     throw new Error('Gagal menyimpan data LEADS: ' + err.message);
+  }
+}
+
+// =============================================================================
+// A6b. updateLead(data) — Update existing row in LEADS by funnelId
+// =============================================================================
+
+function updateLead(data) {
+  try {
+    if (!data.funnelId) throw new Error('funnelId wajib diisi');
+    var ss = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = ss.getSheetByName('LEADS');
+    if (!sheet) throw new Error('Tab LEADS tidak ditemukan');
+
+    var lastRow = sheet.getLastRow();
+    if (lastRow < 2) throw new Error('Data tidak ditemukan');
+
+    var ids = sheet.getRange(2, 2, lastRow - 1, 1).getValues(); // kolom B = funnelId
+    for (var i = 0; i < ids.length; i++) {
+      if (ids[i][0] == data.funnelId) {
+        var targetRow = i + 2;
+        // Update kolom sesuai LEADS column mapping
+        if (data.principal      !== undefined) sheet.getRange(targetRow, 3).setValue(data.principal);
+        if (data.status         !== undefined) sheet.getRange(targetRow, 4).setValue(data.status);
+        if (data.instansi       !== undefined) sheet.getRange(targetRow, 6).setValue(data.instansi);
+        if (data.wilayah        !== undefined) sheet.getRange(targetRow, 7).setValue(data.wilayah);
+        if (data.kabupatenKota  !== undefined) sheet.getRange(targetRow, 8).setValue(data.kabupatenKota);
+        if (data.provinsi       !== undefined) sheet.getRange(targetRow, 9).setValue(data.provinsi);
+        if (data.namaPaket      !== undefined) sheet.getRange(targetRow, 10).setValue(data.namaPaket);
+        if (data.sumberDana     !== undefined) sheet.getRange(targetRow, 11).setValue(data.sumberDana);
+        if (data.nilaiAnggaran  !== undefined) sheet.getRange(targetRow, 12).setValue(data.nilaiAnggaran);
+        if (data.dpp            !== undefined) sheet.getRange(targetRow, 13).setValue(data.dpp);
+        if (data.forecastNetto  !== undefined) sheet.getRange(targetRow, 14).setValue(data.forecastNetto);
+        if (data.ppnNon         !== undefined) sheet.getRange(targetRow, 15).setValue(data.ppnNon);
+        if (data.perkiraanCb    !== undefined) sheet.getRange(targetRow, 16).setValue(data.perkiraanCb);
+        if (data.produk         !== undefined) sheet.getRange(targetRow, 17).setValue(data.produk);
+        if (data.qty            !== undefined) sheet.getRange(targetRow, 18).setValue(data.qty);
+        if (data.satuan         !== undefined) sheet.getRange(targetRow, 19).setValue(data.satuan);
+        if (data.jenisProduk    !== undefined) sheet.getRange(targetRow, 20).setValue(data.jenisProduk);
+        if (data.tk             !== undefined) sheet.getRange(targetRow, 21).setValue(data.tk);
+        if (data.quarter        !== undefined) sheet.getRange(targetRow, 22).setValue(data.quarter);
+        if (data.keterangan     !== undefined) sheet.getRange(targetRow, 24).setValue(data.keterangan);
+        return { success: true, message: 'Data berhasil diupdate', funnelId: data.funnelId };
+      }
+    }
+    throw new Error('funnelId tidak ditemukan: ' + data.funnelId);
+  } catch (err) {
+    throw new Error('Gagal update data LEADS: ' + err.message);
   }
 }
 

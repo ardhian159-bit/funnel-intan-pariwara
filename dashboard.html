@@ -228,6 +228,11 @@
 
 <body class="min-h-screen flex flex-col">
 
+  <!-- LOADING OVERLAY -->
+  <div id="dashboard-loading" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:9999; align-items:center; justify-content:center;">
+    <div style="color:#38bdf8; font-size:1rem; font-weight:600;">Memuat data dashboard...</div>
+  </div>
+
   <!-- ===== NAVBAR (via htmx) ===== -->
   <div id="navbar-container" hx-get="navbar.html" hx-trigger="load" hx-swap="innerHTML">
   </div>
@@ -361,7 +366,7 @@
         </button>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">QUARTER</label>
           <div class="flex flex-wrap gap-2" id="filter-quarter">
@@ -400,6 +405,13 @@
               <option value="ALL">Semua Wilayah</option>
             </select>
           </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">PRINCIPAL</label>
+          <select id="filter-principal" class="w-full bg-slate-700/50 border border-slate-600 text-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+            <option value="ALL">Semua Principal</option>
+          </select>
         </div>
 
         <div>
@@ -530,1520 +542,29 @@
     </footer>
 
     <!-- APPLICATION LOGIC -->
+
+    <!-- PIPELINE DETAIL MODAL -->
+    <div id="pipeline-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.85); z-index:9999; align-items:flex-start; justify-content:center; padding-top:60px; overflow-y:auto;">
+      <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; width:95%; max-width:680px; padding:28px; position:relative;">
+        <button onclick="closePipelineModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#94a3b8; font-size:1.25rem; cursor:pointer;">✕</button>
+        <h3 style="color:#f1f5f9; font-size:1.1rem; font-weight:700; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid #334155;">Detail Pipeline</h3>
+        <div id="pipeline-modal-detail" style="display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; margin-bottom:24px;"></div>
+        <div style="border-top:1px solid #334155; padding-top:20px;">
+          <h4 style="color:#94a3b8; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px;">Riwayat Update Weekly</h4>
+          <div id="pipeline-modal-history" style="display:flex; flex-direction:column; gap:8px;">
+            <div style="color:#64748b; font-size:0.85rem;">Memuat riwayat...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
-      // Embedded JSON data injected by build.py
-      let globalData = [
-        {
-          "no": 1,
-          "principal": "ATS",
-          "pic": "GIRI SURYANTO",
-          "instansi": "Bawaslu",
-          "wilayah": "Kota Administrasi Jakarta Pusat",
-          "provinsi": "DKI Jakarta",
-          "namaPaket": "Belanja Modal alat dan mesin",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 1000000000.0,
-          "forecastNetto": 810810810.8,
-          "produk": "Cetak Buku",
-          "jenisProduk": "Cetak, Kertas, dan Buku Tulis",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 2,
-          "principal": "SKE",
-          "pic": "GIRI SURYANTO",
-          "instansi": "KPU RI",
-          "wilayah": "Kota Administrasi Jakarta Pusat",
-          "provinsi": "DKI Jakarta",
-          "namaPaket": "Pengadaan olah data CPNS",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 0.0,
-          "forecastNetto": 0.0,
-          "produk": "Laptop",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q4",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 3,
-          "principal": "ATS",
-          "pic": "DIKKY MAHISA PUTERA",
-          "instansi": "Kementrian sosial",
-          "wilayah": "Kota Bandar Lampung",
-          "provinsi": "Lampung",
-          "namaPaket": "Paket pengadaan Meubelair",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 1260000000.0,
-          "forecastNetto": 1135135135.0,
-          "produk": "Meubelair",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 4,
-          "principal": "Un categories",
-          "pic": "DIKKY MAHISA PUTERA",
-          "instansi": "kementrian Kesehatan",
-          "wilayah": "Kabupaten Penajam Paser Utara",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan IPAL",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 800000000.0,
-          "forecastNetto": 720720720.7,
-          "produk": "IPAL",
-          "jenisProduk": "Paket Project",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 5,
-          "principal": "Un categories",
-          "pic": "DIKKY MAHISA PUTERA",
-          "instansi": "Kementan",
-          "wilayah": "Kabupaten Malang",
-          "provinsi": "Jawa Timur",
-          "namaPaket": "Paket pengadaan Pupuk",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 700000000.0,
-          "forecastNetto": 630630630.6,
-          "produk": "Pupuk",
-          "jenisProduk": "Paket Project",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 6,
-          "principal": "ATS",
-          "pic": "DANANG SETYO BUDI",
-          "instansi": "Dinas Pendidikan Kutai Timur",
-          "wilayah": "Kabupaten Kutai Timur",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan meubel",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 6489999430.0,
-          "forecastNetto": 5846846333.0,
-          "produk": "MEUBELAIR",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 7,
-          "principal": "SMK",
-          "pic": "DANANG SETYO BUDI",
-          "instansi": "Dinas Pendidikan Kutai Timur",
-          "wilayah": "Kabupaten Kutai Timur",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan ATK",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 2499999810.0,
-          "forecastNetto": 2252252081.0,
-          "produk": "ATK",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 8,
-          "principal": "SKE",
-          "pic": "DANANG SETYO BUDI",
-          "instansi": "Dinas Pendidikan Kutai Timur",
-          "wilayah": "Kabupaten Kutai Timur",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan seragam dan meubel",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 30000000000.0,
-          "forecastNetto": 27027027027.0,
-          "produk": "Seragam/meubel",
-          "jenisProduk": "Paket Project",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 9,
-          "principal": "SMK",
-          "pic": "DANANG SETYO BUDI",
-          "instansi": "Kemenag",
-          "wilayah": "Kota Yogyakarta",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Paket pengadaan ATK",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 10000000000.0,
-          "forecastNetto": 9009009009.0,
-          "produk": "ATK",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 10,
-          "principal": "SMK",
-          "pic": "DANANG SETYO BUDI",
-          "instansi": "Dimas Perhubungan",
-          "wilayah": "Kota Semarang",
-          "provinsi": "Jawa Tengah",
-          "namaPaket": "Paket pengadaan PJU",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 15000000000.0,
-          "forecastNetto": 15000000000.0,
-          "produk": "ATK",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 11,
-          "principal": "IPE",
-          "pic": "BAMBANG SURYANTO",
-          "instansi": "Pendidikan",
-          "wilayah": "Kabupaten Kolaka Utara",
-          "provinsi": "Sulawesi Tenggara",
-          "namaPaket": "Paket Buku Teks pendamping koding Ai",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 242400000.0,
-          "forecastNetto": 242400000.0,
-          "produk": "Buku Teks Pendamping Koding dan Kecerdasan Artifisial untuk SD",
-          "jenisProduk": "Buku Teks Pendamping HET",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 12,
-          "principal": "IPE",
-          "pic": "BAMBANG SURYANTO",
-          "instansi": "Pendidikan",
-          "wilayah": "Kabupaten Kolaka Utara",
-          "provinsi": "Sulawesi Tenggara",
-          "namaPaket": "Paket Buku Teks pendamping koding Ai",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 135750000.0,
-          "forecastNetto": 122297297.3,
-          "produk": "Buku Teks Pendamping Koding dan Kecerdasan Artifisial untuk SMP",
-          "jenisProduk": "Buku Teks Pendamping HET",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 13,
-          "principal": "SMK",
-          "pic": "BAMBANG SURYANTO",
-          "instansi": "Pendidikan",
-          "wilayah": "Kabupaten Kolaka Utara",
-          "provinsi": "Sulawesi Tenggara",
-          "namaPaket": "Paket alat olahraga SD",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 1957614400.0,
-          "forecastNetto": 1763616577.0,
-          "produk": "Alat Olahraga Jenjang SD",
-          "jenisProduk": "Alat Olahraga",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 14,
-          "principal": "ATS",
-          "pic": "HERI IRWANSYAH",
-          "instansi": "DINAS PERUMAHAN RAKYAT DAN KAWASAN PERMUKIMAN",
-          "wilayah": "Kabupaten Boyolali",
-          "provinsi": "Jawa Tengah",
-          "namaPaket": "Paket Pengadaan Mebel",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 13393325.51,
-          "forecastNetto": 12066059.02,
-          "produk": "SOFA RUANG TAMU",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 15,
-          "principal": "ATS",
-          "pic": "HERI IRWANSYAH",
-          "instansi": "DINAS SOSIAL, PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK",
-          "wilayah": "Kabupaten Boyolali",
-          "provinsi": "Jawa Tengah",
-          "namaPaket": "Paket Pengadaan ATK",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 42858641.64,
-          "forecastNetto": 38611388.87,
-          "produk": "HIBAH ALAT SEKOLAH",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 16,
-          "principal": "ATS",
-          "pic": "HERI IRWANSYAH",
-          "instansi": "DINAS PETERNAKAN",
-          "wilayah": "Kabupaten Boyolali",
-          "provinsi": "Jawa Tengah",
-          "namaPaket": "Paket Pengadaan Mebel",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 16071990.62,
-          "forecastNetto": 14479270.83,
-          "produk": "LEMARI KAYU JATI",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 17,
-          "principal": "SKE",
-          "pic": "HERI IRWANSYAH",
-          "instansi": "INSPEKTORAT",
-          "wilayah": "Kabupaten Boyolali",
-          "provinsi": "Jawa Tengah",
-          "namaPaket": "Paket Pengadaan Hibah",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 24000839.32,
-          "forecastNetto": 21622377.77,
-          "produk": "sarung, mukena , al Quran, Iqro",
-          "jenisProduk": "Alat Praktik",
-          "quarter": "Q2",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 18,
-          "principal": "SKE",
-          "pic": "HERI IRWANSYAH",
-          "instansi": "KECAMATAN TERAS",
-          "wilayah": "Kabupaten Boyolali",
-          "provinsi": "Jawa Tengah",
-          "namaPaket": "Paket Pengadaan TIK",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 16071990.62,
-          "forecastNetto": 14479270.83,
-          "produk": "PC (Personal Computer) Intel Core i7,HD 1 TB, RAM 8 GB",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 19,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "SPPG Bantul Pundong Panjangrejo 2",
-          "wilayah": "Kabupaten Bantul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 70421.80921,
-          "forecastNetto": 63443.07136,
-          "produk": "Sarung Tangan Karet (isi 100)",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 20,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "SPPG Bantul Jetis Patalan",
-          "wilayah": "Kabupaten Bantul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 70421.80921,
-          "forecastNetto": 63443.07136,
-          "produk": "Sarung Tangan Karet (isi 100)",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 21,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "SPPG Bantul Jetis Patalan 2",
-          "wilayah": "Kabupaten Bantul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 70421.80921,
-          "forecastNetto": 63443.07136,
-          "produk": "Sarung Tangan Karet (isi 100)",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 22,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "SPPG Bantul Jetis Patalan 3",
-          "wilayah": "Kabupaten Bantul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 70421.80921,
-          "forecastNetto": 63443.07136,
-          "produk": "Sarung Tangan Karet (isi 100)",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 23,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "Puskesmas Semin 1",
-          "wilayah": "Kabupaten Gunungkidul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 57098.76422,
-          "forecastNetto": 51440.32813,
-          "produk": "Pembersih Lantai GUARDER 5L",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 24,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "Puskesmas Semin 2",
-          "wilayah": "Kabupaten Gunungkidul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 57098.76422,
-          "forecastNetto": 51440.32813,
-          "produk": "Pembersih Lantai GUARDER 5L",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 25,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "Puskesmas Tanjungsari",
-          "wilayah": "Kabupaten Gunungkidul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 57098.76422,
-          "forecastNetto": 51440.32813,
-          "produk": "Pembersih Lantai GUARDER 5L",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 26,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "Puskesmas Tepus 1",
-          "wilayah": "Kabupaten Gunungkidul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 57098.76422,
-          "forecastNetto": 51440.32813,
-          "produk": "Pembersih Lantai GUARDER 5L",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 27,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "Puskesmas Tepus 2",
-          "wilayah": "Kabupaten Gunungkidul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 57098.76422,
-          "forecastNetto": 51440.32813,
-          "produk": "Pembersih Lantai GUARDER 5L",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 28,
-          "principal": "SMK",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "Puskesmas Wonosari 1",
-          "wilayah": "Kabupaten Gunungkidul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Rutin",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 57098.76422,
-          "forecastNetto": 51440.32813,
-          "produk": "Pembersih Lantai GUARDER 5L",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 29,
-          "principal": "ATS",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "Puskesmas Wonosari 2",
-          "wilayah": "Kabupaten Gunungkidul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Modal BLUD_Lemari Penyimpanan",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 10080152.39,
-          "forecastNetto": 9081218.372,
-          "produk": "Lemari Arsip RIONE 5 Rak Pintu Ayun",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 30,
-          "principal": "ATS",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "RSUD Prambanan",
-          "wilayah": "Kabupaten Sleman",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Modal BLUD-Mebeler",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 43777305.32,
-          "forecastNetto": 39439013.8,
-          "produk": "Kursi Kerja RIONE Jaring Nautilus HT0A",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 31,
-          "principal": "ATS",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "BPK RI PERWAKILAN PROVINSI DAERAH ISTIMEWA YOGYAKARTA",
-          "wilayah": "Kota Yogyakarta",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Modal Mebeler",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 12860545.0,
-          "forecastNetto": 11586076.57,
-          "produk": "Kursi Susun RIONE T-138",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 32,
-          "principal": "SKE",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "RSUD Wonosari",
-          "wilayah": "Kabupaten Gunungkidul",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Modal Komputer",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 22790971.74,
-          "forecastNetto": 20532406.97,
-          "produk": "PC Desktop Series Intel i5/8GB/512GB SSD/21.5inch/Win11/OHS21",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 33,
-          "principal": "SKE",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "BADAN PERENCANAAN PEMBANGUNAN RISET DAN INOVASI DAERAH DIY",
-          "wilayah": "Kota Yogyakarta",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Modal Komputer",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 34146076.1,
-          "forecastNetto": 30762230.72,
-          "produk": "Laptop Intel Ci7/16GB/512GB/14 inch/Win11/OHS21",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 34,
-          "principal": "SKE",
-          "pic": "BLASIUS DIMAS",
-          "instansi": "BADAN KEUANGAN DAN ASET DAERAH",
-          "wilayah": "Kabupaten Sleman",
-          "provinsi": "Daerah Istimewa Yogyakarta",
-          "namaPaket": "Belanja Modal Komputer",
-          "sumberDana": "",
-          "nilaiAnggaran": 31190517.17,
-          "forecastNetto": 28099565.02,
-          "produk": "PC AIO Intel Ci7/16GB/512GB/23,8inch/Win11/OHS21",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 35,
-          "principal": "IPV",
-          "pic": "JOKO WALUYO",
-          "instansi": "Perpusda Kalteng",
-          "wilayah": "Kota Palangka Raya",
-          "provinsi": "Kalimantan Tengah",
-          "namaPaket": "Paket pengadaan Buku Perpustakaan",
-          "sumberDana": "POKIR",
-          "nilaiAnggaran": 1500000000.0,
-          "forecastNetto": 1351351351.0,
-          "produk": "Buku Perpustakaan",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 36,
-          "principal": "ATS",
-          "pic": "JOKO WALUYO",
-          "instansi": "Perpusda Kalteng",
-          "wilayah": "Kota Palangka Raya",
-          "provinsi": "Kalimantan Tengah",
-          "namaPaket": "Paket pengadaan meubelair",
-          "sumberDana": "POKIR",
-          "nilaiAnggaran": 300000000.0,
-          "forecastNetto": 270270270.3,
-          "produk": "Mebeler",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 37,
-          "principal": "IPV",
-          "pic": "JOKO WALUYO",
-          "instansi": "Dinas Pendidikan Propinsi Kalteng",
-          "wilayah": "Kota Palangka Raya",
-          "provinsi": "Kalimantan Tengah",
-          "namaPaket": "Paket pengadaan Perpustakaan",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 5000000000.0,
-          "forecastNetto": 4504504505.0,
-          "produk": "Buku Perpustakaan",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 38,
-          "principal": "IPV",
-          "pic": "JOKO WALUYO",
-          "instansi": "Dinas Kesehatan Kota Palangka Raya",
-          "wilayah": "Kota Palangka Raya",
-          "provinsi": "Kalimantan Tengah",
-          "namaPaket": "Paket pengadaan Kesehatan",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 10000000000.0,
-          "forecastNetto": 9009009009.0,
-          "produk": "Alat Kesehatan",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 39,
-          "principal": "SMK",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan Baju Seragam TK Negeri",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 565896000.0,
-          "forecastNetto": 509816216.2,
-          "produk": "Baju Seragam TK Negeri",
-          "jenisProduk": "Pakaian dan Seragam",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 40,
-          "principal": "ATS",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  OUT DOOR",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 110612250.0,
-          "forecastNetto": 99650675.68,
-          "produk": "APE OUT DOOR",
-          "jenisProduk": "Alat Peraga APE Luar",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 41,
-          "principal": "ATS",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  OUT DOOR",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 110612250.0,
-          "forecastNetto": 99650675.68,
-          "produk": "APE OUT DOOR",
-          "jenisProduk": "Alat Peraga APE Luar",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 42,
-          "principal": "SKE",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  IN DOOR",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 125227000.0,
-          "forecastNetto": 112817117.1,
-          "produk": "APE IN DOOR",
-          "jenisProduk": "Alat Peraga APE Dalam",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 43,
-          "principal": "SKE",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  IN DOOR",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 146846000.0,
-          "forecastNetto": 132293693.7,
-          "produk": "APE IN DOOR",
-          "jenisProduk": "Alat Peraga APE Dalam",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 44,
-          "principal": "IPV",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  Mewarnai TK /  PAUD",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 130000000.0,
-          "forecastNetto": 117117117.1,
-          "produk": "Buku Mewarnai TK /  PAUD",
-          "jenisProduk": "Buku PAUD",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 45,
-          "principal": "IPV",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  Kumer PAUD Usia 4-5 /  5 - 6",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 132730000.0,
-          "forecastNetto": 119576576.6,
-          "produk": "Buku Kumer PAUD Usia 4-5 /  5 - 6",
-          "jenisProduk": "Buku PAUD",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 46,
-          "principal": "ATS",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  Meja Kursi Siswa",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 1980000000.0,
-          "forecastNetto": 1783783784.0,
-          "produk": "Pengadaan Meja Kursi Siswa",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 47,
-          "principal": "ATS",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  Meja Kursi Siswa PAUD",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 600000000.0,
-          "forecastNetto": 540540540.5,
-          "produk": "Pengadaan Meja Kursi Siswa PAUD",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 48,
-          "principal": "ATS",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket pengadaan  Crayon",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 126479860.0,
-          "forecastNetto": 113945819.8,
-          "produk": "Pengadaan Crayon",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 49,
-          "principal": "IPE",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket Pengadaan Buku Cerita PAUD",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 135720000.0,
-          "forecastNetto": 122270270.3,
-          "produk": "Pengadaan Buku Cerita PAUD",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 50,
-          "principal": "ATS",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket Pengadaan Meja Kerja",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 270000000.0,
-          "forecastNetto": 243243243.2,
-          "produk": "Pengadaan Meja Kerja",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 51,
-          "principal": "ATS",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket Pengadaan Kursi Kerja",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 252000000.0,
-          "forecastNetto": 227027027.0,
-          "produk": "Pengadaan Kursi Kerja",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 52,
-          "principal": "ATS",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Kutai Barat",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket Pengadaan Lemari Arsip",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 53200000.0,
-          "forecastNetto": 47927927.93,
-          "produk": "Pengadaan Lemari Arsip",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 53,
-          "principal": "SKE",
-          "pic": "LILIK LASONO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Penajam Paser Utara",
-          "provinsi": "Kalimantan Timur",
-          "namaPaket": "Paket Pengadaan Laptop",
-          "sumberDana": "POKIR",
-          "nilaiAnggaran": 1200000000.0,
-          "forecastNetto": 1081081081.0,
-          "produk": "Laptop",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 54,
-          "principal": "IPV",
-          "pic": "MANAEK HENDRAWAN SITINJAK",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Deli Serdang",
-          "provinsi": "Sumatera Utara",
-          "namaPaket": "Paket Pengadaan Nonteks untuk SD",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 500000000.0,
-          "forecastNetto": 500000000.0,
-          "produk": "Buku Nonteks untuk SD",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 55,
-          "principal": "ATS",
-          "pic": "MANAEK HENDRAWAN SITINJAK",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Deli Serdang",
-          "provinsi": "Sumatera Utara",
-          "namaPaket": "Paket Pengadaan Kursi Guru&Siswa, Lemari, Papan Tulis",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 1000000000.0,
-          "forecastNetto": 1000000000.0,
-          "produk": "Meja Kursi Guru&Siswa, Lemari, Papan Tulis",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 56,
-          "principal": "IPV",
-          "pic": "MANAEK HENDRAWAN SITINJAK",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Langkat",
-          "provinsi": "Sumatera Utara",
-          "namaPaket": "Paket Pengadaan Nonteks SD-SMP",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 1000000000.0,
-          "forecastNetto": 900900900.9,
-          "produk": "Buku Nonteks SD-SMP",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 57,
-          "principal": "IPV",
-          "pic": "MANAEK HENDRAWAN SITINJAK",
-          "instansi": "Dinas Pendidikan dan Kebudayaan",
-          "wilayah": "Kota Subulussalam",
-          "provinsi": "Nanggroe Aceh Darussalam",
-          "namaPaket": "Paket Pengadaan Nonteks SD-SMP (obral)",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 2000000000.0,
-          "forecastNetto": 1801801802.0,
-          "produk": "Buku Nonteks SD-SMP (obral)",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 58,
-          "principal": "IPE",
-          "pic": "MUHAMMAD RASYID RIDHA",
-          "instansi": "Dinas Pendidikan dan Kebudayaan",
-          "wilayah": "Kota Singkawang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Buku Smartbook SD",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 400000000.0,
-          "forecastNetto": 360360360.4,
-          "produk": "Buku Smartbook SD",
-          "jenisProduk": "Buku Non Teks",
-          "quarter": "Q1",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 59,
-          "principal": "IPE",
-          "pic": "MUHAMMAD RASYID RIDHA",
-          "instansi": "Dinas Pendidikan dan Kebudayaan",
-          "wilayah": "Kota Singkawang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Smartbook SMP",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 400000000.0,
-          "forecastNetto": 360360360.4,
-          "produk": "Buku Smartbook SMP",
-          "jenisProduk": "Buku Non Teks",
-          "quarter": "Q1",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 60,
-          "principal": "IPE",
-          "pic": "MUHAMMAD RASYID RIDHA",
-          "instansi": "Dinas Pendidikan dan Kebudayaan",
-          "wilayah": "Kota Singkawang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Interaktif SD",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 800000000.0,
-          "forecastNetto": 800000000.0,
-          "produk": "Buku Interaktif SD",
-          "jenisProduk": "Buku Teks Pendamping",
-          "quarter": "Q1",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 61,
-          "principal": "IPE",
-          "pic": "MUHAMMAD RASYID RIDHA",
-          "instansi": "Dinas Pendidikan dan Kebudayaan",
-          "wilayah": "Kota Singkawang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Interaktif SMP",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 700000000.0,
-          "forecastNetto": 700000000.0,
-          "produk": "Buku Interaktif SMP",
-          "jenisProduk": "Buku Teks Pendamping",
-          "quarter": "Q1",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 62,
-          "principal": "ATS",
-          "pic": "MUHAMMAD RASYID RIDHA",
-          "instansi": "Dinas Pendidikan dan Kebudayaan",
-          "wilayah": "Kota Singkawang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Meubelair",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 200000000.0,
-          "forecastNetto": 180180180.2,
-          "produk": "Meubeler",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q1",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 63,
-          "principal": "ATS",
-          "pic": "MUHAMMAD RASYID RIDHA",
-          "instansi": "Dinas Pendidikan dan Kebudayaan",
-          "wilayah": "Kota Singkawang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Meubeler SD",
-          "sumberDana": "APBDP",
-          "nilaiAnggaran": 1000000000.0,
-          "forecastNetto": 900900900.9,
-          "produk": "Meubeler SD",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q4",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 64,
-          "principal": "ATS",
-          "pic": "MUHAMMAD RASYID RIDHA",
-          "instansi": "Dinas Pendidikan dan Kebudayaan",
-          "wilayah": "Kota Singkawang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Meubeler SMP",
-          "sumberDana": "APBDP",
-          "nilaiAnggaran": 500000000.0,
-          "forecastNetto": 450450450.5,
-          "produk": "Meubeler SMP",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q4",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 65,
-          "principal": "ATS",
-          "pic": "EKO JULIANTO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Ketapang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Mebel",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 1000000000.0,
-          "forecastNetto": 1000000000.0,
-          "produk": "Mebel",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 66,
-          "principal": "IPE",
-          "pic": "EKO JULIANTO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Ketapang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan buku non teks",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 1000000000.0,
-          "forecastNetto": 1000000000.0,
-          "produk": "Buku",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 67,
-          "principal": "IPE",
-          "pic": "EKO JULIANTO",
-          "instansi": "Dinas Pendidikan Provinsi",
-          "wilayah": "Kota Pontianak",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan buku non teks",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 2800000000.0,
-          "forecastNetto": 2522522523.0,
-          "produk": "Buku",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 68,
-          "principal": "ATS",
-          "pic": "EKO JULIANTO",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Ketapang",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan kertas raport",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 1500000000.0,
-          "forecastNetto": 1500000000.0,
-          "produk": "Kertas Raport",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q4",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 69,
-          "principal": "ATS",
-          "pic": "YUDISTIRA WOLDI PAOKI",
-          "instansi": "Dinas Perpustakaan dan Kearsipan",
-          "wilayah": "Kabupaten Minahasa Tenggara",
-          "provinsi": "Sulawesi Utara",
-          "namaPaket": "Paket pengadaan meubel",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 500000000.0,
-          "forecastNetto": 500000000.0,
-          "produk": "Rione",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 70,
-          "principal": "IPE",
-          "pic": "YUDISTIRA WOLDI PAOKI",
-          "instansi": "Dinas Perpustakaan dan Kearsipan",
-          "wilayah": "Kabupaten Minahasa Tenggara",
-          "provinsi": "Sulawesi Utara",
-          "namaPaket": "Paket pengadaan Buku perpustakaan",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 200000000.0,
-          "forecastNetto": 200000000.0,
-          "produk": "Buku perpustakaan",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 71,
-          "principal": "IPE",
-          "pic": "YUDISTIRA WOLDI PAOKI",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Minahasa",
-          "provinsi": "Sulawesi Utara",
-          "namaPaket": "Paket pengadaan Smartbook",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 150000000.0,
-          "forecastNetto": 135135135.1,
-          "produk": "Smartbook",
-          "jenisProduk": "Buku Teks Pendamping",
-          "quarter": "Q1",
-          "tk": ""
-        },
-        {
-          "no": 72,
-          "principal": "SKE",
-          "pic": "YUDISTIRA WOLDI PAOKI",
-          "instansi": "Dinas Pendidikan",
-          "wilayah": "Kabupaten Minahasa",
-          "provinsi": "Sulawesi Utara",
-          "namaPaket": "Paket pengadaan TIK",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 110000000.0,
-          "forecastNetto": 110000000.0,
-          "produk": "TIK",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q2",
-          "tk": "100%\nClosing/Masuk PO"
-        },
-        {
-          "no": 73,
-          "principal": "SMK",
-          "pic": "YUDISTIRA WOLDI PAOKI",
-          "instansi": "Poltekes manado",
-          "wilayah": "Kota Manado",
-          "provinsi": "Sulawesi Utara",
-          "namaPaket": "Paket pengadaan Seragam",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 886000000.0,
-          "forecastNetto": 886000000.0,
-          "produk": "Seragam",
-          "jenisProduk": "Pakaian dan Seragam",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 74,
-          "principal": "IPV",
-          "pic": "YUDISTIRA WOLDI PAOKI",
-          "instansi": "Poltekes Manado",
-          "wilayah": "Kota Manado",
-          "provinsi": "Sulawesi Utara",
-          "namaPaket": "Paket pengadaan alat Lab",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 777962000.0,
-          "forecastNetto": 777962000.0,
-          "produk": "Lab",
-          "jenisProduk": "Alat Peraga LAB IPA",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 75,
-          "principal": "SKE",
-          "pic": "YUDISTIRA WOLDI PAOKI",
-          "instansi": "RS Noongan",
-          "wilayah": "Kabupaten Minahasa",
-          "provinsi": "Sulawesi Utara",
-          "namaPaket": "Paket pengadaan ATK",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 250000000.0,
-          "forecastNetto": 225225225.2,
-          "produk": "ATK",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q1",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 76,
-          "principal": "SKE",
-          "pic": "AJI FARIZ RACHMAN",
-          "instansi": "Puskesmas Matraman",
-          "wilayah": "Kota Administrasi Jakarta Selatan",
-          "provinsi": "DKI Jakarta",
-          "namaPaket": "Paket pengadaan Printer Tinta",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 8000000.0,
-          "forecastNetto": 7207207.207,
-          "produk": "Printer Tinta",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 77,
-          "principal": "SKE",
-          "pic": "AJI FARIZ RACHMAN",
-          "instansi": "BPOM",
-          "wilayah": "Kota Administrasi Jakarta Pusat",
-          "provinsi": "DKI Jakarta",
-          "namaPaket": "Paket pengadaan Kamera",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 75000000.0,
-          "forecastNetto": 67567567.57,
-          "produk": "Kamera",
-          "jenisProduk": "Elektronik",
-          "quarter": "Q3",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 78,
-          "principal": "SKE",
-          "pic": "REZKI ANUGRAHA",
-          "instansi": "Kesbangpol Provinsi Sumatera Barat",
-          "wilayah": "Kota Padang",
-          "provinsi": "Sumatera Barat",
-          "namaPaket": "Pengadaan  ATK, Alat dan Bahan Komputer",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 23833800.0,
-          "forecastNetto": 21471891.89,
-          "produk": "ATK, Alat dan Bahan Komputer",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q1",
-          "tk": ""
-        },
-        {
-          "no": 79,
-          "principal": "SMK",
-          "pic": "REZKI ANUGRAHA",
-          "instansi": "DINAS KOMUNIKASI, INFORMATIKA DAN STATISTIK, Prov Sumbar",
-          "wilayah": "Kota Padang",
-          "provinsi": "Sumatera Barat",
-          "namaPaket": "Pengadaan Alat Kebersihan dan Alat Kantor Habis Pakai",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 74050800.0,
-          "forecastNetto": 66712432.43,
-          "produk": "Alat Kebersihan dan Alat Kantor Habis Pakai",
-          "jenisProduk": "Alat Kesehatan / Kebersihan",
-          "quarter": "Q1",
-          "tk": ""
-        },
-        {
-          "no": 80,
-          "principal": "SMK",
-          "pic": "REZKI ANUGRAHA",
-          "instansi": "Balai Karantina Hewan Ikan Dan Tumbuhan Sumatera Barat",
-          "wilayah": "Kota Padang",
-          "provinsi": "Sumatera Barat",
-          "namaPaket": "Pengadaan pengadaan Pakaian Dinas Pegawai/perawat",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 102366000.0,
-          "forecastNetto": 92221621.62,
-          "produk": "Pakaian Dinas Pegawai/perawat",
-          "jenisProduk": "Pakaian dan Seragam",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 81,
-          "principal": "SKE",
-          "pic": "ATEP KUNAEPI",
-          "instansi": "1.\u2060 \u2060Dinas Pendikan Provinsi kalbar Alat Pendidikan",
-          "wilayah": "Kota Pontianak",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Alat Pendidikan SMK",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 5000000000.0,
-          "forecastNetto": 5000000000.0,
-          "produk": "Alat Pendidikan SMK",
-          "jenisProduk": "Alat Praktik SMK",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 82,
-          "principal": "ATS",
-          "pic": "ATEP KUNAEPI",
-          "instansi": "2.\u2060 \u2060\u2060Dinas pendidikan Kota Pontianak Mebeler",
-          "wilayah": "Kota Pontianak",
-          "provinsi": "Kalimantan Barat",
-          "namaPaket": "Paket pengadaan Mebelair",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 3000000000.0,
-          "forecastNetto": 3000000000.0,
-          "produk": "Mebelair",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 83,
-          "principal": "ATS",
-          "pic": "YUDHA PRATISTA APRIANATA",
-          "instansi": "Perumda Tabanan",
-          "wilayah": "Kabupaten Tabanan",
-          "provinsi": "Bali",
-          "namaPaket": "Paket pengadaan ATK & Elektronik",
-          "sumberDana": "BUMD",
-          "nilaiAnggaran": 2000000000.0,
-          "forecastNetto": 1801801802.0,
-          "produk": "ATK & Elektronik",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 84,
-          "principal": "ATS",
-          "pic": "YUDHA PRATISTA APRIANATA",
-          "instansi": "Puskesmas Denpasar Barat",
-          "wilayah": "Kota Denpasar",
-          "provinsi": "Bali",
-          "namaPaket": "Paket pengadaan, ATK, Elektronik",
-          "sumberDana": "BLUD",
-          "nilaiAnggaran": 314000000.0,
-          "forecastNetto": 282882882.9,
-          "produk": "Mebel, ATK, Elektronik",
-          "jenisProduk": "Paket Project",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 85,
-          "principal": "ATS",
-          "pic": "AGUS MUHCLIS",
-          "instansi": "Sekwan DPRD Kab.Bandung Barat",
-          "wilayah": "Kabupaten Bandung Barat",
-          "provinsi": "Jawa Barat",
-          "namaPaket": "Paket pengadaan meja dan kursi",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 741300000.0,
-          "forecastNetto": 667837837.8,
-          "produk": "Kursi meja + stage",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "75%\nSudah Masuk Dalam Short-List Atau Kemungkinan Besar untuk Menang"
-        },
-        {
-          "no": 86,
-          "principal": "ATS",
-          "pic": "AGUS MUHCLIS",
-          "instansi": "Sekwan DPRD Kab.Bandung Barat",
-          "wilayah": "Kabupaten Bandung Barat",
-          "provinsi": "Jawa Barat",
-          "namaPaket": "Paket pengadaan ATK",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 211677200.0,
-          "forecastNetto": 190700180.2,
-          "produk": "Meubelair selasar gedung",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "25%\nPenawaran (RAB) Sudah Dikirimkan ke Relasi"
-        },
-        {
-          "no": 87,
-          "principal": "IPE",
-          "pic": "BAMBANG MUDJIRAN",
-          "instansi": "Sekretariat DPRD",
-          "wilayah": "Kabupaten Bengkulu Tengah",
-          "provinsi": "Bengkulu",
-          "namaPaket": "Pengadaan Buku Bacaan Masyarakat",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 500000000.0,
-          "forecastNetto": 450450450.5,
-          "produk": "Pengadaan Buku Bacaan Masyarakat",
-          "jenisProduk": "Buku Non Teks HET",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 88,
-          "principal": "ATS",
-          "pic": "BAMBANG MUDJIRAN",
-          "instansi": "Sekretariat DPRD",
-          "wilayah": "Kabupaten Bengkulu Tengah",
-          "provinsi": "Bengkulu",
-          "namaPaket": "Pengadaan Meubelair",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 500000000.0,
-          "forecastNetto": 450450450.5,
-          "produk": "Pengadaan Meubelair",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 89,
-          "principal": "SKE",
-          "pic": "RISKY ALDIANSYAH",
-          "instansi": "POLRI",
-          "wilayah": "Kota Administrasi Jakarta Timur",
-          "provinsi": "DKI Jakarta",
-          "namaPaket": "Paket pengadaan Alat Tulis",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 392200000.0,
-          "forecastNetto": 353333333.3,
-          "produk": "Zebra ZD23042-30PG00EZ",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 90,
-          "principal": "SKE",
-          "pic": "RISKY ALDIANSYAH",
-          "instansi": "POLRI",
-          "wilayah": "Kota Administrasi Jakarta Timur",
-          "provinsi": "DKI Jakarta",
-          "namaPaket": "Paket pengadaan Alat Tulis",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 956040000.0,
-          "forecastNetto": 861297297.3,
-          "produk": "Zebra DS2208 SR7U2100SGW",
-          "jenisProduk": "Alat Tulis Kantor",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 91,
-          "principal": "SKE",
-          "pic": "RISKY ALDIANSYAH",
-          "instansi": "POLRI",
-          "wilayah": "Kota Administrasi Jakarta Timur",
-          "provinsi": "DKI Jakarta",
-          "namaPaket": "Paket pengadaan Elektronik",
-          "sumberDana": "APBN",
-          "nilaiAnggaran": 4204400000.0,
-          "forecastNetto": 3787747748.0,
-          "produk": "Epson LQ2190",
-          "jenisProduk": "Elektronik",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 92,
-          "principal": "ATS",
-          "pic": "FIKRI ARI HANAFI",
-          "instansi": "DINAS KESEHATAN KAB.PEMALANG",
-          "wilayah": "Kabupaten Pemalang",
-          "provinsi": "Jawa Tengah",
-          "namaPaket": "Paket pengadaan Meubel",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 1198820000.0,
-          "forecastNetto": 1080018018.0,
-          "produk": "meja kursi lemari",
-          "jenisProduk": "Mebel / Furnitur",
-          "quarter": "Q3",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 93,
-          "principal": "SKE",
-          "pic": "FIKRI ARI HANAFI",
-          "instansi": "DISKOMINFO KAB.PEMALANG",
-          "wilayah": "Kabupaten Pemalang",
-          "provinsi": "Jawa Tengah",
-          "namaPaket": "Paket pengadaan periphearl",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 49020000.0,
-          "forecastNetto": 44162162.16,
-          "produk": "laptop printer",
-          "jenisProduk": "TIK & Periperal",
-          "quarter": "Q2",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        },
-        {
-          "no": 94,
-          "principal": "SMK, ATS",
-          "pic": "SALES PROJECT",
-          "instansi": "PUSKESMAS, SPPG, RSUD, INTANSI DAERAH",
-          "wilayah": "Indonesia",
-          "provinsi": "Nasional",
-          "namaPaket": "Paket pengadaan Bahan Kebersihan, Pengadaan Meubeler, Pengadaan Peripehal dll",
-          "sumberDana": "APBD",
-          "nilaiAnggaran": 56560000000.0,
-          "forecastNetto": 50954954955.0,
-          "produk": "",
-          "jenisProduk": "Paket Project",
-          "quarter": "Q4",
-          "tk": "50%\nJika Ada Peluang Untuk Menang Atau Sudah Dipanggil Klarifikasi"
-        }
-      ];
+      let globalData = [];
 
       // Default empty array if placeholder isn't replaced
       if (typeof globalData === 'string' && globalData.includes('__JSON' + '_DATA__')) {
         globalData = [];
       }
-
       // Process dataset to add standard parsable fields
       function processData(dataArr) {
         return dataArr.map((item, idx) => {
@@ -2078,22 +599,36 @@
       }
       // APPS_SCRIPT_URL, TOKEN, apiGet → lihat assets/api.js
 
-      async function loadFromSheets() {
+      function showDashboardLoading(show) {
+        const el = document.getElementById('dashboard-loading');
+        if (el) el.style.display = show ? 'flex' : 'none';
+      }
+
+      async function loadDashboardData() {
         try {
-          const result = await apiGet('getLeads');
-          const raw = Array.isArray(result) ? result : (result.data || []);
-          state.data = processData(raw);
-          initDashboard();
-        } catch (err) {
-          console.error('Gagal load Sheets:', err);
+          showDashboardLoading(true);
+          const res = await apiGet('getLeads');
+          if (res && res.data) {
+            globalData = res.data;
+          } else if (Array.isArray(res)) {
+            globalData = res;
+          }
           state.data = processData(globalData);
-          initDashboard();
+          populateFilterOptions();
+          applyFilters();
+        } catch(e) {
+          console.error('Failed to load dashboard data:', e);
+          state.data = processData(globalData);
+          populateFilterOptions();
+          applyFilters();
+        } finally {
+          showDashboardLoading(false);
         }
       }
       let state = {
         data: [],
         filtered: [],
-        filters: { q: 'ALL', sd: 'ALL', pic: 'ALL', prov: 'ALL', tk: 'ALL', search: '' },
+        filters: { q: 'ALL', sd: 'ALL', pic: 'ALL', prov: 'ALL', wilayah: 'ALL', principal: 'ALL', tk: 'ALL', search: '' },
         sort: { col: 'no', asc: true },
         page: 1,
         perPage: 20
@@ -2111,7 +646,7 @@
         const updateDateEl = document.getElementById('updateDate');
         if (updateDateEl) updateDateEl.textContent = `Live Data: ${currentDate}`;
 
-        loadFromSheets();
+        loadDashboardData();
       });
 
       // CSV UPLOAD
@@ -2208,6 +743,15 @@
         picSelect.innerHTML = '<option value="ALL">Semua PIC</option>' + pics.map(p => `<option value="${p}">${p}</option>`).join('');
         updateWilayahOptions();
 
+        // Principal
+        const principals = [...new Set(state.data.map(d => d.principal).filter(Boolean))].sort();
+        const selPrincipal = document.getElementById('filter-principal');
+        principals.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p; opt.textContent = p;
+          selPrincipal.appendChild(opt);
+        });
+
         // Attach listeners
         document.querySelectorAll('.filter-btn').forEach(btn => {
           btn.addEventListener('click', (e) => {
@@ -2230,6 +774,10 @@
           applyFilters();
         });
         wilSelect.addEventListener('change', e => { state.filters.wilayah = e.target.value; applyFilters(); });
+        document.getElementById('filter-principal').addEventListener('change', function() {
+          state.filters.principal = this.value;
+          applyFilters();
+        });
         document.getElementById('searchInput').addEventListener('input', e => { state.filters.search = e.target.value.toLowerCase(); state.page = 1; applyFilters(); });
       }
 
@@ -2254,9 +802,10 @@
       }
 
       function resetFilters() {
-        state.filters = { q: 'ALL', sd: 'ALL', pic: 'ALL', wilayah: 'ALL', tk: 'ALL', search: '' };
+        state.filters = { q: 'ALL', sd: 'ALL', pic: 'ALL', wilayah: 'ALL', principal: 'ALL', tk: 'ALL', search: '' };
         document.getElementById('searchInput').value = '';
         document.getElementById('filter-pic').value = 'ALL';
+        document.getElementById('filter-principal').value = 'ALL';
         updateWilayahOptions();
 
         ['filter-quarter', 'filter-sumberdana', 'filter-tk'].forEach(id => {
@@ -2281,6 +830,8 @@
           // Check PIC & Wilayah
           if (state.filters.pic !== 'ALL' && d.pic !== state.filters.pic) return false;
           if (state.filters.wilayah !== 'ALL' && d.wilayah !== state.filters.wilayah) return false;
+          // Check Principal
+          if (state.filters.principal !== 'ALL' && d.principal !== state.filters.principal) return false;
           // Check Search
           if (state.filters.search) {
             const search = state.filters.search;
@@ -2360,7 +911,7 @@
 
         tb.innerHTML = rows.map(r => {
           return `
-                <tr class="hover:bg-slate-800/80 transition-colors row-highlight-${r.tkNum}">
+                <tr class="hover:bg-slate-800/80 transition-colors row-highlight-${r.tkNum} cursor-pointer" onclick="openPipelineModal('${r.funnelId || r.no}')">
                     <td class="px-3 py-3 font-medium">${r.no}</td>
                     <td class="px-3 py-3 whitespace-nowrap">${r.pic}</td>
                     <td class="px-3 py-3 font-semibold text-slate-200">${r.principal}</td>
@@ -2392,6 +943,73 @@
         document.getElementById('btnPrev').disabled = state.page <= 1;
         document.getElementById('btnNext').disabled = state.page >= maxPage;
       }
+
+      async function openPipelineModal(funnelId) {
+        const d = state.filtered.find(x => (x.funnelId || x.no) === funnelId)
+                  || state.data.find(x => (x.funnelId || x.no) === funnelId);
+        if (!d) return;
+
+        document.getElementById('pipeline-modal-detail').innerHTML = `
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Funnel ID</div><div style="color:#38bdf8;font-weight:700;">${d.funnelId || '-'}</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">PIC</div><div style="color:#f1f5f9;">${d.pic || '-'}</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Principal</div><div style="color:#f1f5f9;font-weight:600;">${d.principal || '-'}</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Quarter</div><div style="color:#f1f5f9;">${d.quarter || '-'}</div></div>
+          <div style="grid-column:span 2"><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Nama Paket</div><div style="color:#f1f5f9;">${d.namaPaket || '-'}</div></div>
+          <div style="grid-column:span 2"><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Instansi (KL/P/D)</div><div style="color:#f1f5f9;font-weight:600;">${d.instansi || '-'}</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Wilayah</div><div style="color:#f1f5f9;">${d.wilayah || '-'}</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Provinsi</div><div style="color:#f1f5f9;">${d.provinsi || '-'}</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Sumber Dana</div><div style="color:#f1f5f9;">${d.sd || '-'}</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Stage (TK)</div><div style="color:#f1f5f9;">${d.tkNum}%</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Nilai Anggaran</div><div style="color:#94a3b8;">${formatRupiahShort(d.bruto)}</div></div>
+          <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Forecast Netto</div><div style="color:#2dd4bf;font-weight:700;">${formatRupiahShort(d.netto)}</div></div>
+          ${d.keterangan ? `<div style="grid-column:span 2"><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Keterangan</div><div style="color:#94a3b8;font-size:0.875rem;">${d.keterangan}</div></div>` : ''}
+        `;
+
+        const modal = document.getElementById('pipeline-modal');
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        const histEl = document.getElementById('pipeline-modal-history');
+        histEl.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Memuat riwayat...</div>';
+
+        try {
+          const res = await apiGet('getTrackers');
+          let trackers = [];
+          if (res && res.data) trackers = res.data;
+          else if (Array.isArray(res)) trackers = res;
+
+          const history = trackers
+            .filter(t => t.funnelId === funnelId || t.projectId === funnelId)
+            .sort((a, b) => (b.week || '').localeCompare(a.week || ''));
+
+          if (history.length === 0) {
+            histEl.innerHTML = '<div style="color:#64748b;font-size:0.85rem;">Belum ada riwayat update.</div>';
+            return;
+          }
+
+          histEl.innerHTML = history.map(t => `
+            <div style="background:#0f172a; border:1px solid #334155; border-radius:8px; padding:12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                <span style="color:#38bdf8; font-weight:700; font-size:0.85rem;">${t.week || '-'}</span>
+                <span class="badge badge-${t.tk || '0'}" style="font-size:0.7rem;">${t.statusBaru || '-'}</span>
+              </div>
+              <div style="color:#2dd4bf; font-weight:600; font-size:0.85rem; margin-bottom:4px;">${t.forecastNetto ? 'Rp ' + Number(t.forecastNetto).toLocaleString('id-ID') : '-'}</div>
+              ${t.notes ? `<div style="color:#94a3b8; font-size:0.8rem;">${t.notes}</div>` : ''}
+            </div>
+          `).join('');
+        } catch(e) {
+          histEl.innerHTML = '<div style="color:#ef4444;font-size:0.85rem;">Gagal memuat riwayat.</div>';
+        }
+      }
+
+      function closePipelineModal() {
+        document.getElementById('pipeline-modal').style.display = 'none';
+        document.body.style.overflow = '';
+      }
+
+      document.getElementById('pipeline-modal').addEventListener('click', function(e) {
+        if (e.target === this) closePipelineModal();
+      });
 
       const btnPrevEl = document.getElementById('btnPrev');
       const btnNextEl = document.getElementById('btnNext');
@@ -2758,6 +1376,7 @@
       });
     </script>
   </div><!-- end main content -->
+
 <footer class="text-center text-xs text-slate-600 py-4 mt-4">\n  made with 🔥 by Adrian\n</footer>\n</body>
 
 </html>

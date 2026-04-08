@@ -351,6 +351,7 @@
             <h3 class="text-base font-bold text-white mb-5 flex items-center gap-2 border-b border-slate-700 pb-3">
                 📝 Input Funnel Baru
             </h3>
+            <div id="fi-edit-banner" class="hidden mb-3 px-4 py-2 rounded-lg bg-blue-900/30 border border-blue-700/50 flex items-center"></div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="form-label">Nama Paket / Rencana Pengadaan *</label>
@@ -457,9 +458,8 @@
                         class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-sm font-semibold text-slate-300 border border-slate-600 transition">
                     Reset
                 </button>
-                <button onclick="handleInputSubmit()"
-                        class="px-5 py-2 rounded-lg text-sm font-bold text-white transition"
-                        style="background: linear-gradient(135deg, #0d9488, #0ea5e9);">
+                <button id="fi-submit-btn" onclick="handleInputSubmit()"
+                        class="px-5 py-2 rounded-lg text-sm font-bold text-white transition bg-teal-600 hover:bg-teal-500">
                     ➕ Tambah ke Pipeline
                 </button>
             </div>
@@ -486,10 +486,11 @@
                             <th class="px-3 py-2">TK</th>
                             <th class="px-3 py-2">STATUS</th>
                             <th class="px-3 py-2">QUARTER</th>
+                            <th class="px-3 py-2 text-left">AKSI</th>
                         </tr>
                     </thead>
                     <tbody id="pipeline-table-body">
-                        <tr><td colspan="9" class="text-center py-8 text-slate-500">Memuat data...</td></tr>
+                        <tr><td colspan="10" class="text-center py-8 text-slate-500">Memuat data...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -528,15 +529,20 @@
                 <h3 class="text-base font-bold text-white mb-4 border-b border-slate-700 pb-2">
                     Sales Funnel — Pipeline Saya
                 </h3>
-                <div style="position:relative; height:280px;">
+                <div style="position:relative; height:220px;">
                     <canvas id="my-funnel-chart"></canvas>
                 </div>
+                <div class="grid grid-cols-4 gap-2 mt-4" id="quarter-mini-cards"></div>
             </div>
             <div class="card p-5">
                 <h3 class="text-base font-bold text-white mb-4 border-b border-slate-700 pb-2">
                     📊 Rekap Pipeline per Stage
                 </h3>
                 <div id="status-rekap" class="flex flex-col gap-2"></div>
+                <div class="mt-4">
+                  <div class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Rekap per Principal</div>
+                  <div id="principal-rekap" class="flex flex-col gap-2"></div>
+                </div>
             </div>
         </div>
         <!-- Section 1: Chart Quarter -->
@@ -621,6 +627,7 @@ var selectedProjectId = null;
 var currentTab       = 'update';
 var inputNettoManual = false;
 var myFunnelChart    = null;
+var editingFunnelId  = null;
 
 var currentWeek      = getISOWeek(today);
 var currentYear      = today.getFullYear();
@@ -1199,6 +1206,10 @@ function generateFunnelId() {
 }
 
 async function handleInputSubmit() {
+    if (editingFunnelId) {
+        handleEditSubmit();
+        return;
+    }
     var required = ['fi-principal','fi-namapaket','fi-instansi','fi-provinsi','fi-status','fi-tk','fi-brutto','fi-jenisproduk'];
     var valid = true;
     required.forEach(function(id) {
@@ -1259,7 +1270,7 @@ function renderPipelineTable() {
     if (countEl) countEl.textContent = funnelData.length + ' project';
 
     if (funnelData.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-slate-500">Belum ada project. Tambahkan via form di atas.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center py-8 text-slate-500">Belum ada project. Tambahkan via form di atas.</td></tr>';
         return;
     }
 
@@ -1277,8 +1288,126 @@ function renderPipelineTable() {
             '<td class="px-3 py-2"><span class="badge ' + getTKBadgeClass(parseInt(p.tk)) + '">' + (p.tk || 0) + '%</span></td>' +
             '<td class="px-3 py-2"><span class="badge ' + getStatusBadgeClass(p.status) + '">' + (p.status || '-') + '</span></td>' +
             '<td class="px-3 py-2 text-slate-400">' + (p.quarter || '-') + '</td>' +
+            '<td class="px-3 py-2">' +
+              '<button onclick="startEditFunnel(\'' + (p.funnelId || '') + '\')" ' +
+                'class="text-xs px-2 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white">Edit</button>' +
+            '</td>' +
             '</tr>';
     }).join('');
+}
+
+function startEditFunnel(funnelId) {
+    var p = funnelData.find(function(x) { return x.funnelId === funnelId; });
+    if (!p) { showToast('Data tidak ditemukan', 'error'); return; }
+
+    editingFunnelId = funnelId;
+
+    // Populate form dengan data existing
+    document.getElementById('fi-namapaket').value  = p.namaPaket || '';
+    document.getElementById('fi-instansi').value   = p.instansi || '';
+    document.getElementById('fi-sumberdana').value = p.sumberDana || '';
+    document.getElementById('fi-quarter').value    = p.quarter || '';
+    document.getElementById('fi-principal').value  = p.principal || '';
+    document.getElementById('fi-keterangan').value = p.keterangan || '';
+    document.getElementById('fi-jenisproduk').value = p.jenisProduk || '';
+    document.getElementById('fi-produk').value     = p.produk || '';
+    document.getElementById('fi-qty').value        = p.qty || '';
+    document.getElementById('fi-satuan').value     = p.satuan || '';
+    document.getElementById('fi-ppn').value        = p.ppnNon || p.ppn || '';
+    document.getElementById('fi-cb').value         = p.perkiraanCb || p.cb || '';
+    document.getElementById('fi-brutto').value     = p.nilaiAnggaran || p.brutto || '';
+
+    // Set provinsi dulu, lalu wilayah
+    var provSel = document.getElementById('fi-provinsi');
+    if (provSel) {
+        provSel.value = p.provinsi || '';
+        onInputProvinsiChange();
+        setTimeout(function() {
+            document.getElementById('fi-wilayah').value = p.kabupatenKota || p.kabKota || '';
+        }, 100);
+    }
+
+    // Set TK dan trigger status
+    var tkSel = document.getElementById('fi-tk');
+    if (tkSel) {
+        tkSel.value = p.tk || '';
+        onTKChange(tkSel);
+    }
+
+    calcInputForecast();
+
+    // Update UI form ke edit mode
+    var btn = document.getElementById('fi-submit-btn');
+    btn.textContent = '✏️ Update Funnel';
+    btn.classList.remove('bg-teal-600', 'hover:bg-teal-500');
+    btn.classList.add('bg-blue-600', 'hover:bg-blue-500');
+
+    // Tampilkan banner edit mode
+    var editBanner = document.getElementById('fi-edit-banner');
+    if (editBanner) {
+        editBanner.innerHTML = '<span class="text-blue-400 font-semibold text-sm">✏️ Mode Edit: ' + funnelId + '</span>' +
+            '<button onclick="cancelEditFunnel()" class="text-xs px-2 py-1 rounded bg-slate-600 hover:bg-slate-500 text-white ml-3">Batal Edit</button>';
+        editBanner.classList.remove('hidden');
+    }
+
+    // Scroll ke form
+    document.getElementById('section-input').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function cancelEditFunnel() {
+    editingFunnelId = null;
+    resetInputForm();
+    var btn = document.getElementById('fi-submit-btn');
+    btn.textContent = '➕ Tambah ke Pipeline';
+    btn.classList.remove('bg-blue-600', 'hover:bg-blue-500');
+    btn.classList.add('bg-teal-600', 'hover:bg-teal-500');
+    var editBanner = document.getElementById('fi-edit-banner');
+    if (editBanner) editBanner.classList.add('hidden');
+}
+
+async function handleEditSubmit() {
+    var brutto = parseCurrency(document.getElementById('fi-brutto').value);
+    var netto  = parseCurrency(document.getElementById('fi-netto').value);
+    var tk     = parseInt(document.getElementById('fi-tk').value) || 0;
+    var ppn    = document.getElementById('fi-ppn').value;
+    var cb     = parseFloat(document.getElementById('fi-cb').value || '0');
+    var dpp    = ppn === 'PPN' ? Math.round(brutto / 1.11) : brutto;
+
+    var updatedLead = {
+        funnelId:      editingFunnelId,
+        principal:     document.getElementById('fi-principal').value,
+        sumberDana:    document.getElementById('fi-sumberdana').value,
+        quarter:       document.getElementById('fi-quarter').value,
+        namaPaket:     document.getElementById('fi-namapaket').value.trim(),
+        instansi:      document.getElementById('fi-instansi').value.trim(),
+        provinsi:      document.getElementById('fi-provinsi').value,
+        kabupatenKota: document.getElementById('fi-wilayah').value,
+        status:        document.getElementById('fi-status').value,
+        tk:            tk,
+        nilaiAnggaran: brutto,
+        dpp:           dpp,
+        forecastNetto: netto,
+        ppnNon:        ppn,
+        perkiraanCb:   cb,
+        jenisProduk:   document.getElementById('fi-jenisproduk').value,
+        produk:        document.getElementById('fi-produk').value.trim(),
+        qty:           parseInt(document.getElementById('fi-qty').value || '0') || 0,
+        satuan:        document.getElementById('fi-satuan').value.trim(),
+        keterangan:    document.getElementById('fi-keterangan').value.trim()
+    };
+
+    try {
+        await apiGet('updateLead', { payload: JSON.stringify(updatedLead) });
+        // Update local funnelData
+        var idx = funnelData.findIndex(function(x) { return x.funnelId === editingFunnelId; });
+        if (idx !== -1) funnelData[idx] = Object.assign(funnelData[idx], updatedLead);
+        showToast('✅ Funnel berhasil diupdate!', 'success');
+        cancelEditFunnel();
+        renderPipelineTable();
+        updateHeader();
+    } catch(e) {
+        showToast('Gagal update: ' + e.message, 'error');
+    }
 }
 
 // =============================================
@@ -1292,7 +1421,9 @@ function renderStatistik() {
     document.getElementById('stat-pipeline').textContent = funnelData.length;
 
     renderFunnelChart();
+    renderQuarterMiniCards();
     renderTopClosing();
+    renderPrincipalRekap();
     renderQuarterChart();
     renderProdukChart();
     renderPrincipalChart();
@@ -1329,6 +1460,62 @@ function renderTopClosing() {
             '<div class="h-1.5 rounded-full transition-all" style="width:' + pct + '%;background:' + s.color + ';"></div>' +
             '</div>' +
             '</div>';
+    }).join('');
+}
+
+function renderPrincipalRekap() {
+    var container = document.getElementById('principal-rekap');
+    if (!container) return;
+
+    // Group by principal
+    var grouped = {};
+    funnelData.forEach(function(p) {
+        var key = p.principal || 'Lainnya';
+        if (!grouped[key]) grouped[key] = { count: 0, netto: 0 };
+        grouped[key].count++;
+        grouped[key].netto += parseFloat(p.netto || p.forecastNetto || 0);
+    });
+
+    // Sort descending by netto
+    var sorted = Object.keys(grouped).map(function(k) {
+        return { name: k, count: grouped[k].count, netto: grouped[k].netto };
+    }).sort(function(a, b) { return b.netto - a.netto; });
+
+    if (sorted.length === 0) {
+        container.innerHTML = '<div class="text-slate-500 text-sm">Tidak ada data</div>';
+        return;
+    }
+
+    var maxNetto = sorted[0].netto || 1;
+
+    container.innerHTML = sorted.map(function(item) {
+        var pct = Math.round((item.netto / maxNetto) * 100);
+        return '<div class="rounded-lg p-3" style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);">' +
+            '<div class="flex items-center justify-between mb-1.5">' +
+              '<span class="text-sm font-bold" style="color:#38bdf8">' + item.name + '</span>' +
+              '<span class="text-xs text-slate-400">' + item.count + ' paket · ' + fmtRp(item.netto) + '</span>' +
+            '</div>' +
+            '<div class="w-full bg-slate-700/50 rounded-full h-1.5">' +
+              '<div class="h-1.5 rounded-full" style="width:' + pct + '%;background:#38bdf8;"></div>' +
+            '</div>' +
+          '</div>';
+    }).join('');
+}
+
+function renderQuarterMiniCards() {
+    var container = document.getElementById('quarter-mini-cards');
+    if (!container) return;
+
+    var quarters = ['Q1', 'Q2', 'Q3', 'Q4'];
+    container.innerHTML = quarters.map(function(q) {
+        var items  = funnelData.filter(function(p) { return p.quarter === q; });
+        var brutto = items.reduce(function(s, p) { return s + (p.brutto || p.nilaiAnggaran || 0); }, 0);
+        var count  = items.length;
+        return '<div style="background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);border-radius:8px;padding:10px;text-align:center;">' +
+            '<div style="color:#38bdf8;font-weight:700;font-size:0.8rem;">' + q + '</div>' +
+            '<div style="color:#f1f5f9;font-weight:600;font-size:0.75rem;margin-top:4px;">' + fmtRp(brutto) + '</div>' +
+            '<div style="color:#64748b;font-size:0.7rem;margin-top:2px;">' + count + ' paket</div>' +
+        '</div>';
     }).join('');
 }
 
@@ -1413,8 +1600,8 @@ function renderFunnelChart() {
                         {
                             label: 'Total Brutto',
                             data: bruttos,
-                            backgroundColor: 'rgba(99,102,241,0.3)',
-                            borderColor: '#6366f1',
+                            backgroundColor: 'rgba(20,184,166,0.25)',
+                            borderColor: '#14b8a6',
                             borderWidth: 2,
                             borderRadius: 4
                         }
@@ -1432,12 +1619,22 @@ function renderFunnelChart() {
                                     return [' Brutto: ' + fmtRp(ctx.raw), ' Jumlah: ' + paket + ' paket'];
                                 }
                             }
+                        },
+                        datalabels: {
+                            display: true,
+                            color: '#f1f5f9',
+                            anchor: 'end',
+                            align: 'end',
+                            font: { weight: 'bold', size: 9 },
+                            formatter: function(v) {
+                                return v >= 1e9 ? (v/1e9).toFixed(2)+' M' : (v/1e6).toFixed(2)+' Jt';
+                            }
                         }
                     },
                     scales: {
                         x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(148,163,184,0.1)' } },
                         y: {
-                            ticks: { color: '#6366f1', callback: function(v) { return 'Rp ' + (v/1e9).toFixed(1) + 'M'; } },
+                            ticks: { color: '#14b8a6', callback: function(v) { return 'Rp ' + (v >= 1e9 ? (v/1e9).toFixed(1)+'M' : (v/1e6).toFixed(0)+'Jt'); } },
                             grid: { color: 'rgba(148,163,184,0.1)' }
                         }
                     }
@@ -1463,7 +1660,7 @@ function renderFunnelChart() {
             var labels = sorted.map(function(e) { return e[0]; });
             var counts = sorted.map(function(e) { return e[1]; });
             var bruttos = sorted.map(function(e) { return bruttoMap[e[0]] || 0; });
-            var colors = ['#14b8a6','#6366f1','#f59e0b','#ef4444','#8b5cf6','#10b981','#3b82f6','#f97316','#ec4899','#84cc16'];
+            var colors = ['#14b8a6','#38bdf8','#6366f1','#f59e0b','#8b5cf6','#10b981','#3b82f6','#f97316','#ec4899','#84cc16'];
             var ctx = document.getElementById('produk-chart');
             if (!ctx) return;
             if (produkChartInst) { produkChartInst.destroy(); produkChartInst = null; }
@@ -1473,7 +1670,7 @@ function renderFunnelChart() {
                     labels: labels,
                     datasets: [{
                         data: counts,
-                        backgroundColor: colors.map(function(c) { return c + '55'; }),
+                        backgroundColor: colors.map(function(c) { return c + '33'; }),
                         borderColor: colors,
                         borderWidth: 2,
                         borderRadius: 4
@@ -1493,6 +1690,14 @@ function renderFunnelChart() {
                                     ];
                                 }
                             }
+                        },
+                        datalabels: {
+                            display: true,
+                            color: '#f1f5f9',
+                            anchor: 'end',
+                            align: 'end',
+                            font: { weight: 'bold', size: 9 },
+                            formatter: function(v) { return v > 0 ? v : ''; }
                         }
                     },
                     scales: {
@@ -1524,7 +1729,7 @@ function renderFunnelChart() {
                     labels: labels,
                     datasets: [{
                         data: counts,
-                        backgroundColor: colors.map(function(c) { return c + '99'; }),
+                        backgroundColor: colors.map(function(c) { return c + 'bb'; }),
                         borderColor: colors,
                         borderWidth: 2
                     }]
@@ -1532,6 +1737,7 @@ function renderFunnelChart() {
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    cutout: '65%',
                     plugins: {
                         legend: { position: 'right', labels: { color: '#94a3b8', font: { size: 11 }, padding: 12 } },
                         tooltip: {
