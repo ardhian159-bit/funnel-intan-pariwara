@@ -229,7 +229,8 @@
 <body class="min-h-screen flex flex-col">
 
   <!-- LOADING OVERLAY -->
-  <div id="dashboard-loading" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:9999; align-items:center; justify-content:center;">
+  <div id="dashboard-loading"
+    style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.8); z-index:9999; align-items:center; justify-content:center;">
     <div style="color:#38bdf8; font-size:1rem; font-weight:600;">Memuat data dashboard...</div>
   </div>
 
@@ -409,7 +410,8 @@
 
         <div>
           <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">PRINCIPAL</label>
-          <select id="filter-principal" class="w-full bg-slate-700/50 border border-slate-600 text-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+          <select id="filter-principal"
+            class="w-full bg-slate-700/50 border border-slate-600 text-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
             <option value="ALL">Semua Principal</option>
           </select>
         </div>
@@ -454,6 +456,9 @@
         <h3 class="text-lg font-bold text-white mb-4 border-b border-slate-700 pb-2">Proporsi Sumber Dana</h3>
         <div class="chart-container">
           <canvas id="sumberDanaChart"></canvas>
+        </div>
+        <div id="sd-legend"
+          style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;margin-top:12px;">
         </div>
       </div>
     </div>
@@ -507,9 +512,11 @@
               <th class="px-3 py-3 whitespace-nowrap" onclick="sortTable('sumberDana')">Dana <span
                   id="sort-sumberDana"></span></th>
               <th class="px-3 py-3 text-right whitespace-nowrap" onclick="sortTable('nilaiAnggaran')">Nilai Anggaran
-                <span id="sort-nilaiAnggaran"></span></th>
+                <span id="sort-nilaiAnggaran"></span>
+              </th>
               <th class="px-3 py-3 text-right whitespace-nowrap" onclick="sortTable('forecastNetto')">Forecast Netto
-                <span id="sort-forecastNetto"></span></th>
+                <span id="sort-forecastNetto"></span>
+              </th>
               <th class="px-3 py-3 text-center" onclick="sortTable('quarter')">Q <span id="sort-quarter"></span></th>
               <th class="px-3 py-3 text-center" onclick="sortTable('tkNum')">Stage (T.K) <span id="sort-tkNum"></span>
               </th>
@@ -544,13 +551,21 @@
     <!-- APPLICATION LOGIC -->
 
     <!-- PIPELINE DETAIL MODAL -->
-    <div id="pipeline-modal" style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.85); z-index:9999; align-items:flex-start; justify-content:center; padding-top:60px; overflow-y:auto;">
-      <div style="background:#1e293b; border:1px solid #334155; border-radius:12px; width:95%; max-width:680px; padding:28px; position:relative;">
-        <button onclick="closePipelineModal()" style="position:absolute; top:16px; right:16px; background:none; border:none; color:#94a3b8; font-size:1.25rem; cursor:pointer;">✕</button>
-        <h3 style="color:#f1f5f9; font-size:1.1rem; font-weight:700; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid #334155;">Detail Pipeline</h3>
-        <div id="pipeline-modal-detail" style="display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; margin-bottom:24px;"></div>
+    <div id="pipeline-modal"
+      style="display:none; position:fixed; inset:0; background:rgba(15,23,42,0.85); z-index:9999; align-items:flex-start; justify-content:center; padding-top:60px; overflow-y:auto;">
+      <div
+        style="background:#1e293b; border:1px solid #334155; border-radius:12px; width:95%; max-width:680px; padding:28px; position:relative;">
+        <button onclick="closePipelineModal()"
+          style="position:absolute; top:16px; right:16px; background:none; border:none; color:#94a3b8; font-size:1.25rem; cursor:pointer;">✕</button>
+        <h3
+          style="color:#f1f5f9; font-size:1.1rem; font-weight:700; margin-bottom:20px; padding-bottom:12px; border-bottom:1px solid #334155;">
+          Detail Pipeline</h3>
+        <div id="pipeline-modal-detail"
+          style="display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; margin-bottom:24px;"></div>
         <div style="border-top:1px solid #334155; padding-top:20px;">
-          <h4 style="color:#94a3b8; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px;">Riwayat Update Weekly</h4>
+          <h4
+            style="color:#94a3b8; font-size:0.8rem; font-weight:600; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:12px;">
+            Riwayat Update Weekly</h4>
           <div id="pipeline-modal-history" style="display:flex; flex-direction:column; gap:8px;">
             <div style="color:#64748b; font-size:0.85rem;">Memuat riwayat...</div>
           </div>
@@ -616,7 +631,7 @@
           state.data = processData(globalData);
           populateFilterOptions();
           applyFilters();
-        } catch(e) {
+        } catch (e) {
           console.error('Failed to load dashboard data:', e);
           state.data = processData(globalData);
           populateFilterOptions();
@@ -774,7 +789,7 @@
           applyFilters();
         });
         wilSelect.addEventListener('change', e => { state.filters.wilayah = e.target.value; applyFilters(); });
-        document.getElementById('filter-principal').addEventListener('change', function() {
+        document.getElementById('filter-principal').addEventListener('change', function () {
           state.filters.principal = this.value;
           applyFilters();
         });
@@ -946,7 +961,7 @@
 
       async function openPipelineModal(funnelId) {
         const d = state.filtered.find(x => (x.funnelId || x.no) === funnelId)
-                  || state.data.find(x => (x.funnelId || x.no) === funnelId);
+          || state.data.find(x => (x.funnelId || x.no) === funnelId);
         if (!d) return;
 
         document.getElementById('pipeline-modal-detail').innerHTML = `
@@ -962,6 +977,8 @@
           <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Stage (TK)</div><div style="color:#f1f5f9;">${d.tkNum}%</div></div>
           <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Nilai Anggaran</div><div style="color:#94a3b8;">${formatRupiahShort(d.bruto)}</div></div>
           <div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Forecast Netto</div><div style="color:#2dd4bf;font-weight:700;">${formatRupiahShort(d.netto)}</div></div>
+          ${d.produk ? `<div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Produk</div><div style="color:#f1f5f9;">${d.produk}</div></div>` : ''}
+          ${d.jenisProduk ? `<div><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Jenis Produk</div><div style="color:#f1f5f9;">${d.jenisProduk}</div></div>` : ''}
           ${d.keterangan ? `<div style="grid-column:span 2"><div style="color:#64748b;font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;">Keterangan</div><div style="color:#94a3b8;font-size:0.875rem;">${d.keterangan}</div></div>` : ''}
         `;
 
@@ -997,7 +1014,7 @@
               ${t.notes ? `<div style="color:#94a3b8; font-size:0.8rem;">${t.notes}</div>` : ''}
             </div>
           `).join('');
-        } catch(e) {
+        } catch (e) {
           histEl.innerHTML = '<div style="color:#ef4444;font-size:0.85rem;">Gagal memuat riwayat.</div>';
         }
       }
@@ -1007,7 +1024,7 @@
         document.body.style.overflow = '';
       }
 
-      document.getElementById('pipeline-modal').addEventListener('click', function(e) {
+      document.getElementById('pipeline-modal').addEventListener('click', function (e) {
         if (e.target === this) closePipelineModal();
       });
 
@@ -1186,11 +1203,19 @@
         d.forEach(x => {
           let s = x.sd.toUpperCase();
           if (s !== '-' && s) {
-            sdMap[s] = (sdMap[s] || 0) + x.netto;
+            sdMap[s] = (sdMap[s] || 0) + x.bruto;
           }
         });
         const sortedSd = Object.keys(sdMap).map(k => ({ name: k, val: sdMap[k] })).sort((a, b) => b.val - a.val);
         const pieColors = ['#f43f5e', '#8b5cf6', '#14b8a6', '#f59e0b', '#3b82f6', '#10b981', '#6366f1', '#ec4899'];
+
+        const sdTotal = sortedSd.reduce((s, x) => s + x.val, 0);
+        const fmtSD = v => {
+          if (v >= 1e12) return 'Rp ' + (v / 1e12).toFixed(2) + ' T';
+          if (v >= 1e9) return 'Rp ' + (v / 1e9).toFixed(2) + ' M';
+          if (v >= 1e6) return 'Rp ' + (v / 1e6).toFixed(2) + ' Jt';
+          return 'Rp ' + Math.round(v).toLocaleString('id-ID');
+        };
 
         if (charts.sumber) charts.sumber.destroy();
         charts.sumber = new Chart(document.getElementById('sumberDanaChart'), {
@@ -1208,25 +1233,58 @@
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-              legend: { position: 'right', labels: { color: '#cbd5e1', padding: 15 } },
+              legend: {
+                display: false
+              },
               datalabels: {
                 color: '#ffffff',
+                font: { size: 11, weight: '500' },
                 formatter: (value, ctx) => {
-                  let sum = 0;
-                  let dataArr = ctx.chart.data.datasets[0].data;
-                  dataArr.map(data => {
-                    sum += data;
-                  });
-                  let percentage = (value * 100 / sum);
-                  // Hide labels for slices that are too small to read clearly
-                  if (percentage < 3) return '';
-                  return percentage.toFixed(1) + "%";
-                }
+                  const pct = (value / sdTotal * 100);
+                  if (pct < 4) return '';
+                  return pct.toFixed(1) + '%';
+                },
+                anchor: 'end',
+                align: 'end',
+                offset: 4,
+                clamp: true
               }
             },
-            cutout: '70%'
-          }
+            cutout: '65%'
+          },
+          plugins: [{
+            id: 'sdCenterText',
+            afterDraw(chart) {
+              const { ctx, chartArea: { left, right, top, bottom } } = chart;
+              const cx = (left + right) / 2;
+              const cy = (top + bottom) / 2;
+              ctx.save();
+              ctx.textAlign = 'center';
+              ctx.fillStyle = '#64748b';
+              ctx.font = '11px sans-serif';
+              ctx.fillText('Total Bruto', cx, cy - 10);
+              ctx.fillStyle = '#2dd4bf';
+              ctx.font = '500 14px sans-serif';
+              ctx.fillText(fmtSD(sdTotal), cx, cy + 8);
+              ctx.restore();
+            }
+          }]
         });
+
+        const sdLegendEl = document.getElementById('sd-legend');
+        if (sdLegendEl) {
+          sdLegendEl.innerHTML = sortedSd.map((x, i) => {
+            const pct = (x.val / sdTotal * 100).toFixed(1);
+            const color = pieColors[i % pieColors.length];
+            return `<span style="display:flex;align-items:center;gap:5px;font-size:11px;">
+  <span style="width:8px;height:8px;border-radius:2px;background:${color};flex-shrink:0;"></span>
+  <span style="display:flex;flex-direction:column;line-height:1.3;">
+    <span style="color:#e2e8f0;font-weight:500;">${x.name} <span style="color:#94a3b8;">${pct}%</span></span>
+    <span style="color:#64748b;font-size:10px;">${fmtSD(x.val)}</span>
+  </span>
+</span>`;
+          }).join('');
+        }
 
         // 5. Principal Chart
         const principalMap = {};
@@ -1336,14 +1394,19 @@
         const goProto = document.getElementById('btn-go-prototype');
         if (goProto) goProto.classList.add('hidden');
 
-        // Tampilkan Monitoring
-        const navMonitoring = document.getElementById('nav-monitoring');
-        if (navMonitoring) navMonitoring.classList.remove('hidden');
-
-        // Tampilkan Control Panel kalau superadmin
+        // Tampilkan Monitoring & Control Panel — sembunyikan untuk guest
         if (savedSession) {
           try {
             const sess = JSON.parse(savedSession);
+            if (sess.role !== 'guest') {
+              const navMonitoring = document.getElementById('nav-monitoring');
+              if (navMonitoring) navMonitoring.classList.remove('hidden');
+            } else {
+              const navInput = document.getElementById('nav-input');
+              const navUpdate = document.getElementById('nav-update');
+              if (navInput) navInput.classList.add('hidden');
+              if (navUpdate) navUpdate.classList.add('hidden');
+            }
             if (sess.role === 'superadmin') {
               const navControl = document.getElementById('nav-control');
               if (navControl) navControl.classList.remove('hidden');
@@ -1363,7 +1426,8 @@
               btnLogout.textContent = `Logout [${sess.username}]`;
               btnLogout.onclick = function () {
                 sessionStorage.removeItem('ip_session');
-                window.location.href = 'admin.html';
+                const logoutRole = sess.role || '';
+                window.location.href = (logoutRole === 'guest') ? 'sales.html' : 'admin.html';
               };
             }
           } catch (e) {
@@ -1377,6 +1441,7 @@
     </script>
   </div><!-- end main content -->
 
-<footer class="text-center text-xs text-slate-600 py-4 mt-4">\n  made with 🔥 by Adrian\n</footer>\n</body>
+  <footer class="text-center text-xs text-slate-600 py-4 mt-4">\n made with 🔥 by Adrian\n</footer>\n
+</body>
 
 </html>

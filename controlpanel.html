@@ -37,13 +37,23 @@
                 opacity: 1;
             }
         }
+
         @keyframes sectionFadeIn {
-            from { opacity: 0; transform: translateY(6px); }
-            to   { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .section-fade-in {
             animation: sectionFadeIn 0.25s ease forwards;
         }
+
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -1508,11 +1518,8 @@
     <div id="toast" class="toast toast-success"></div>
 
     <!-- ===== NAVBAR ===== -->
- <!-- ===== NAVBAR (via htmx) ===== -->
-    <div id="navbar-container"
-         hx-get="navbar.html"
-         hx-trigger="load"
-         hx-swap="innerHTML">
+    <!-- ===== NAVBAR (via htmx) ===== -->
+    <div id="navbar-container" hx-get="navbar.html" hx-trigger="load" hx-swap="innerHTML">
     </div>
 
     <!-- ===== MAIN CONTENT ===== -->
@@ -1530,19 +1537,24 @@
                     <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
                         <h3 class="text-lg font-bold text-white">👤 User Management</h3>
                         <button onclick="showAddUserForm()"
-                            class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">+ Tambah User</button>
+                            class="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 rounded text-xs font-bold text-white">+
+                            Tambah User</button>
                     </div>
                     <!-- Form tambah user (hidden by default) -->
                     <div id="um-add-form" class="hidden mb-4 p-3 bg-slate-800 rounded-lg">
                         <div class="grid grid-cols-2 gap-2 mb-2">
-                            <input type="text" id="um-username" class="input-field text-xs py-1.5" placeholder="Username">
-                            <input type="password" id="um-password" class="input-field text-xs py-1.5" placeholder="Password">
+                            <input type="text" id="um-username" class="input-field text-xs py-1.5"
+                                placeholder="Username">
+                            <input type="password" id="um-password" class="input-field text-xs py-1.5"
+                                placeholder="Password">
                             <select id="um-role" class="input-field text-xs py-1.5">
                                 <option value="sales">sales</option>
                                 <option value="admin">admin</option>
                                 <option value="superadmin">superadmin</option>
+                                <option value="guest">guest</option>
                             </select>
-                            <input type="text" id="um-picname" class="input-field text-xs py-1.5" placeholder="PIC Name (opsional)">
+                            <input type="text" id="um-picname" class="input-field text-xs py-1.5"
+                                placeholder="PIC Name (opsional)">
                         </div>
                         <div id="um-add-error" class="text-red-400 text-xs mb-2 hidden"></div>
                         <div class="flex gap-2">
@@ -1555,11 +1567,13 @@
                     <!-- Tabel daftar user -->
                     <div id="um-user-table" class="space-y-1 max-h-72 overflow-y-auto"></div>
                     <!-- Modal reset password -->
-                    <div id="um-reset-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
+                    <div id="um-reset-modal"
+                        class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center">
                         <div class="bg-slate-800 rounded-xl p-5 w-80">
                             <h4 class="text-white font-bold mb-3">Reset Password</h4>
                             <p id="um-reset-label" class="text-slate-400 text-xs mb-2"></p>
-                            <input type="password" id="um-new-password" class="input-field text-xs py-1.5 mb-2 w-full" placeholder="Password baru">
+                            <input type="password" id="um-new-password" class="input-field text-xs py-1.5 mb-2 w-full"
+                                placeholder="Password baru">
                             <div id="um-reset-error" class="text-red-400 text-xs mb-2 hidden"></div>
                             <div class="flex gap-2 justify-end">
                                 <button onclick="closeResetModal()"
@@ -1650,7 +1664,7 @@
                 el.style.border = '1px solid rgba(20,184,166,0.4)';
             }
         }
-// auth functions → lihat assets/auth.js
+        // auth functions → lihat assets/auth.js
         // ============================================================
         // SECTION A: DROPDOWN MASTER DATA (from Excel)
         // ============================================================
@@ -1658,7 +1672,7 @@
         var principals = ['ATS', 'SKE', 'SMK', 'IPE', 'IPV', 'Un categories'];
         var sumberDanaList = ['APBN', 'APBD', 'DAK', 'BOS', 'BLUD', 'BUMD', 'POKIR', 'APBDP', 'Swasta'];
         var jenisProdukList = ['Mebel / Furnitur', 'Alat Tulis Kantor', 'TIK & Periperal', 'Buku Non Teks HET', 'Buku Teks Pendamping HET', 'Buku Teks Pendamping', 'Buku Non Teks', 'Buku PAUD', 'Cetak, Kertas, dan Buku Tulis', 'Alat Olahraga', 'Alat Kesehatan / Kebersihan', 'Alat Praktik', 'Alat Praktik SMK', 'Alat Peraga APE Luar', 'Alat Peraga APE Dalam', 'Alat Peraga LAB IPA', 'Pakaian dan Seragam', 'Elektronik', 'Paket Project'];
-        var statusList = ['Gagal','Informasi Awal','Informasi Kebutuhan','Presentasi','Peluang 50:50','Hot Prospek','Closing'];
+        var statusList = ['Gagal', 'Informasi Awal', 'Informasi Kebutuhan', 'Presentasi', 'Peluang 50:50', 'Hot Prospek', 'Closing'];
         var tkValues = ['5%', '10%', '25%', '50%', '75%', '100%'];
 
         // ============================================================
@@ -1673,8 +1687,8 @@
         var nextFunnelId = 100;
         var nextUpdateId = 200;
 
-       // REGION_DATA & provinsiList → lihat assets/region-data.js
-    // utility functions → lihat assets/utils.js
+        // REGION_DATA & provinsiList → lihat assets/region-data.js
+        // utility functions → lihat assets/utils.js
 
         // ============================================================
         // SECTION C: MOCK FUNNEL DATA (from Excel - 15 real entries)
@@ -1689,11 +1703,11 @@
         // ============================================================
         // SECTION E: UTILITY FUNCTIONS
         // ============================================================
-// utility functions → lihat assets/utils.js
-var today = new Date();
-var currentWeek = getISOWeek(today);
-var currentYear = 2026;
-var currentWeekLabel = `W${currentWeek}-${currentYear}`;
+        // utility functions → lihat assets/utils.js
+        var today = new Date();
+        var currentWeek = getISOWeek(today);
+        var currentYear = 2026;
+        var currentWeekLabel = `W${currentWeek}-${currentYear}`;
         // auth functions → lihat assets/auth.js
         async function loadPipelineData() {
             if (CONFIG.USE_MOCK_DATA) return funnelData;
@@ -1784,8 +1798,9 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
                             <span class="font-bold text-white">${u.username}</span>
                             <span class="ml-2 px-1.5 py-0.5 rounded text-[10px] font-semibold
                                 ${u.role === 'superadmin' ? 'bg-purple-900/50 text-purple-300' :
-                                  u.role === 'admin' ? 'bg-blue-900/50 text-blue-300' :
-                                  'bg-slate-700 text-slate-300'}">${u.role}</span>
+                        u.role === 'admin' ? 'bg-blue-900/50 text-blue-300' :
+                            u.role === 'guest' ? 'bg-amber-900/50 text-amber-300' :
+                                'bg-slate-700 text-slate-300'}">${u.role}</span>
                             ${u.picName ? `<span class="ml-2 text-slate-400">${u.picName}</span>` : ''}
                         </div>
                         <div class="flex gap-1">
@@ -1796,7 +1811,7 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
                         </div>
                     </div>
                 `).join('');
-            } catch(err) {
+            } catch (err) {
                 tbody.innerHTML = `<p class="text-red-400 text-xs">Error: ${err.message}</p>`;
             }
         }
@@ -1813,9 +1828,9 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
         async function submitAddUser() {
             const username = document.getElementById('um-username').value.trim();
             const password = document.getElementById('um-password').value;
-            const role     = document.getElementById('um-role').value;
-            const picName  = document.getElementById('um-picname').value.trim().toUpperCase();
-            const errEl    = document.getElementById('um-add-error');
+            const role = document.getElementById('um-role').value;
+            const picName = document.getElementById('um-picname').value.trim().toUpperCase();
+            const errEl = document.getElementById('um-add-error');
             if (!username || !password) {
                 errEl.textContent = 'Username dan password wajib diisi.';
                 errEl.classList.remove('hidden');
@@ -1828,7 +1843,7 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
                 showToast('✅ User berhasil ditambahkan');
                 hideAddUserForm();
                 loadUserList();
-            } catch(err) {
+            } catch (err) {
                 errEl.textContent = err.message;
                 errEl.classList.remove('hidden');
             }
@@ -1858,7 +1873,7 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
                 if (res.error) { errEl.textContent = res.error; errEl.classList.remove('hidden'); return; }
                 showToast('✅ Password berhasil direset');
                 closeResetModal();
-            } catch(err) {
+            } catch (err) {
                 errEl.textContent = err.message;
                 errEl.classList.remove('hidden');
             }
@@ -1870,7 +1885,7 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
                 if (res.error) { showToast('Error: ' + res.error, 'error'); return; }
                 showToast('✅ User berhasil dihapus');
                 loadUserList();
-            } catch(err) {
+            } catch (err) {
                 showToast('Error: ' + err.message, 'error');
             }
         }
@@ -1952,7 +1967,7 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
             if (!el) return;
             placeholderValue = placeholderValue !== undefined ? placeholderValue : '';
             el.innerHTML = '<option value="' + placeholderValue + '">' + placeholder + '</option>';
-            items.forEach(function(item) {
+            items.forEach(function (item) {
                 el.innerHTML += '<option value="' + item + '">' + item + '</option>';
             });
         }
@@ -1977,16 +1992,16 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
             showToast('✅ Submission flag direset untuk ' + user);
         }
         async function saveSettingsToSheets() {
-    try {
-        await apiGet('saveSettings', {
-            payload: JSON.stringify({
-                picNames, principals, sumberDanaList
-            })
-        });
-    } catch(e) {
-        console.warn('Gagal save settings:', e);
-    }
-}
+            try {
+                await apiGet('saveSettings', {
+                    payload: JSON.stringify({
+                        picNames, principals, sumberDanaList
+                    })
+                });
+            } catch (e) {
+                console.warn('Gagal save settings:', e);
+            }
+        }
         function renderActivityLog() {
             const cont = document.getElementById('activity-log');
             if (!cont) return;
@@ -1999,7 +2014,7 @@ var currentWeekLabel = `W${currentWeek}-${currentYear}`;
         // ============================================================
         // SECTION L: INITIALIZATION
         // ============================================================
-function logout() {
+        function logout() {
             currentSession = { role: null, username: null };
             currentRole = null;
             sessionStorage.removeItem('ip_session');
@@ -2013,7 +2028,7 @@ function logout() {
                 return;
             }
             // Warmup Apps Script — eliminasi cold start
-            apiGet('ping').catch(function() {});
+            apiGet('ping').catch(function () { });
             // Restore session dari sessionStorage (misal: back dari dashboard.html)
             const savedSession = sessionStorage.getItem('ip_session');
             if (savedSession) {
@@ -2021,7 +2036,7 @@ function logout() {
                     const parsed = JSON.parse(savedSession);
                     currentSession = parsed;
                     currentRole = parsed.role;
-                } catch(e) {
+                } catch (e) {
                     sessionStorage.removeItem('ip_session');
                 }
             }
@@ -2041,13 +2056,13 @@ function logout() {
 
             // If live, clear mock data and load from Sheets
             try {
-    const settings = await apiGet('getSettings');
-    if (settings.picNames?.length)   picNames = settings.picNames;
-    if (settings.principals?.length) principals = settings.principals;
-    if (settings.sumberDana?.length) sumberDanaList = settings.sumberDana;
-} catch(e) {
-    console.warn('Gagal load settings:', e);
-}
+                const settings = await apiGet('getSettings');
+                if (settings.picNames?.length) picNames = settings.picNames;
+                if (settings.principals?.length) principals = settings.principals;
+                if (settings.sumberDana?.length) sumberDanaList = settings.sumberDana;
+            } catch (e) {
+                console.warn('Gagal load settings:', e);
+            }
             if (!CONFIG.USE_MOCK_DATA) {
                 weeklyUpdates = [];
                 funnelData = [];
@@ -2074,26 +2089,26 @@ function logout() {
             console.log('Sales Management System - Intan Pariwara 2026 initialized');
             console.log('Current Week:', currentWeekLabel);
             console.log('Funnel entries:', funnelData.length);
-        console.log('Weekly updates:', weeklyUpdates.length);
+            console.log('Weekly updates:', weeklyUpdates.length);
         }
         // Run on load
         document.addEventListener('DOMContentLoaded', init);
         // ===== NAVBAR HTMX HANDLER =====
-        document.addEventListener('htmx:afterSwap', function(evt) {
-    if (evt.target.id !== 'navbar-container') return;
-    const goProto = document.getElementById('btn-go-prototype');
-    if (goProto) goProto.classList.add('hidden');
-    // Pastikan Dashboard button selalu visible
-    const navDb = document.getElementById('nav-dashboard');
-    if (navDb) navDb.classList.remove('hidden');
-    if (typeof updateNavVisibility === 'function') updateNavVisibility();
+        document.addEventListener('htmx:afterSwap', function (evt) {
+            if (evt.target.id !== 'navbar-container') return;
+            const goProto = document.getElementById('btn-go-prototype');
+            if (goProto) goProto.classList.add('hidden');
+            // Pastikan Dashboard button selalu visible
+            const navDb = document.getElementById('nav-dashboard');
+            if (navDb) navDb.classList.remove('hidden');
+            if (typeof updateNavVisibility === 'function') updateNavVisibility();
         });
     </script>
 
 
-<footer class="text-center text-xs text-slate-600 py-4 mt-4">
-  made with 🔥 by Adrian
-</footer>
+    <footer class="text-center text-xs text-slate-600 py-4 mt-4">
+        made with 🔥 by Adrian
+    </footer>
 </body>
 
 </html>
